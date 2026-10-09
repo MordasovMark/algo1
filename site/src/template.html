@@ -287,6 +287,17 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0
 .gai{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
 .gai>div{border:2px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface2)}
 .gai ul{margin:6px 0 0;padding-inline-start:18px;font-size:.92rem}
+.olist{display:flex;flex-direction:column;gap:8px}
+.oq{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:start;border:2px solid var(--line);background:var(--surface2);border-radius:14px;padding:10px 12px;color:var(--ink)}
+.oq b{font-family:var(--f-display);font-weight:400}
+.oq span{grid-column:1;font-size:.82rem;color:var(--ink2)}
+.oq em{grid-row:1/3;grid-column:2;align-self:center;font-style:normal;font-family:var(--f-code);color:var(--ink2)}
+.oq.done{border-color:var(--good)}
+.opart{display:flex;flex-direction:column;gap:8px;padding:12px;border:2px solid var(--line);border-radius:14px;background:var(--surface2)}
+.otxt{font:inherit;font-size:1rem;color:var(--ink);background:var(--surface);border:2px solid var(--line);border-radius:10px;padding:10px;width:100%;resize:vertical;min-height:90px}
+.otxt[readonly]{opacity:.8}
+.omodel{border:2px solid var(--good);border-radius:12px;padding:10px 12px;background:var(--surface)}
+.omodel p{margin:6px 0 0}
 #toast{position:fixed;inset-inline:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 #toast div{background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 16px;font-weight:700;box-shadow:var(--shadow);animation:pop .35s ease-out both;max-width:420px}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:70}
@@ -368,7 +379,7 @@ en:{
 };
 
 /* ---------- state ---------- */
-function fresh(){return {think:{},retry:{},guideSeen:0,xp:0,streak:0,best:0,last:"",freezes:1,ans:{},lc:{},learned:{},badges:{},boss:{},exam:0,daily:{},cleared:0,set:{lang:"he",sound:false}}}
+function fresh(){return {open:{},openDone:{},think:{},retry:{},guideSeen:0,xp:0,streak:0,best:0,last:"",freezes:1,ans:{},lc:{},learned:{},badges:{},boss:{},exam:0,daily:{},cleared:0,set:{lang:"he",sound:false}}}
 var mem=null;
 function load(){try{var s=localStorage.getItem(KEY);if(s)return Object.assign(fresh(),JSON.parse(s))}catch(e){}return mem?Object.assign(fresh(),mem):fresh()}
 var S=load();
@@ -1462,6 +1473,62 @@ function closeOv(){document.getElementById("ov").innerHTML="";AIQ=null;if(!S.gui
   box.addEventListener("keydown",function(e){if(e.key==="Escape"&&box.innerHTML)closeOv()});
 })();
 
+/* ---------- open exam questions: attempt first, then reveal the model answer ---------- */
+var OPEN_BY={},OQ=null,OLN=null;
+D.open.questions.forEach(function(q){(OPEN_BY[q.node]=OPEN_BY[q.node]||[]).push(q)});
+function oGet(qid,pid){S.open=S.open||{};var q=S.open[qid]=S.open[qid]||{};return q[pid]=q[pid]||{txt:"",rev:0,self:""}}
+function oProg(q){var d=0;q.parts.forEach(function(p){var s=S.open&&S.open[q.id]&&S.open[q.id][p.id];if(s&&s.rev&&s.self)d++});return d}
+function oQ(id){var r=null;D.open.questions.forEach(function(q){if(q.id===id)r=q});return r}
+function oBr(s){return esc(s).replace(/\n/g,"<br>")}
+function oDraw(){
+  var box=document.getElementById("ov"),h;
+  var keep=document.querySelector("#ov .sbody"),st=keep?keep.scrollTop:0;
+  if(!OQ){
+    var list=D.open.questions.filter(function(q){return !OLN||q.node===OLN});
+    h='<div class="scrim" data-oact="scrim"><div class="sheet modal" role="dialog" aria-modal="true" aria-label="'+esc(B("שאלות מבחן פתוחות","Open exam questions"))+'"><div class="shead"><span class="core2" style="--ic:var(--sun);color:var(--sun-ink)">✎</span><div style="min-width:0"><h2>'+esc(B("שאלות מבחן פתוחות","Open exam questions"))+'</h2><div class="chip" style="margin-top:4px">'+esc(B("כותבים ניסיון, ורק אז רואים פתרון","Write an attempt, then see the solution"))+'</div></div><button class="xbtn" data-oact="close" id="ox" aria-label="close">✕</button></div><div class="sbody">';
+    h+='<p>'+esc(B("אלה שאלות מהבחינות של 2022-2024, כפי שנבחנים עליהן: על נייר. כתבו תשובה (אפילו חלקית) ובדקו את עצמכם מול פתרון לדוגמה.","These are questions from the 2022-2024 exams, the way you are tested: on paper. Write an answer (even a partial one) and check yourself against a model solution."))+'</p>';
+    h+='<div class="olist">'+list.map(function(q){var d=oProg(q),n=q.parts.length;return '<button class="oq'+(d===n?" done":"")+'" data-oact="oq" data-id="'+q.id+'"><b>'+esc(loc(q.title))+'</b><span>'+esc(loc(NODES[q.node].title))+' · '+esc(D.open.meta.sources[q.source])+' · '+esc(q.difficulty)+'</span><em>'+d+'/'+n+'</em></button>'}).join("")+'</div>';
+    h+='<p class="ivn">'+esc(B("הסעיפים שמסומנים 'נגזר' נפתרו על ידי ולא היה להם פתרון רשמי בקבצים. שווה לבדוק אותם עם מתרגל/ת.","Parts marked 'derived' were solved by me and had no official solution in the files. Worth checking with a TA."))+'</p></div></div></div>';
+  }else{
+    var q=oQ(OQ);
+    h='<div class="scrim" data-oact="scrim"><div class="sheet modal" role="dialog" aria-modal="true" aria-label="'+esc(loc(q.title))+'"><div class="shead"><button class="xbtn" data-oact="oback" aria-label="back">←</button><div style="min-width:0"><h2>'+esc(loc(q.title))+'</h2><div class="chip" style="margin-top:4px">'+esc(D.open.meta.sources[q.source])+'</div></div><button class="xbtn" data-oact="close" id="ox" aria-label="close">✕</button></div><div class="sbody">';
+    h+='<p><b>'+oBr(loc(q.stem))+'</b></p>';
+    q.parts.forEach(function(p,i){
+      var s=oGet(q.id,p.id);
+      h+='<div class="opart"><div class="sub">'+(q.parts.length>1?String.fromCharCode(1488+i)+". ":"")+esc(loc(p.prompt))+'</div>';
+      h+='<textarea class="otxt" rows="4" data-q="'+q.id+'" data-p="'+p.id+'" placeholder="'+esc(B("כתבו כאן נוסחה, אלגוריתם או נימוק. אפשר חלקי.","Write your formula, algorithm or argument here. Partial is fine."))+'"'+(s.rev?" readonly":"")+'>'+esc(s.txt)+'</textarea>';
+      if(!s.rev)h+='<button class="btn" data-oact="oreveal" data-q="'+q.id+'" data-p="'+p.id+'">'+esc(B("בדקו את עצמכם","Check yourself"))+'</button>';
+      else{
+        h+='<div class="omodel"><b>'+esc(B("פתרון לדוגמה","Model solution"))+(p.derived?' <span class="chip draft">'+esc(B("נגזר","derived"))+'</span>':"")+'</b><p>'+oBr(loc(p.model))+'</p></div>';
+        h+='<div class="row2"><span class="lkn">'+esc(B("איך הלך?","How did it go?"))+'</span>'+[["y",B("הצלחתי","Got it")],["p",B("חלקית","Partly")],["n",B("לא הצלחתי","Missed it")]].map(function(r){return '<button class="toggle" data-oact="orate" data-q="'+q.id+'" data-p="'+p.id+'" data-v="'+r[0]+'" aria-pressed="'+(s.self===r[0])+'">'+esc(r[1])+'</button>'}).join("")+'</div>';
+      }
+      h+='</div>';
+    });
+    h+='</div></div></div>';
+  }
+  box.innerHTML=h;var nb=document.querySelector("#ov .sbody");if(nb&&keep)nb.scrollTop=st;
+  if(!keep){var x=document.getElementById("ox");if(x)x.focus()}
+}
+function openOList(node){AIQ=null;OQ=null;OLN=node||null;oDraw()}
+BADGES.push({id:"open3",he:["כותבים על נייר","3 שאלות מבחן פתוחות הושלמו"],en:["Pen on paper","3 open exam questions completed"],ok:function(){return Object.keys(S.openDone||{}).length>=3}});
+(function(){
+  var box=document.getElementById("ov");
+  box.addEventListener("click",function(e){
+    var el=e.target.closest("[data-oact]");if(!el)return;var a=el.getAttribute("data-oact");
+    if(a==="oq"){OQ=el.getAttribute("data-id");oDraw();return}
+    if(a==="oback"){OQ=null;oDraw();return}
+    if(a==="oreveal"){var q=el.getAttribute("data-q"),p=el.getAttribute("data-p"),s=oGet(q,p);
+      if(s.txt.trim().length<15){toast(B("קודם כתבו ניסיון, אפילו חלקי (לפחות כמה מילים).","Write an attempt first, even a partial one (at least a few words)."));return}
+      s.rev=1;touch();save();oDraw();return}
+    if(a==="orate"){var q2=el.getAttribute("data-q"),p2=el.getAttribute("data-p"),v=el.getAttribute("data-v"),s2=oGet(q2,p2),first=!s2.paid;
+      s2.self=v;if(first){s2.paid=1;addXP(v==="y"?8:v==="p"?3:1)}
+      var qq=oQ(q2);S.openDone=S.openDone||{};
+      if(oProg(qq)===qq.parts.length&&!S.openDone[q2]){S.openDone[q2]=1;addXP(5);toast(B("סיימתם שאלה פתוחה! +5 XP","Open question finished! +5 XP"));confetti()}
+      save();checkBadges();save();oDraw();return}
+  },true);
+  box.addEventListener("input",function(e){var t=e.target;if(t.classList&&t.classList.contains("otxt")){oGet(t.getAttribute("data-q"),t.getAttribute("data-p")).txt=t.value;save()}});
+})();
+
 var VZ=null,vizTimer=null;
 window.__vizOpen=function(k){vizOpen(k,null)};
 function vizTitle(k){return VIZ[k].t[L()==="he"?0:1]}
@@ -1591,6 +1658,7 @@ function mapHTML(){
   h+='<button class="quest hot" data-act="cont"><b>'+esc(t("cont"))+'</b><span>'+(nx?esc(loc(NODES[nx].title)):"")+'</span></button>';
   h+='<button class="quest'+(dDone?" done":"")+'" data-act="daily"'+(dDone?" disabled":"")+'><b>'+esc(t("daily"))+'</b><span>'+esc(dDone?t("dailyDone"):t("dailyGo"))+'</span></button>';
   h+='<button class="quest" data-act="review"'+(due?"":" disabled")+'><b>'+esc(t("review"))+'</b><span>'+esc(t("reviewN")(due))+'</span></button>';
+  h+='<button class="quest" data-act="openlist"><b>'+esc(B("שאלות מבחן פתוחות","Open exam questions"))+'</b><span>'+esc(B(D.open.questions.length+" תרגילים. קודם ניסיון, ואז פתרון","")+(L()==="he"?"":D.open.questions.length+" exercises. Attempt first, then the solution"))+'</span></button>';
   h+='<button class="quest" data-act="exam"><b>'+esc(t("exam"))+'</b><span>'+esc(t("examSub"))+'</span></button></div>';
   h+='<p class="chip" style="margin-top:6px">'+esc(t("starsHelp"))+'</p>';
   ORDER.forEach(function(w,i){h+=islandHTML(w);if(i<ORDER.length-1)h+='<svg class="wave" viewBox="0 0 400 28" preserveAspectRatio="none" aria-hidden="true"><path d="M0 14 Q25 0 50 14 T100 14 T150 14 T200 14 T250 14 T300 14 T350 14 T400 14" fill="none" stroke="currentColor" stroke-width="3"/></svg>'});
@@ -1614,6 +1682,7 @@ function sheetHTML(id){
   h+='<p>'+esc(loc(n.summary))+'</p>';
   if(ms.length)h+='<div class="warn">'+esc(t("softlock"))+' <b>'+ms.map(function(m){return esc(loc(NODES[m].title))}).join(", ")+'</b></div>';
   if(NODE_VIZ[id])h+='<button class="btn sun" data-act="viz" data-id="'+id+'" data-k="'+NODE_VIZ[id]+'">▶ '+esc(B("הדגמה: ","Demo: ")+vizTitle(NODE_VIZ[id]))+'</button>';
+  if(OPEN_BY[id])h+='<button class="btn ghost" data-act="openq-node" data-id="'+id+'">✎ '+esc(B("שאלות מבחן פתוחות (","Open exam questions (")+OPEN_BY[id].length+")")+'</button>';
   h+='<div class="sub">'+esc(t("qs"))+'</div>';
   if(f.qs.length){h+='<button class="btn" data-act="practice" data-id="'+id+'">'+esc(t("practiceN")(f.qs.length))+'</button>'}
   else h+='<p class="chip" style="align-self:flex-start">'+esc(t("noqs"))+'</p>';
@@ -1755,6 +1824,8 @@ app.addEventListener("click",function(e){
    case "node":V.sheet=id;render();break;
    case "viz":vizOpen(el.getAttribute("data-k"),id);break;
    case "guide":openGuide();break;
+   case "openlist":openOList(null);break;
+   case "openq-node":openOList(el.getAttribute("data-id"));break;
    case "ai":openAI(el.getAttribute("data-n"));break;
    case "tstart":S.think[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("הטיימר התחיל. בהצלחה!","Timer started. Good luck!"));render();break;
    case "rstart":S.retry[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("בהצלחה בניסיון השני!","Good luck on the second try!"));render();break;

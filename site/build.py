@@ -19,6 +19,7 @@ D = {
     'lc': load('leetcode.json'),
     'mcq': load('exam-mcq.json'),
     'videos': load('island-videos.json'),
+    'open': load('exam-open.json'),
     'ai': {
         'skill': (ai / 'claude-skill/pseudocode-to-leetcode/SKILL.md').read_text(encoding='utf8'),
         'gem': gem,

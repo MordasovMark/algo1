@@ -1,0 +1,233 @@
+{
+  "meta": {
+    "note": "Open exam questions rewritten from the 2022-2024 Algorithms 1 exams (stems paraphrased, model answers summarized in my own words from the official solutions that were in the PDFs). A part marked derived=true had no official solution in the files and was worked out by me: a TA should verify it. The student writes an attempt first; the model answer is revealed only after an attempt.",
+    "sources": {
+      "2022-A-sample": "סמסטר א' 2022, מבחן לדוגמה",
+      "2022-A-moedB": "סמסטר א' 2022, מועד ב'",
+      "2022-B-moedA": "סמסטר ב' 2022, מועד א'",
+      "2022-B-moedB": "סמסטר ב' 2022, מועד ב'",
+      "2023-A-moedB": "סמסטר א' 2023, מועד ב'",
+      "2024-A-miluim": "סמסטר א' 2024, מועד מילואים / מועד א'",
+      "2024-B-moedA": "סמסטר ב' 2024, מועד א'"
+    }
+  },
+  "questions": [
+    {
+      "id": "open-001", "node": "dp-lcs", "source": "2022-A-sample", "ref": "שאלה 1", "difficulty": "medium",
+      "title": { "he": "תת-סדרה פלינדרומית ארוכה ביותר", "en": "Longest palindromic subsequence" },
+      "stem": { "he": "נתונה מחרוזת S באורך n. מחפשים את אורך תת-הסדרה הארוכה ביותר של S (לא בהכרח רצופה) שהיא פלינדרום. ב-BARCAR התשובה היא 3 (RAR).", "en": "Given a string S of length n, find the length of the longest subsequence of S (not necessarily contiguous) that is a palindrome. In BARCAR the answer is 3 (RAR)." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו נוסחת נסיגה P(i,j) ופרטו את תפקיד כל פרמטר.", "en": "Write a recurrence P(i,j) and state what each parameter means." },
+          "model": { "he": "P(i,j) = אורך תת-הסדרה הפלינדרומית הארוכה ביותר של S[i..j].\nP(i,j) = 0 אם i>j.\nP(i,j) = 1 אם i=j.\nP(i,j) = P(i+1, j−1) + 2 אם S[i]=S[j] ו-i≠j.\nאחרת P(i,j) = max( P(i+1,j), P(i,j−1) ).\nהתשובה לבעיה: P(1,n).", "en": "P(i,j) = length of the longest palindromic subsequence of S[i..j].\nP(i,j) = 0 if i>j.\nP(i,j) = 1 if i=j.\nP(i,j) = P(i+1, j−1) + 2 if S[i]=S[j] and i≠j.\nOtherwise P(i,j) = max( P(i+1,j), P(i,j−1) ).\nThe answer is P(1,n)." } },
+        { "id": "b", "prompt": { "he": "הסבירו למה הנוסחה נכונה.", "en": "Explain why the recurrence is correct." },
+          "model": { "he": "אם הקצוות שווים, שני התווים האלה יכולים להיות הקצוות של הפלינדרום, ובפנים נשאר פלינדרום של S[i+1..j−1]. אם הקצוות שונים, לפחות אחד מהם לא משתתף בפלינדרום אופטימלי, ולכן הפתרון הוא הטוב מבין S[i+1..j] ו-S[i..j−1]. מחרוזת ריקה היא פלינדרום באורך 0.", "en": "If the ends are equal, they can be the two ends of the palindrome, leaving a palindrome inside S[i+1..j−1]. If they differ, at least one of them is not used by an optimal palindrome, so the answer is the better of S[i+1..j] and S[i..j−1]. The empty string is a palindrome of length 0." } },
+        { "id": "c", "prompt": { "he": "מהי סיבוכיות הזמן והמקום של תכנון דינמי לבעיה? נמקו.", "en": "What are the time and space complexity of the DP? Justify." },
+          "model": { "he": "זמן Θ(n²) ומקום Θ(n²). הטבלה היא n×n (כל זוג i,j), וכל תא מחושב ב-O(1) משני תאים סמוכים. לשחזור התת-סדרה עצמה הולכים אחורה בטבלה מ-(1,n).", "en": "Time Θ(n²) and space Θ(n²). The table is n×n (every pair i,j) and each cell takes O(1) from at most two neighbouring cells. To recover the subsequence walk back through the table from (1,n)." } }
+      ]
+    },
+    {
+      "id": "open-002", "node": "kmp", "source": "2022-A-sample", "ref": "שאלה 2", "difficulty": "easy",
+      "title": { "he": "רוטציה מעגלית עם KMP", "en": "Circular rotation with KMP" },
+      "stem": { "he": "מחרוזת S2 היא רוטציה מעגלית של S1 אם מעבירים לה קידומת לסוף. נתונה פונקציה KMP(T,P) שמחזירה 1 אם P מופיעה ב-T. כתבו Is_Rotation(T1,T2) לשתי מחרוזות באורך n.", "en": "S2 is a circular rotation of S1 if moving a prefix of S1 to its end gives S2. You are given KMP(T,P), which returns 1 if P occurs in T. Write Is_Rotation(T1,T2) for two strings of length n." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "מה הפסאודו-קוד?", "en": "What is the pseudocode?" },
+          "model": { "he": "Is_Rotation(T1, T2): return KMP(T1·T1, T2)\n(אפשר להוסיף בדיקה שהאורכים שווים.)", "en": "Is_Rotation(T1, T2): return KMP(T1·T1, T2)\n(You may add a check that the lengths are equal.)" } },
+        { "id": "b", "prompt": { "he": "נמקו למה זה נכון.", "en": "Explain why it is correct." },
+          "model": { "he": "אם S2 = s(k+1)…s(n) s(1)…s(k), אז החלק הראשון הוא סיפא של S1 והחלק השני הוא קידומת של S1. בשרשור S1·S1 הסיפא והקידומת נפגשות ב'תפר', ולכן S2 מופיעה בתוכו. בכיוון ההפוך, כל תת-מחרוזת באורך n של S1·S1 היא רוטציה של S1.", "en": "If S2 = s(k+1)…s(n) s(1)…s(k), the first part is a suffix of S1 and the second a prefix of S1. In S1·S1 the suffix and the prefix meet at the seam, so S2 occurs in it. Conversely, every length-n substring of S1·S1 is a rotation of S1." } },
+        { "id": "c", "prompt": { "he": "מהי סיבוכיות האלגוריתם?", "en": "What is the complexity?" },
+          "model": { "he": "Θ(n). KMP לינארי בגודל הקלט, והטקסט כאן באורך 2n והתבנית באורך n.", "en": "Θ(n). KMP is linear in the input size, and here the text has length 2n and the pattern n." } }
+      ]
+    },
+    {
+      "id": "open-003", "node": "randomized", "source": "2022-A-sample", "ref": "שאלה 3", "difficulty": "medium",
+      "title": { "he": "האם C = A·B? (אלגוריתם הסתברותי)", "en": "Is C = A·B? (randomized)" },
+      "stem": { "he": "נתונות שלוש מטריצות A, B, C ריבועיות בגודל k×k. רוצים להכריע אם C = A·B.", "en": "Given three k×k matrices A, B, C, decide whether C = A·B." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "מהו אלגוריתם נאיבי וזמן הריצה שלו?", "en": "What is the naive algorithm and its running time?" },
+          "model": { "he": "מחשבים A·B ומשווים ל-C. כפל מטריצות רגיל לוקח Θ(k³) (שזה Θ(n^1.5) ביחס לגודל הקלט n=k²).", "en": "Compute A·B and compare with C. Ordinary matrix multiplication costs Θ(k³), which is Θ(n^1.5) in the input size n=k²." } },
+        { "id": "b", "prompt": { "he": "הציעו אלגוריתם מונטה קרלו.", "en": "Propose a Monte Carlo algorithm." },
+          "model": { "he": "מגרילים וקטור סיביות y באורך k. מחשבים A·(B·y) ו-C·y (כל אחד כפל מטריצה בווקטור). אם התוצאות שונות מחזירים 'לא שווה', אחרת מחזירים 'שווה'.", "en": "Draw a random bit vector y of length k. Compute A·(B·y) and C·y (each a matrix-vector product). If they differ return 'not equal', otherwise return 'equal'." } },
+        { "id": "c", "prompt": { "he": "מה זמן הריצה, ומה ההסתברות לטעות?", "en": "What is the running time and the error probability?" },
+          "model": { "he": "זמן Θ(k²), כלומר Θ(n) בגודל הקלט: שלוש כפלות מטריצה בווקטור. אם האלגוריתם אומר 'לא שווה' הוא תמיד צודק. אם הוא אומר 'שווה' הוא עלול לטעות בהסתברות קטנה מ-1/2.\nהסבר: נסמן D = C − AB ≠ 0 ויהי d(ij) ≠ 0. לכל וקטור 'שקרן' v (כלומר Dv=0) הוקטור v' שמתקבל מהיפוך הסיבית j מקיים Dv' ≠ 0. לכן יש לפחות כמה וקטורים אמינים כמו שקרנים.", "en": "Time Θ(k²), i.e. Θ(n) in the input size: three matrix-vector products. If it says 'not equal' it is always right. If it says 'equal' it may be wrong with probability below 1/2.\nWhy: let D = C − AB ≠ 0 with some d(ij) ≠ 0. For each 'liar' vector v (Dv=0) flipping bit j gives v' with Dv' ≠ 0. So there are at least as many truthful vectors as liars." } }
+      ]
+    },
+    {
+      "id": "open-004", "node": "greedy-asp", "source": "2022-A-sample", "ref": "שאלה 4", "difficulty": "medium",
+      "title": { "he": "המעגלים הזרים", "en": "Disjoint circles" },
+      "stem": { "he": "נתונים n מעגלים שמרכזיהם על ציר x (מרכז c, רדיוס r). רוצים את המספר המקסימלי של מעגלים זרים בזוגות (בלי חיתוך או השקה).", "en": "Given n circles centred on the x-axis (centre c, radius r), find the maximum number of pairwise disjoint circles (no crossing or tangency)." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "האם הפתרון האופטימלי יחיד?", "en": "Is the optimal solution unique?" },
+          "model": { "he": "לא. אפשר שיהיו כמה קבוצות באותו גודל מקסימלי (בדוגמה של המבחן יש שתי קבוצות באותו גודל), ולכן הבחירה אינה יחידה.", "en": "No. Several sets can have the same maximum size (the exam example has two such sets), so the optimum is not unique." } },
+        { "id": "b", "prompt": { "he": "כתבו אלגוריתם חמדני.", "en": "Write a greedy algorithm." },
+          "model": { "he": "כל מעגל הוא מקטע [c−r, c+r]. ממיינים לפי הקצה הימני בסדר עולה. בוחרים את הראשון, מסירים את כל המעגלים שהקצה השמאלי שלהם קטן או שווה לקצה הימני של הנבחר (השקה נחשבת חיתוך), וחוזרים על כך עד שהרשימה ריקה.", "en": "Each circle is the interval [c−r, c+r]. Sort by right end ascending. Take the first, remove every circle whose left end is ≤ the chosen right end (tangency counts as touching), and repeat until the list is empty." } },
+        { "id": "c", "prompt": { "he": "הוכיחו את תכונת הבחירה החמדנית.", "en": "Prove the greedy-choice property." },
+          "model": { "he": "יהי C* פתרון אופטימלי. אם הוא מכיל את המעגל g שהאלגוריתם בחר (הקצה הימני הקטן ביותר) סיימנו. אחרת נחליף במעגל של C* עם הקצה הימני הקטן ביותר בו את g. הקצה הימני של g לא גדול ממנו, ולכן g זר לכל שאר המעגלים של C*. מתקבל פתרון באותו גודל שמכיל את g.", "en": "Let C* be optimal. If it contains the greedy circle g (smallest right end) we are done. Otherwise replace the circle of C* with the smallest right end by g. g's right end is no larger, so g is disjoint from the rest of C*. We get an optimal solution containing g." } },
+        { "id": "d", "prompt": { "he": "הוכיחו תת-מבנה אופטימלי.", "en": "Prove optimal substructure." },
+          "model": { "he": "אחרי בחירת g מסירים את כל המעגלים שנחתכים איתו, וזו תת-בעיה מאותו סוג על מעגלים שנותרו. פתרון אופטימלי שמכיל את g הוא g ועוד פתרון אופטימלי של תת-הבעיה: אילו היה פתרון טוב יותר לתת-הבעיה, אפשר היה לשלב אותו עם g ולקבל פתרון טוב יותר מ-C*, בסתירה. זמן הריצה O(n log n).", "en": "After choosing g, remove every circle touching it; what is left is the same kind of problem. An optimal solution containing g is g plus an optimal solution of the subproblem: a better subproblem solution combined with g would beat C*, a contradiction. Running time O(n log n)." } }
+      ]
+    },
+    {
+      "id": "open-005", "node": "dp-principles", "source": "2023-A-moedB", "ref": "שאלה 1", "difficulty": "medium",
+      "title": { "he": "מסלול נחש במטריצה", "en": "Snake path in a matrix" },
+      "stem": { "he": "נתונה מטריצה A בגודל n×n של שלמים. מסלול נחש הוא סדרת ערכים שבה מכל תא עוברים ימינה או למטה, והפרש מוחלט בין שני ערכים עוקבים הוא לכל היותר 1. מחפשים את אורך מסלול הנחש הארוך ביותר.", "en": "Given an n×n integer matrix A. A snake path moves right or down from each cell, and consecutive values differ by at most 1. Find the length of the longest snake path." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו נוסחת נסיגה T(i,j) = אורך מסלול הנחש הארוך ביותר שמסתיים בתא (i,j).", "en": "Write a recurrence for T(i,j) = the longest snake path that ends at cell (i,j)." },
+          "model": { "he": "T(i,j) = 1 + המקסימום של T(i−1,j) ו-T(i,j−1) מבין המקודמים החוקיים, כלומר אלה שנמצאים בטבלה ושהפרש הערך שלהם מ-A[i][j] הוא לכל היותר 1.\nאם אין אף מקודם חוקי (או שזה תא ההתחלה), T(i,j) = 1.\nהתשובה: המקסימום של T על כל התאים.", "en": "T(i,j) = 1 + the maximum of T(i−1,j) and T(i,j−1) over the valid predecessors, i.e. those inside the matrix whose value differs from A[i][j] by at most 1.\nIf no predecessor is valid (or this is the start), T(i,j) = 1.\nThe answer is the maximum of T over all cells." } },
+        { "id": "b", "prompt": { "he": "מה סיבוכיות הזמן והמקום של האלגוריתם?", "en": "What are the time and space complexity?" },
+          "model": { "he": "זמן O(n²): n² תאים וכל אחד תלוי בשניים. מקום O(n²) לטבלה המלאה. אם צריך רק את האורך, די לשמור שורה אחת או שתיים ולכן O(n) מקום.", "en": "Time O(n²): n² cells, each depends on two. Space O(n²) for the full table. If only the length is needed, one or two rows suffice, so O(n) space." } }
+      ]
+    },
+    {
+      "id": "open-006", "node": "dp-lcs", "source": "2022-A-moedB", "ref": "שאלה 1", "difficulty": "medium",
+      "title": { "he": "חיתוך מחרוזת למילים חוקיות", "en": "Splitting a string into valid words" },
+      "stem": { "he": "נתונה פונקציה T(S,i,j) שמחזירה ב-O(1) אם S[i..j] היא מילה חוקית. נתונה מחרוזת S באורך n שניתנת לחיתוך חוקי. מחפשים את המספר המינימלי של מילים בחיתוך חוקי.", "en": "You have T(S,i,j), which returns in O(1) whether S[i..j] is a valid word. S has length n and can be split into valid words. Find the minimum number of words in a valid split." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו נוסחת נסיגה והגדירו את הפונקציה.", "en": "Write a recurrence and define the function." },
+          "model": { "he": "C(i) = המספר המינימלי של מילים בחיתוך חוקי של S[1..i], או ∞ אם אין.\nC(0) = 0.\nC(i) = min לכל 0 ≤ j < i שבהם S[j+1..i] מילה חוקית של ( C(j) + 1 ).\nהסבר: המילה האחרונה היא S[j+1..i], ומה שלפניה חיתוך חוקי מינימלי של S[1..j]. התשובה: C(n).", "en": "C(i) = minimum number of words in a valid split of S[1..i], or ∞ if none exists.\nC(0) = 0.\nC(i) = min over 0 ≤ j < i with S[j+1..i] a valid word of ( C(j) + 1 ).\nWhy: the last word is S[j+1..i] and what precedes it is a minimum valid split of S[1..j]. The answer is C(n)." } },
+        { "id": "b", "prompt": { "he": "מה סיבוכיות הזמן והמקום?", "en": "What are the time and space complexity?" },
+          "derived": true,
+          "model": { "he": "זמן O(n²): יש n ערכים, וכל אחד בודק עד n אפשרויות j בזמן קבוע. מקום O(n) למערך C.", "en": "Time O(n²): n values, each tries up to n choices of j in constant time each. Space O(n) for the array C." } }
+      ]
+    },
+    {
+      "id": "open-007", "node": "dc-boyer-moore", "source": "2022-A-moedB", "ref": "שאלה 2", "difficulty": "medium",
+      "title": { "he": "ישר דרך הראשית שעליו רוב הנקודות", "en": "A line through the origin holding most points" },
+      "stem": { "he": "נתונות n נקודות במישור. כתבו אלגוריתם לינארי שמכריע אם קיים ישר דרך ראשית הצירים שעליו לפחות 51% מהנקודות, ואחר כך לפחות 34%.", "en": "Given n points in the plane, write a linear-time algorithm that decides whether some line through the origin contains at least 51% of the points, and then at least 34%." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "שיטה ל-51%.", "en": "The method for 51%." },
+          "model": { "he": "נקודות על אותו ישר דרך הראשית הן נקודות בעלות אותו שיפוע y/x (עבור x=0 קובעים שיפוע ∞). בונים מערך שיפועים, מריצים Boyer-Moore ומקבלים מועמד לרוב. סופרים את מופעי המועמד: אם לפחות 0.51n, קיים ישר כזה. (חובה לאמת, כי Boyer-Moore מחזיר מועמד נכון רק אם קיים רוב.) אפשר גם Select במקום n/2 ואז ספירה.", "en": "Points on one line through the origin share the slope y/x (use ∞ for x=0). Build the slope array, run Boyer-Moore to get a majority candidate, and count its occurrences: if at least 0.51n, such a line exists. (Verification is required: Boyer-Moore only returns the right value if a majority exists.) Select at rank n/2 plus a count also works." } },
+        { "id": "b", "prompt": { "he": "שיטה ל-34%.", "en": "The method for 34%." },
+          "model": { "he": "ערך שמופיע ביותר משליש מהמקומות חייב לתפוס את המקום n/3 או את המקום 2n/3 במערך הממוין. מריצים Select פעמיים (ברמות n/3 ו-2n/3), סופרים את המופעים של כל אחד משני המועמדים, ובודקים אם אחד מהם מופיע לפחות 0.34n פעמים. סך הכול O(n).", "en": "A value covering more than a third of the sorted array must sit at rank n/3 or 2n/3. Run Select twice (ranks n/3 and 2n/3), count each of the two candidates, and check whether one appears at least 0.34n times. Total O(n)." } }
+      ]
+    },
+    {
+      "id": "open-008", "node": "huffman", "source": "2022-A-moedB", "ref": "שאלה 4", "difficulty": "medium",
+      "title": { "he": "הלחמת חבלים (Huffman בתחפושת)", "en": "Welding ropes (Huffman in disguise)" },
+      "stem": { "he": "מלחימים n חבלים לחבל אחד. עלות הלחמה של שני חבלים היא סכום אורכיהם, והתוצאה חבל באורך הסכום. מחפשים עלות כוללת מינימלית. לדוגמה, עבור 4,3,2,6 העלות המינימלית היא 29.", "en": "Weld n ropes into one. Welding two ropes costs the sum of their lengths and produces a rope of that length. Minimize the total cost. For 4,3,2,6 the minimum is 29." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו אלגוריתם חמדני.", "en": "Write a greedy algorithm." },
+          "model": { "he": "שומרים את האורכים בערימת מינימום. כל עוד נשאר יותר מחבל אחד: מוציאים את שני הקצרים x ו-y, מוסיפים לעלות x+y, ומחזירים לערימה חבל באורך x+y. זמן O(n log n). בדוגמה: 2+3=5 (עלות 5), 4+5=9 (עלות 9), 6+9=15 (עלות 15), סך 29.", "en": "Keep the lengths in a min-heap. While more than one rope remains: extract the two shortest x and y, add x+y to the cost, and push a rope of length x+y. O(n log n). In the example: 2+3=5 (cost 5), 4+5=9 (cost 9), 6+9=15 (cost 15), total 29." } },
+        { "id": "b", "prompt": { "he": "הוכיחו את תכונת הבחירה החמדנית (שני הקצרים הם אחים בעומק מקסימלי בפתרון אופטימלי כלשהו).", "en": "Prove the greedy-choice property (the two shortest ropes are siblings at maximum depth in some optimal tree)." },
+          "model": { "he": "הלחמות מיוצגות בעץ שבו כל חבל הוא עלה, והעלות היא סכום (אורך × עומק). יהי T עץ אופטימלי, x ו-y שני הקצרים, ו-b ו-c שני עלים אחים בעומק מקסימלי. אם x ו-b שונים, מחליפים ביניהם ומקבלים T'. ההפרש בעלות הוא B(T) − B(T') = (f[b] − f[x]) · (d(b) − d(x)) ≥ 0, כי f[b] ≥ f[x] ו-b עמוק לפחות כמו x. אותו דבר עם y ו-c. לכן יש עץ אופטימלי שבו x ו-y אחים בעומק מקסימלי.", "en": "Welds form a tree where each rope is a leaf and the cost is the sum of length × depth. Let T be optimal, x and y the two shortest ropes, b and c two sibling leaves at maximum depth. If x and b differ, swap them to get T'. The cost difference is B(T) − B(T') = (f[b] − f[x]) · (d(b) − d(x)) ≥ 0, since f[b] ≥ f[x] and b is at least as deep as x. Same for y and c. So some optimal tree has x and y as deepest siblings." } }
+      ]
+    },
+    {
+      "id": "open-009", "node": "dp-lcs", "source": "2022-B-moedA", "ref": "שאלה 4", "difficulty": "medium",
+      "title": { "he": "ספירת הופעות כתת-סדרה", "en": "Counting occurrences as a subsequence" },
+      "stem": { "he": "נתונים טקסט T ותבנית P. סופרים בכמה דרכים P מופיעה בתוך T כתת-סדרה. לדוגמה, T = subsequence ו-P = see: התשובה 6.", "en": "Given a text T and a pattern P, count the ways P occurs in T as a subsequence. Example: T = subsequence, P = see gives 6." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו נוסחת נסיגה והסבירו אותה.", "en": "Write a recurrence and explain it." },
+          "model": { "he": "C(i,j) = מספר הפעמים ש-P[1..j] מופיעה כתת-סדרה של T[1..i].\nC(i,0) = 1. C(i,j) = 0 כאשר i < j.\nאם T[i] ≠ P[j]: C(i,j) = C(i−1,j) (התו האחרון של T לא משתתף).\nאם T[i] = P[j]: C(i,j) = C(i−1,j−1) + C(i−1,j): או שמשתמשים בהתאמה הזו, או שמדלגים עליה.", "en": "C(i,j) = number of times P[1..j] occurs as a subsequence of T[1..i].\nC(i,0) = 1. C(i,j) = 0 when i < j.\nIf T[i] ≠ P[j]: C(i,j) = C(i−1,j) (the last character of T is not used).\nIf T[i] = P[j]: C(i,j) = C(i−1,j−1) + C(i−1,j): either use this match or skip it." } },
+        { "id": "b", "prompt": { "he": "מה סיבוכיות האלגוריתם? ומה התוצאה עבור T=abcbac, P=abc?", "en": "What is the complexity, and what is the result for T=abcbac, P=abc?" },
+          "model": { "he": "זמן ומקום O(|T|·|P|): ממלאים טבלה בגודל |T| × |P|. עבור T=abcbac ו-P=abc התוצאה 3: המיקומים (1,2,3), (1,2,6) ו-(1,4,6).", "en": "Time and space O(|T|·|P|): fill a |T| × |P| table. For T=abcbac and P=abc the result is 3: positions (1,2,3), (1,2,6) and (1,4,6)." } }
+      ]
+    },
+    {
+      "id": "open-010", "node": "mst", "source": "2022-B-moedA", "ref": "שאלה 3", "difficulty": "hard",
+      "title": { "he": "עץ צוואר בקבוק מול עץ פורש מינימלי", "en": "Bottleneck tree versus MST" },
+      "stem": { "he": "בגרף קשיר ממושקל, עץ צוואר בקבוק מינימלי (MBST) הוא עץ פורש שבו משקל הצלע הכבדה ביותר הוא הקטן ביותר האפשרי.", "en": "In a connected weighted graph, a minimum bottleneck spanning tree (MBST) is a spanning tree whose heaviest edge is as light as possible." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "תנו גרף על 3 קודקודים שבו יש MBST שאינו עפ״מ (MST).", "en": "Give a 3-vertex graph with an MBST that is not an MST." },
+          "model": { "he": "משולש עם משקלים 1, 2, 2. העפ״מ הוא הצלעות 1 ו-2 (משקל כולל 3, צוואר בקבוק 2). העץ שמורכב משתי צלעות 2 הוא MBST (צוואר בקבוק 2 גם הוא) אבל משקלו 4, ולכן אינו עפ״מ.", "en": "A triangle with weights 1, 2, 2. The MST uses the edges 1 and 2 (total 3, bottleneck 2). The tree made of the two 2-edges is an MBST (bottleneck 2 as well) but weighs 4, so it is not an MST." } },
+        { "id": "b", "prompt": { "he": "הוכיחו שכל עפ״מ הוא גם MBST.", "en": "Prove that every MST is an MBST." },
+          "model": { "he": "נניח בשלילה שעפ״מ T_min אינו MBST: יש בו צלע e0=(u,v) שכבדה מכל צלעות עץ MBST כלשהו T. הסרת e0 מ-T_min מפצלת את הקודקודים לשני חלקים A ו-B. במסלול מ-u ל-v ב-T חייבת להיות צלע e1 שחוצה בין A ל-B, והיא קלה מ-e0, ו-e1 אינה ב-T_min. אז T_min − e0 + e1 הוא עץ פורש קל יותר מ-T_min, בסתירה לכך ש-T_min עפ״מ.", "en": "Suppose an MST T_min is not an MBST: it has an edge e0=(u,v) heavier than every edge of some MBST T. Removing e0 splits the vertices into A and B. The path from u to v in T must contain an edge e1 crossing between A and B; it is lighter than e0 and not in T_min. Then T_min − e0 + e1 is a spanning tree lighter than T_min, contradicting that T_min is an MST." } }
+      ]
+    },
+    {
+      "id": "open-011", "node": "select", "source": "2022-B-moedB", "ref": "שאלה 2", "difficulty": "medium",
+      "title": { "he": "פיצול מערך עם הפרש סכומים מקסימלי", "en": "Splitting an array to maximize the sum difference" },
+      "stem": { "he": "נתון מערך A של n מספרים טבעיים שונים ומספר k < n. מחלקים אותו לשתי קבוצות B (בגודל k) ו-C (בגודל n−k) כך ש-|Sum(B) − Sum(C)| מקסימלי. כתבו אלגוריתם בזמן O(n).", "en": "Given an array A of n distinct natural numbers and k < n, split it into B (size k) and C (size n−k) maximizing |Sum(B) − Sum(C)|. Write an O(n) algorithm." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "מהו האלגוריתם ולמה הוא נכון?", "en": "What is the algorithm and why is it correct?" },
+          "model": { "he": "הקבוצה הקטנה מבין השתיים מקבלת את האיברים הקטנים ביותר, והגדולה מקבלת את השאר. מריצים Select למציאת האיבר ה-k (או ה-(n−k)) בגודלו, ואז מעבר אחד שמחלק לפי הסף.\nלמה זה נכון: כשהקבוצה הקטנה (נניח בגודל k ≤ n−k) מקבלת את k הקטנים, ההפרש הוא Total − 2·S_k. החלופה (k הגדולים) נותנת 2·L_k − Total. ההפרש בין שתי האפשרויות הוא 2·(Total − S_k − L_k) ≥ 0, כי k הקטנים ו-k הגדולים הם קבוצות זרות.", "en": "The smaller of the two groups gets the smallest elements and the larger group gets the rest. Use Select to find the k-th (or (n−k)-th) smallest and make one pass splitting by that threshold.\nWhy: when the smaller group (say size k ≤ n−k) takes the k smallest, the difference is Total − 2·S_k. The alternative (the k largest) gives 2·L_k − Total. The gap between the two options is 2·(Total − S_k − L_k) ≥ 0, since the k smallest and k largest are disjoint sets." } },
+        { "id": "b", "prompt": { "he": "מה סיבוכיות הזמן?", "en": "What is the running time?" },
+          "model": { "he": "O(n): Select לוקח O(n) ואחריו מעבר אחד ב-O(n). בלי Select, מיון היה עולה O(n log n).", "en": "O(n): Select takes O(n) followed by one O(n) pass. Sorting instead would cost O(n log n)." } }
+      ]
+    },
+    {
+      "id": "open-012", "node": "bfs", "source": "2024-A-miluim", "ref": "שאלה 1", "difficulty": "medium",
+      "title": { "he": "צומת הפרדה", "en": "Cut vertex" },
+      "stem": { "he": "נתון גרף לא מכוון G ברשימת סמיכויות וצומת x. x הוא צומת הפרדה אם הסרתו מגדילה את מספר רכיבי הקשירות. כתבו אלגוריתם יעיל שמכריע זאת.", "en": "Given an undirected graph G as an adjacency list and a vertex x. x is a cut vertex if removing it increases the number of connected components. Write an efficient algorithm to decide it." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "מהו האלגוריתם?", "en": "What is the algorithm?" },
+          "model": { "he": "אם deg(x) ≤ 1, x אינו צומת הפרדה. אחרת בוחרים שכן v של x ומריצים BFS מ-v בגרף G−x. אם אחד משכני x אינו מושג (מרחק ∞), x הוא צומת הפרדה. אחרת לא.", "en": "If deg(x) ≤ 1, x is not a cut vertex. Otherwise pick a neighbour v of x and run BFS from v in G−x. If some neighbour of x is unreached (distance ∞), x is a cut vertex. Otherwise it is not." } },
+        { "id": "b", "prompt": { "he": "נמקו נכונות וחשבו סיבוכיות.", "en": "Justify correctness and give the complexity." },
+          "model": { "he": "x הוא צומת הפרדה אם ורק אם יש שני שכנים שלו ברכיבי קשירות שונים של G−x. BFS מ-v מגיע בדיוק לרכיב של v, ולכן מספיק לבדוק אם כל שאר השכנים הושגו. זמן O(V+E): BFS עם עוד מעבר על deg(x) שכנים.", "en": "x is a cut vertex iff two of its neighbours lie in different components of G−x. BFS from v reaches exactly v's component, so it is enough to check whether every other neighbour was reached. Time O(V+E): one BFS plus a scan of deg(x) neighbours." } }
+      ]
+    },
+    {
+      "id": "open-013", "node": "greedy-knapsack", "source": "2024-A-miluim", "ref": "שאלה 2", "difficulty": "hard",
+      "title": { "he": "תרמיל 0/1 במקרה מיוחד", "en": "0/1 knapsack in a special case" },
+      "stem": { "he": "בתרמיל 0/1 ידוע שאם ממיינים את הפריטים לפי משקל עולה, הערכים יורדים. כלומר ככל שהפריט כבד יותר, כך הוא פחות יקר. קיבולת S. מחפשים קבוצה בעלת ערך מקסימלי.", "en": "In a 0/1 knapsack, sorting items by weight ascending gives values descending: the heavier an item, the less valuable. Capacity S. Find a maximum-value set." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו אלגוריתם חמדני.", "en": "Write a greedy algorithm." },
+          "model": { "he": "ממיינים לפי משקל עולה. מוסיפים פריטים לפי הסדר (מהקל לכבד) כל עוד המשקל המצטבר לא עולה על S, ועוצרים בפריט הראשון שלא נכנס.", "en": "Sort by weight ascending. Add items in that order (lightest first) while the total weight stays within S, and stop at the first item that does not fit." } },
+        { "id": "b", "prompt": { "he": "הוכיחו נכונות (בחירה חמדנית ותת-מבנה אופטימלי).", "en": "Prove correctness (greedy choice and optimal substructure)." },
+          "model": { "he": "בחירה חמדנית: הפריט 1 הוא הקל ביותר והיקר ביותר. יהי A פתרון אופטימלי שלא מכיל אותו, ו-i1 הפריט הקל ביותר בו. מחליפים את i1 ב-1: המשקל לא גדל (w1 ≤ w(i1)) והערך לא קטן (v1 ≥ v(i1)), ולכן מתקבל פתרון חוקי ואופטימלי שמכיל את 1.\nתת-מבנה: אם A = {1} ∪ A1 אופטימלי, אז A1 אופטימלי לבעיה על הפריטים 2..n עם קיבולת S − w1. אילו היה פתרון B1 עם ערך גדול יותר, אז {1} ∪ B1 היה טוב מ-A, בסתירה.", "en": "Greedy choice: item 1 is both the lightest and the most valuable. Let A be optimal without it and i1 its lightest item. Replace i1 by 1: weight does not grow (w1 ≤ w(i1)) and value does not shrink (v1 ≥ v(i1)), so we get a feasible optimal solution containing item 1.\nSubstructure: if A = {1} ∪ A1 is optimal, A1 is optimal for items 2..n with capacity S − w1. A better B1 would make {1} ∪ B1 beat A, a contradiction." } },
+        { "id": "c", "prompt": { "he": "מה זמן הריצה?", "en": "What is the running time?" },
+          "model": { "he": "O(n log n) בגלל המיון. המעבר עצמו O(n).", "en": "O(n log n) because of the sort. The scan itself is O(n)." } }
+      ]
+    },
+    {
+      "id": "open-014", "node": "huffman", "source": "2024-A-miluim", "ref": "שאלה 3", "difficulty": "hard",
+      "title": { "he": "האם זה קוד Huffman?", "en": "Is this a Huffman code?" },
+      "stem": { "he": "א. האם הקוד {00, 11, 01, 100, 101} יכול להיות קוד Huffman עבור שכיחויות כלשהן? ב. בנו עץ Huffman לשכיחויות 1, 3, 9, 27, 81. ג. האם כל סדרה הנדסית של 5 איברים נותנת אותו עץ?", "en": "a. Can the code {00, 11, 01, 100, 101} be a Huffman code for some frequencies? b. Build the Huffman tree for frequencies 1, 3, 9, 27, 81. c. Does every 5-term geometric sequence give the same tree?" },
+      "parts": [
+        { "id": "a", "prompt": { "he": "סעיף א׳.", "en": "Part a." }, "derived": true,
+          "model": { "he": "כן. עץ הקוד מלא (לכל צומת פנימי שני ילדים), ואפשר לבחור שכיחויות שמשחזרות את הבנייה: 00=3, 01=3, 11=2, 100=1, 101=1. Huffman ממזג 1+1=2 (הצמתים 100 ו-101), אחר כך 2+2=4 (עם 11), אחר כך 3+3=6, ולבסוף 4+6. זה בדיוק העץ הנתון.", "en": "Yes. The code tree is full (every internal node has two children), and frequencies can reproduce the construction: 00=3, 01=3, 11=2, 100=1, 101=1. Huffman merges 1+1=2 (nodes 100 and 101), then 2+2=4 (with 11), then 3+3=6, and finally 4+6. That is exactly the given tree." } },
+        { "id": "b", "prompt": { "he": "סעיף ב׳.", "en": "Part b." }, "derived": true,
+          "model": { "he": "ממזגים: 1+3=4, אחר כך 4+9=13, אחר כך 13+27=40, ולבסוף 40+81=121. העץ הוא 'שרשרת': 81 בעומק 1, 27 בעומק 2, 9 בעומק 3, ו-1 ו-3 בעומק 4. עלות הקידוד: 81·1 + 27·2 + 9·3 + (1+3)·4 = 178 ביטים.", "en": "Merge: 1+3=4, then 4+9=13, then 13+27=40, finally 40+81=121. The tree is a 'chain': 81 at depth 1, 27 at depth 2, 9 at depth 3, and 1 and 3 at depth 4. Encoding cost: 81·1 + 27·2 + 9·3 + (1+3)·4 = 178 bits." } },
+        { "id": "c", "prompt": { "he": "סעיף ג׳.", "en": "Part c." },
+          "model": { "he": "לא. דוגמה נגדית: מנה q=1 (כל השכיחויות שוות). אז הממוזגים הם זוגות שווים והעץ מאוזן יחסית, ולא שרשרת כמו בסעיף ב׳.", "en": "No. Counterexample: ratio q=1 (all frequencies equal). The merges pair equal weights and the tree is nearly balanced, not a chain as in part b." } }
+      ]
+    },
+    {
+      "id": "open-015", "node": "dp-principles", "source": "2024-A-miluim", "ref": "שאלה 4", "difficulty": "medium",
+      "title": { "he": "משחק הקפיצות", "en": "The jump game" },
+      "stem": { "he": "נתון מערך A בגודל n, וכל איבר הוא המספר המרבי של צעדים קדימה שאפשר לקפוץ ממנו. מחפשים את מספר הקפיצות המינימלי להגיע לסוף המערך מאינדקס 1. לדוגמה, ב-{1,4,6,4,5,3,3,2,1,3} התשובה 3.", "en": "Given an array A of size n where each element is the maximum number of steps you may jump forward from there. Find the minimum number of jumps to reach the end from index 1. For {1,4,6,4,5,3,3,2,1,3} the answer is 3." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו נוסחת נסיגה והגדירו אותה במילים.", "en": "Write a recurrence and define it in words." },
+          "model": { "he": "C(i) = מספר הקפיצות המינימלי להגיע לאינדקס n מאינדקס i.\nC(n) = 0.\nC(i) = 1 + min של C(i+j) לכל 1 ≤ j ≤ min(A[i], n−i).\nהסבר: קופצים j צעדים ממקום i, ואז ממשיכים אופטימלית משם. התשובה C(1). (אפשר גם להגדיר מהתחלה: C(i) מינימום קפיצות להגיע ל-i מאינדקס 1.)", "en": "C(i) = minimum number of jumps to reach index n from index i.\nC(n) = 0.\nC(i) = 1 + the minimum of C(i+j) over 1 ≤ j ≤ min(A[i], n−i).\nWhy: jump j steps from i, then continue optimally. The answer is C(1). (Or define from the start: C(i) = minimum jumps to reach i from index 1.)" } },
+        { "id": "b", "prompt": { "he": "מה סיבוכיות הזמן והמקום, ומה אם רוצים גם את האינדקסים בדרך?", "en": "What are the time and space complexity, and what if you also want the path?" },
+          "model": { "he": "זמן O(n²) ומקום O(n): n ערכים וכל אחד בודק עד n אפשרויות. כדי לקבל את האינדקסים שומרים לכל i גם את ה-j שנבחר (מערך נוסף בגודל n), ואז הולכים קדימה לפיו: אותה סיבוכיות, כלומר זמן O(n²) ומקום O(n).", "en": "Time O(n²) and space O(n): n values, each checking up to n options. To get the path also store, for each i, the chosen j (one more array of size n) and follow it forward: the same complexity, O(n²) time and O(n) space." } }
+      ]
+    },
+    {
+      "id": "open-016", "node": "greedy-asp", "source": "2024-B-moedA", "ref": "שאלה 2", "difficulty": "medium",
+      "title": { "he": "תחנות רכבת", "en": "Train stations" },
+      "stem": { "he": "K ערים נמצאות בנקודות x1 < … < xK על קו. בוחרים מיקומים לתחנות כך שכל עיר במרחק של D לכל היותר מתחנה כלשהי. רוצים מספר תחנות מינימלי. לדוגמה, עבור 1,5,9,16 ו-D=3 מספיקות 3 תחנות (3, 9, 16).", "en": "K cities lie at x1 < … < xK on a line. Choose station locations so every city is within D of some station, using as few stations as possible. For 1,5,9,16 and D=3, 3 stations suffice (3, 9, 16)." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "האם הפתרון האופטימלי יחיד?", "en": "Is the optimal solution unique?" },
+          "model": { "he": "לא. בדוגמה אפשר גם 4, 9, 16 (4 מכסה את 1 ואת 5). קיימים עוד פתרונות כי אפשר להזיז תחנה בטווח שבו היא עדיין מכסה את אותן ערים.", "en": "No. In the example 4, 9, 16 also works (4 covers both 1 and 5). A station can be shifted within a range while still covering the same cities." } },
+        { "id": "b", "prompt": { "he": "כתבו אלגוריתם חמדני.", "en": "Write a greedy algorithm." },
+          "model": { "he": "מקמים תחנה בנקודה x1 + D (הכי ימינה שעדיין מכסה את העיר הראשונה). עוברים על הערים בסדר: אם עיר אינה מכוסה (xi − D > מיקום התחנה האחרונה), מקמים תחנה חדשה ב-xi + D. זמן O(K) על קלט ממוין.", "en": "Place a station at x1 + D (as far right as still covers the first city). Scan the cities in order: if a city is not covered (xi − D > last station), place a new station at xi + D. O(K) on sorted input." } },
+        { "id": "c", "prompt": { "he": "הוכיחו שהאלגוריתם אופטימלי.", "en": "Prove the algorithm is optimal." },
+          "model": { "he": "האלגוריתם מחזיר פתרון חוקי: כל עיר מכוסה. נניח בשלילה שהוא לא אופטימלי. מכל הפתרונות האופטימליים ניקח OPT עם הקידומת המשותפת הארוכה ביותר עם פתרון החמדן D: d1=b1,…,di=bi ו-d(i+1) ≠ b(i+1). לפי הבחירה החמדנית d(i+1) = x(m+1) + D, הכי ימנית שאפשר, ולכן d(i+1) > b(i+1) ומכסה לפחות את כל מה ש-b(i+1) מכסה. החלפת b(i+1) ב-d(i+1) נותנת פתרון חוקי באותו גודל עם קידומת משותפת ארוכה יותר, בסתירה.", "en": "The algorithm returns a feasible solution: every city is covered. Suppose it is not optimal. Among optimal solutions take OPT sharing the longest prefix with the greedy solution D: d1=b1,…,di=bi and d(i+1) ≠ b(i+1). By the greedy choice d(i+1) = x(m+1) + D, as far right as possible, so d(i+1) > b(i+1) and covers everything b(i+1) covers. Replacing b(i+1) by d(i+1) gives a feasible solution of the same size with a longer shared prefix, a contradiction." } }
+      ]
+    },
+    {
+      "id": "open-017", "node": "dp-principles", "source": "2024-B-moedA", "ref": "שאלה 4", "difficulty": "medium",
+      "title": { "he": "מספר פעולות מינימלי ל-K", "en": "Minimum operations to reach K" },
+      "stem": { "he": "מתחילים ב-1 ומותר: להוסיף 1, להכפיל ב-2 או להכפיל ב-3. מחפשים את מספר הפעולות המינימלי להגיע ל-K. לדוגמה, 10 דורש 3 פעולות.", "en": "Start at 1; allowed: add 1, multiply by 2, multiply by 3. Find the minimum number of operations to reach K. For example 10 needs 3 operations." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "כתבו נוסחת נסיגה.", "en": "Write a recurrence." },
+          "model": { "he": "C(i) = מספר הפעולות המינימלי להפוך 1 ל-i.\nC(1) = 0.\nC(i) = 1 + min של: C(i−1), וגם C(i/2) אם i זוגי, וגם C(i/3) אם i מתחלק ב-3.\nהסבר: הפעולה האחרונה היא הוספת 1, הכפלה ב-2 או הכפלה ב-3, ולכן יש עד שלוש אפשרויות. התשובה C(K).", "en": "C(i) = minimum operations to turn 1 into i.\nC(1) = 0.\nC(i) = 1 + the minimum of: C(i−1), and C(i/2) if i is even, and C(i/3) if i is divisible by 3.\nWhy: the last operation is +1, ×2 or ×3, so there are up to three options. The answer is C(K)." } },
+        { "id": "b", "prompt": { "he": "סיבוכיות? האם האלגוריתם פולינומי?", "en": "Complexity? Is the algorithm polynomial?" },
+          "model": { "he": "זמן ומקום Θ(K). אבל גודל הקלט הוא n = log K ביטים, ולכן K = 2^n: זמן אקספוננציאלי בגודל הקלט. האלגוריתם הוא פסאודו-פולינומי ולא פולינומי.", "en": "Time and space Θ(K). But the input size is n = log K bits, so K = 2^n: exponential in the input size. The algorithm is pseudo-polynomial, not polynomial." } },
+        { "id": "c", "prompt": { "he": "מלאו את הטבלה עבור K=7.", "en": "Fill the table for K=7." },
+          "model": { "he": "C(1..7) = 0, 1, 1, 2, 3, 2, 3. למשל C(5) = 3 (1→2→4→5) ו-C(7) = C(6) + 1 = 3 (1→3→6→7).", "en": "C(1..7) = 0, 1, 1, 2, 3, 2, 3. For example C(5) = 3 (1→2→4→5) and C(7) = C(6) + 1 = 3 (1→3→6→7)." } }
+      ]
+    },
+    {
+      "id": "open-018", "node": "suffix-trees", "source": "2023-A-moedB", "ref": "שאלה 3", "difficulty": "hard",
+      "title": { "he": "שכיחויות מילים באורך 4 ותבנית 'בחילוף'", "en": "4-mer frequencies and a permuted pattern" },
+      "stem": { "he": "א. רשימה של 1000 מילים באורך 50 מעל A,C,G,T. מחשבים את השכיחות של כל תת-מחרוזת באורך 4 בזמן לינארי. ב. מחפשים תבנית P בטקסט T מעל {a,b,c} כשמותר להחליף את האותיות בתבנית בפרמוטציה כלשהי של הא״ב. מחזירים את כל המקומות.", "en": "a. A list of 1000 words of length 50 over A,C,G,T. Compute the frequency of every length-4 substring in linear time. b. Search for a pattern P in a text T over {a,b,c} where the letters of the pattern may be replaced by any permutation of the alphabet. Return every position." },
+      "parts": [
+        { "id": "a", "prompt": { "he": "איך פותרים את סעיף א׳ בזמן לינארי?", "en": "How do you solve part a in linear time?" },
+          "model": { "he": "משרשרים את כל המילים, ובסוף כל מילה מוסיפים מפריד ייחודי ($i). בונים עץ סיפות לטקסט בזמן לינארי. לכל צומת פנימי מחשבים 'עומק מחרוזת' (באורך תווי הא״ב לפני מפריד). מוצאים את הצמתים שעומקם לפחות 4 ושעומק אביהם קטן מ-4: כל צומת כזה מייצג תת-מחרוזת באורך 4, ומספר העלים בתת-העץ שלו הוא השכיחות. כל זה בסריקה אחת של העץ, ולכן הכול לינארי בגודל הקלט.", "en": "Concatenate all words, adding a unique separator ($i) after each. Build a suffix tree of the text in linear time. For each internal node compute its string depth (counting alphabet characters before a separator). Find nodes with depth at least 4 whose parent has depth below 4: each represents a length-4 substring, and the number of leaves in its subtree is its frequency. One traversal of the tree, so everything is linear in the input size." } },
+        { "id": "b", "prompt": { "he": "ואיך פותרים את סעיף ב׳?", "en": "And part b?" },
+          "model": { "he": "לכל אחת מ-3! = 6 פרמוטציות של האותיות יוצרים את התבנית המוחלפת, ומריצים KMP על T עם כל אחת מ-6 התבניות. מאחדים את המקומות. זמן 6·O(n+m) = O(n+m), כלומר לינארי.", "en": "For each of the 3! = 6 permutations of the letters build the permuted pattern and run KMP on T with each of the 6 patterns. Union the positions. Time 6·O(n+m) = O(n+m), linear." } }
+      ]
+    }
+  ]
+}
