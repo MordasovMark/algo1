@@ -9,7 +9,8 @@
       "mst": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים.",
       "select": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים.",
       "randomized": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים."
-    }
+    },
+    "video": "video = YouTube id of a NeetCode video, only where a web search explicitly tied the video to NeetCode (title format or a description linking neetcode.io). Other questions have no id and the page links to a YouTube search instead. The ids could not be opened from this environment (youtube.com is blocked), so please click each one once to confirm."
   },
   "questions": [
     {
@@ -91,7 +92,8 @@
       "explanation": {
         "he": "חיבור ספרה-ספרה עם נשא (carry), בזמן O(max(n,m)). זו הדרך שבה מחברים מספרים גדולים, ומכינה להבנת עלות הכפל הרגיל O(n²) שקרצובה משפרת.",
         "en": "Digit-by-digit addition with carry. Warm-up for Karatsuba's cost model."
-      }
+      },
+      "video": "keuWJ47xG8g"
     },
     {
       "number": 69,
@@ -111,7 +113,8 @@
       "explanation": {
         "he": "חיפוש בינארי על התשובה בטווח [0, x]. בכל צעד מחלקים את הטווח לחצי, בזמן O(log x). זו תבנית 'הפרד ומשול' פשוטה: בעיה אחת קטנה בכל פעם.",
         "en": "Binary search on the answer, O(log x)."
-      }
+      },
+      "video": "zdMhGxRWutQ"
     },
     {
       "number": 169,
@@ -131,7 +134,8 @@
       "explanation": {
         "he": "Boyer-Moore: שומרים מועמד ומונה. אותו ערך מגדיל, ערך אחר מקטין, ובאפס מחליפים מועמד. הסיבה שזה עובד: כל זוג של שני ערכים שונים 'מבטל' זה את זה, ואיבר רוב לא יכול להתבטל לגמרי. O(n) זמן ו-O(1) מקום. פתרון נוסף: הפרד ומשול על חצאים.",
         "en": "Boyer-Moore voting: candidate + counter, O(n) time, O(1) space."
-      }
+      },
+      "video": "7pnhv842keE"
     },
     {
       "number": 1150,
@@ -275,7 +279,8 @@
       "explanation": {
         "he": "DFS מסמן תאים שביקרנו בהם. כל תא יבשה תורם 4 מינוס מספר שכניו שגם יבשה. אפשר גם בלי DFS בסריקה אחת. O(rows*cols).",
         "en": "DFS or a single scan; each land cell adds 4 minus land neighbours."
-      }
+      },
+      "video": "fISIuAFRM2s"
     },
     {
       "number": 104,
@@ -479,7 +484,8 @@
       "explanation": {
         "he": "מחשבים מראש סכומי קידומת prefix[i]. כל שאילתה היא prefix[j+1]-prefix[i] ב-O(1). מראה את הרעיון של 'מילוי טבלה פעם אחת ושימוש חוזר'.",
         "en": "Precompute prefix sums; each query O(1)."
-      }
+      },
+      "video": "2pndAmo_sMA"
     },
     {
       "number": 392,
@@ -579,7 +585,8 @@
       "explanation": {
         "he": "ממיינים לפי התחלה ובודקים אם הסיום של כל פגישה אחרי ההתחלה של הבאה. O(n log n). אחר כך עוברים ל-ASP המלא: כמה פגישות מקסימום אפשר לקיים?",
         "en": "Sort and compare neighbours. O(n log n)."
-      }
+      },
+      "video": "PaJxqZVPhbg"
     },
     {
       "number": 2037,
