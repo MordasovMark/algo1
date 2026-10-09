@@ -1,0 +1,1799 @@
+<title>מסע האלגוריתמים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Secular+One&display=swap">
+<style>
+/* Layout: one winding path per island, islands stacked down a single column; level, XP and streak pinned in a sticky bar. */
+:root{
+  --bg:#e8f3f1; --surface:#ffffff; --surface2:#f3f9f8; --ink:#0f2a3f; --ink2:#486174; --line:#c9dddb;
+  --brand:#0b7f86; --brand-ink:#ffffff; --sun:#f2b100; --sun-ink:#3b2a00;
+  --good:#1b8f50; --bad:#cf3f3f; --warn:#b86e00; --locked:#a9bcc4;
+  --c-sky:#2f80d1; --c-emerald:#1f9d6b; --c-violet:#7a5ad1; --c-amber:#d98a00; --c-rose:#d6456b; --c-slate:#5f7385;
+  --shadow:0 1px 0 rgba(15,42,63,.06),0 6px 18px rgba(15,42,63,.08);
+  --f-display:'Secular One','Rubik',system-ui,sans-serif;
+  --f-body:'Rubik',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-code:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#09192a; --surface:#10283b; --surface2:#0d2133; --ink:#e7f2f6; --ink2:#9db5c4; --line:#22425a;
+  --brand:#3cc4c9; --brand-ink:#04222a; --sun:#ffc933; --sun-ink:#3b2a00;
+  --good:#4cc98a; --bad:#ff8080; --warn:#f0b04a; --locked:#3a5468;
+  --c-sky:#5aa5f0; --c-emerald:#3dc891; --c-violet:#9c86f0; --c-amber:#f0ae2e; --c-rose:#f0698d; --c-slate:#8aa0b2;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#09192a; --surface:#10283b; --surface2:#0d2133; --ink:#e7f2f6; --ink2:#9db5c4; --line:#22425a;
+  --brand:#3cc4c9; --brand-ink:#04222a; --sun:#ffc933; --sun-ink:#3b2a00;
+  --good:#4cc98a; --bad:#ff8080; --warn:#f0b04a; --locked:#3a5468;
+  --c-sky:#5aa5f0; --c-emerald:#3dc891; --c-violet:#9c86f0; --c-amber:#f0ae2e; --c-rose:#f0698d; --c-slate:#8aa0b2;
+  --shadow:0 1px 0 rgba(0,0,0,.3),0 8px 22px rgba(0,0,0,.35); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:0 96px}
+.wrap{max-width:640px;margin-inline:auto}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--brand)}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:8px}
+h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0;line-height:1.2}
+.btn{border:0;border-radius:14px;padding:12px 18px;font-weight:700;background:var(--brand);color:var(--brand-ink);box-shadow:0 3px 0 rgba(0,0,0,.22);transition:transform .08s}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.22)}
+.btn.ghost{background:var(--surface);color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.sun{background:var(--sun);color:var(--sun-ink)}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:.8rem;font-weight:700;background:var(--surface2);border:1px solid var(--line);color:var(--ink2)}
+.chip.draft{border-style:dashed}
+
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:12px 10px;border-bottom:1px solid var(--line);margin-inline:-16px;padding-inline:16px}
+.bar-in{max-width:640px;margin-inline:auto;display:flex;align-items:center;gap:12px}
+.lvl{width:46px;height:46px;border-radius:14px;background:var(--brand);color:var(--brand-ink);display:grid;place-items:center;font-family:var(--f-display);font-size:1.35rem;flex:none}
+.xpbox{flex:1;min-width:0}
+.xprow{display:flex;justify-content:space-between;gap:8px;font-size:.82rem;color:var(--ink2);font-weight:500}
+.xprow b{color:var(--ink);font-family:var(--f-display);font-weight:400;font-size:.95rem}
+.track{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:4px}
+.track i{display:block;height:100%;background:var(--sun);border-radius:99px;transition:width .5s}
+.pill{border:2px solid var(--line);background:var(--surface);border-radius:14px;padding:6px 10px;font-weight:700;display:flex;align-items:center;gap:6px;flex:none;font-variant-numeric:tabular-nums}
+.pill svg{width:18px;height:18px}
+
+/* hero */
+.hero{padding-block:22px 6px}
+.hero h1{font-size:clamp(1.9rem,7vw,2.6rem)}
+.hero p{margin:6px 0 0;color:var(--ink2);max-width:46ch}
+
+/* quests */
+.quests{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-block:16px 8px}
+.quest{background:var(--surface);border:2px solid var(--line);border-radius:16px;padding:12px 14px;text-align:start;display:flex;flex-direction:column;gap:2px;box-shadow:var(--shadow)}
+.quest b{font-family:var(--f-display);font-weight:400;font-size:1.05rem}
+.quest span{font-size:.85rem;color:var(--ink2)}
+.quest.hot{border-color:var(--sun)}
+.quest.done{opacity:.7}
+
+/* islands */
+.island{margin-top:34px}
+.ihead{display:flex;gap:12px;align-items:center;background:var(--ic);color:var(--brand-ink);border-radius:18px;padding:14px 16px;box-shadow:var(--shadow)}
+.ihead .wk{font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;opacity:.92;font-weight:700}
+.ihead h2{font-size:1.45rem;color:var(--brand-ink)}
+.ihead .pr{margin-inline-start:auto;text-align:end;font-variant-numeric:tabular-nums;font-weight:700;white-space:nowrap}
+.ihead .mini{display:block;height:6px;width:84px;background:rgba(127,127,127,.35);border-radius:9px;margin-top:5px;margin-inline-start:auto;overflow:hidden}
+.ihead .mini i{display:block;height:100%;background:var(--brand-ink)}
+.path{position:relative;container-type:inline-size;max-width:420px;margin-inline:auto;margin-top:6px}
+.path>svg{display:block;width:100%;height:auto}
+.stop{position:absolute;transform:translate(-50%,-50%);width:17cqw;height:17cqw;border:0;background:none;padding:0;overflow:visible;border-radius:50%}
+.disc{position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--ic) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;box-shadow:var(--shadow)}
+.core{width:82%;height:82%;border-radius:50%;background:var(--surface);display:grid;place-items:center;font-family:var(--f-code);font-weight:700;font-size:4.3cqw;color:var(--ic);letter-spacing:-.02em}
+.stop.done .core{background:var(--ic);color:var(--brand-ink)}
+.stop.locked .disc{background:var(--line);box-shadow:none}
+.stop.locked .core{background:var(--surface2);color:var(--locked);border:2px dashed var(--locked)}
+.stop.next .disc{animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.stars{position:absolute;left:50%;top:calc(100% - 1.2cqw);transform:translateX(-50%);display:flex;gap:.2cqw;font-size:3.6cqw;line-height:1;background:var(--surface);border-radius:99px;padding:.6cqw 1.6cqw;border:1px solid var(--line);color:var(--sun);white-space:nowrap}
+.stars .off{color:var(--line)}
+.lbl{position:absolute;left:-6.5cqw;width:30cqw;top:calc(100% + 2.8cqw);text-align:center;font-size:max(11px,3.5cqw);font-weight:700;line-height:1.2;color:var(--ink)}
+.stop.locked .lbl{color:var(--ink2)}
+.tag{position:absolute;left:50%;top:-7.5cqw;transform:translateX(-50%);background:var(--sun);color:var(--sun-ink);font-weight:700;font-size:3.2cqw;padding:.6cqw 2.4cqw;border-radius:99px;white-space:nowrap}
+.tag:after{content:"";position:absolute;left:50%;bottom:-1.2cqw;width:2cqw;height:2cqw;background:var(--sun);transform:translateX(-50%) rotate(45deg)}
+.stop.boss{width:21cqw;height:21cqw;border-radius:0}
+.stop.boss .disc{border-radius:0;clip-path:polygon(25% 3%,75% 3%,98% 50%,75% 97%,25% 97%,2% 50%);box-shadow:none}
+.stop.boss .core{border-radius:0;clip-path:polygon(25% 3%,75% 3%,98% 50%,75% 97%,25% 97%,2% 50%);width:86%;height:86%;font-size:3.8cqw;background:var(--ic);color:var(--brand-ink)}
+.stop.boss.locked .core{background:var(--surface2);color:var(--locked);border:0}
+.stop.boss .lbl{left:-4.5cqw;top:calc(100% + 2.4cqw)}
+
+.wave{display:block;width:100%;height:28px;color:var(--line);margin-top:6px}
+
+/* overlay (sheet / modal) */
+.scrim{position:fixed;inset:0;background:rgba(5,16,26,.55);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--surface);width:100%;max-width:640px;max-height:88%;border-radius:24px 24px 0 0;display:flex;flex-direction:column;box-shadow:var(--shadow);padding-bottom:env(safe-area-inset-bottom,0px)}
+.sheet.modal{max-height:92%}
+.shead{display:flex;gap:12px;align-items:center;padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+.shead .core2{width:52px;height:52px;border-radius:50%;background:var(--ic);color:var(--brand-ink);display:grid;place-items:center;font-family:var(--f-code);font-weight:700;font-size:.95rem;flex:none}
+.shead h2{font-size:1.35rem}
+.xbtn{margin-inline-start:auto;border:2px solid var(--line);background:var(--surface2);width:40px;height:40px;border-radius:12px;font-size:1.1rem;flex:none}
+.sbody{overflow:auto;padding:14px 16px 18px;display:flex;flex-direction:column;gap:14px}
+.sbody p{margin:0}
+.warn{background:var(--surface2);border:2px dashed var(--warn);color:var(--ink);border-radius:14px;padding:10px 12px;font-size:.92rem}
+.lcl{display:flex;flex-direction:column;gap:8px;padding:0;margin:0;list-style:none}
+.lc{border:2px solid var(--line);border-radius:14px;background:var(--surface2)}
+.lc.on{border-color:var(--good)}
+.lc-top{display:flex;gap:10px;align-items:center;padding:10px 12px}
+.lc-top input{width:22px;height:22px;accent-color:var(--good);flex:none}
+.lc-top label{flex:1;min-width:0;font-weight:500}
+.lc-top .num{font-family:var(--f-code);color:var(--ink2);font-size:.85rem}
+.lc-vid{padding:0 12px 10px;display:flex;flex-wrap:wrap;gap:8px}
+.vbtn{border:2px solid var(--ic);background:var(--surface);color:var(--ink);border-radius:12px;padding:6px 12px;font-weight:700}
+.vcells.wide .vcw{width:auto;min-width:48px}.vcells.wide .vc{padding-inline:8px;white-space:nowrap}
+.vtri{display:flex;flex-direction:column;align-items:center;gap:4px}.vtr{display:flex;gap:4px}.vtr .vc{width:34px}
+.vid{display:inline-flex;gap:6px;align-items:center;font-weight:700;text-decoration:none;border:2px solid var(--brand);border-radius:12px;padding:6px 12px;background:var(--surface);color:var(--ink)}
+.vid.alt{border-color:var(--line);font-weight:500;color:var(--ink2)}
+.lc details{padding:0 12px 10px;font-size:.92rem;color:var(--ink2)}
+.lc summary{cursor:pointer;color:var(--brand);font-weight:700}
+.lc details p{margin-top:6px}
+.sub{font-family:var(--f-display);font-size:1.05rem}
+
+/* quiz */
+.qtop{display:flex;align-items:center;gap:12px;padding-block:14px 8px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+.dots{flex:1;display:flex;gap:4px}
+.dots i{flex:1;height:10px;border-radius:9px;background:var(--line)}
+.dots i.ok{background:var(--good)}.dots i.no{background:var(--bad)}.dots i.cur{background:var(--sun)}
+.timer{font-family:var(--f-code);font-weight:700;font-variant-numeric:tabular-nums;min-width:4.2ch;text-align:center}
+.qcard{background:var(--surface);border:2px solid var(--line);border-radius:20px;padding:18px;box-shadow:var(--shadow);margin-top:10px}
+.qmeta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.stem{font-size:1.08rem;margin:0 0 14px;font-weight:500}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:start;width:100%;border:2px solid var(--line);background:var(--surface2);border-radius:14px;padding:12px 14px;box-shadow:0 3px 0 var(--line);transition:transform .08s}
+.opt:active:not([disabled]){transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.opt .k{flex:none;width:28px;height:28px;border-radius:9px;border:2px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:.85rem;background:var(--surface)}
+.opt .tx{flex:1;min-width:0;overflow-wrap:anywhere}
+.opt.sel{border-color:var(--brand);box-shadow:0 3px 0 var(--brand)}
+.opt.sel .k{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.opt.right{border-color:var(--good);box-shadow:0 3px 0 var(--good);background:var(--surface)}
+.opt.right .k{background:var(--good);color:#fff;border-color:var(--good)}
+.opt.wrong{border-color:var(--bad);box-shadow:0 3px 0 var(--bad);background:var(--surface)}
+.opt.wrong .k{background:var(--bad);color:#fff;border-color:var(--bad)}
+.opt[disabled]{cursor:default}
+.fb{margin-top:14px;border-radius:14px;padding:12px 14px;border:2px solid var(--line);position:relative}
+.fb.ok{border-color:var(--good)}.fb.no{border-color:var(--bad)}
+.fb h3{font-size:1.2rem;margin-bottom:4px}
+.fb.ok h3{color:var(--good)}.fb.no h3{color:var(--bad)}
+.fb p{margin:0;color:var(--ink)}
+.gain{position:absolute;inset-inline-end:12px;top:-14px;background:var(--sun);color:var(--sun-ink);font-weight:700;border-radius:99px;padding:2px 12px;animation:pop .6s ease-out both}
+@keyframes pop{from{transform:translateY(10px) scale(.7);opacity:0}to{transform:none;opacity:1}}
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.actions .btn{flex:1;min-width:130px}
+
+/* results */
+.res{text-align:center;padding-block:28px 8px}
+.res h1{font-size:2rem}
+.big{font-family:var(--f-display);font-size:3.4rem;line-height:1;margin-block:10px;font-variant-numeric:tabular-nums}
+.rlist{display:flex;flex-direction:column;gap:8px;margin-top:14px;text-align:start}
+.rlist details{border:2px solid var(--line);border-radius:14px;background:var(--surface);padding:10px 12px}
+.rlist summary{cursor:pointer;font-weight:500}
+.rlist .y{color:var(--good)}.rlist .n{color:var(--bad)}
+.rlist p{margin:8px 0 0;color:var(--ink2);font-size:.95rem}
+
+/* profile */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stats div{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:10px 4px}
+.stats b{display:block;font-family:var(--f-display);font-weight:400;font-size:1.5rem;font-variant-numeric:tabular-nums}
+.stats span{font-size:.78rem;color:var(--ink2)}
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.badge{border:2px solid var(--line);border-radius:14px;padding:10px;background:var(--surface2);display:flex;flex-direction:column;gap:2px}
+.badge b{font-family:var(--f-display);font-weight:400}
+.badge span{font-size:.82rem;color:var(--ink2)}
+.badge.off{opacity:.55;border-style:dashed}
+.badge.on{border-color:var(--sun)}
+.ibar{display:flex;flex-direction:column;gap:8px}
+.irow{display:grid;grid-template-columns:minmax(0,1fr) 90px 44px;gap:10px;align-items:center;font-size:.92rem}
+.irow .track{margin:0;height:8px}
+.irow .track i{background:var(--ic)}
+.irow em{font-style:normal;text-align:end;font-variant-numeric:tabular-nums;color:var(--ink2)}
+.row2{display:flex;gap:8px;flex-wrap:wrap}
+.toggle{border:2px solid var(--line);background:var(--surface2);border-radius:12px;padding:8px 14px;font-weight:700}
+.toggle[aria-pressed="true"]{border-color:var(--brand);background:var(--brand);color:var(--brand-ink)}
+.danger{border-color:var(--bad);color:var(--bad);background:transparent}
+
+
+/* visual lab */
+#viz .scrim{z-index:50}
+.vlab{margin-top:10px;padding:12px 14px;background:var(--surface);border:2px dashed var(--ic);border-radius:16px;display:flex;flex-direction:column;gap:6px}
+.vlab b{font-family:var(--f-display);font-weight:400;font-size:1.1rem}
+.vlh{font-size:.85rem;color:var(--ink2)}
+.vchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.vchip{border:2px solid var(--ic);background:var(--surface2);color:var(--ink);border-radius:999px;padding:6px 14px;font-weight:700;font-size:.9rem}
+.vform{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
+.vfield{display:flex;flex-direction:column;gap:2px;font-size:.8rem;color:var(--ink2);min-width:0;flex:1 1 140px}
+.vfield input,.vfield select,.vsp{font:inherit;font-size:1rem;color:var(--ink);background:var(--surface2);border:2px solid var(--line);border-radius:10px;padding:8px 10px;min-width:0;width:100%}
+.vsp{width:auto;padding:6px 8px}
+.vspd{display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--ink2);margin-inline-start:auto}
+.vstage{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:12px;overflow-x:auto;min-height:150px}
+.vcap{min-height:3.2em;font-weight:500}
+.vctl{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.vctl .btn{padding:10px 14px}
+#vslider{width:100%;accent-color:var(--brand)}
+.vcount{text-align:center;font-family:var(--f-code);font-size:.85rem;color:var(--ink2)}
+.vrow{display:flex;gap:8px;align-items:flex-start;margin-block:6px}
+.vname{flex:none;min-width:4.6em;font-size:.8rem;color:var(--ink2);padding-top:6px}
+.vcells{display:flex;gap:4px}
+.vcw{text-align:center;width:36px;flex:none}
+.vc{height:36px;border:2px solid var(--line);border-radius:9px;display:grid;place-items:center;font-family:var(--f-code);font-weight:700;background:var(--surface);color:var(--ink)}
+.vc.cur{border-color:var(--sun);background:var(--sun);color:var(--sun-ink)}
+.vc.ok{border-color:var(--good);background:var(--good);color:var(--brand-ink)}
+.vc.no{border-color:var(--bad);background:var(--bad);color:var(--brand-ink)}
+.vc.hi{border-color:var(--brand);background:var(--brand);color:var(--brand-ink)}
+.vc.dim{opacity:.4}
+.vc.sp{visibility:hidden}
+.vcells.sm .vcw{width:26px}.vcells.sm .vc{height:28px;font-size:.78rem}
+.vi{font-size:.68rem;color:var(--ink2);min-height:1em}
+.vp{font-size:.7rem;font-weight:700;color:var(--brand);min-height:1em;white-space:nowrap}
+.vinfo{margin-top:8px;padding:8px 10px;background:var(--surface);border:1px solid var(--line);border-radius:10px;font-size:.9rem}
+.vt{border-collapse:collapse;font-family:var(--f-code);font-size:.85rem;margin-block:4px}
+.vt th,.vt td{border:1px solid var(--line);padding:4px 8px;text-align:center;min-width:30px;color:var(--ink)}
+.vt th{background:var(--surface);color:var(--ink2);font-weight:500}
+.vt td.cur{background:var(--sun);color:var(--sun-ink)}
+.vt td.hi{background:var(--surface);}
+.vt td.ok{background:var(--good);color:var(--brand-ink)}
+.vt td.dep{background:var(--brand);color:var(--brand-ink)}
+.vt tr.curr th,.vt tr.curr td{background:var(--sun);color:var(--sun-ink)}
+.vtwo{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-top:8px}
+.vlist{font-family:var(--f-code);font-size:.85rem;line-height:1.7;direction:ltr;text-align:left}
+.vlog{font-family:var(--f-code);font-size:.85rem;direction:ltr;text-align:left;display:flex;flex-direction:column;gap:2px}
+.vl{padding-block:2px;color:var(--ink2)}
+.vl.cur{color:var(--ink);font-weight:700;background:var(--surface);border-radius:6px;outline:2px solid var(--sun)}
+.vl.res{color:var(--ink)}
+.vlegend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.85rem;margin-top:6px;font-family:var(--f-code)}
+.vlegend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-inline-end:5px}
+.vbar{display:flex;height:34px;border:2px solid var(--line);border-radius:10px;overflow:hidden;margin-top:4px;direction:ltr}
+.vseg{display:grid;place-items:center;color:var(--brand-ink);font-weight:700;min-width:0}
+.vseg.empty{background:var(--surface);color:var(--ink2)}
+.vtreewrap{overflow-x:auto;margin-bottom:8px}
+.gsvg{display:block;width:100%;max-width:440px;height:auto;margin-inline:auto}
+.gsvg.tree{max-width:none;margin-inline:0}
+.gsvg text{font-family:var(--f-code);font-size:13px;font-weight:700;fill:var(--ink)}
+.gsvg .gw{font-size:11px;fill:var(--ink2)}
+.gsvg .gnode .gtag,.gsvg .gnode.done .gtag,.gsvg .gnode.cur .gtag,.gsvg .gnode.filled .gtag{font-size:12px;fill:var(--ink);paint-order:stroke;stroke:var(--surface2);stroke-width:3px;stroke-linejoin:round}
+.gsvg .ge{stroke:var(--line);stroke-width:3;fill:none}
+.gsvg .gh{fill:var(--line)}
+.gsvg .ge.on{stroke:var(--brand);stroke-width:5}.gsvg .gh.on{fill:var(--brand)}
+.gsvg .ge.cur{stroke:var(--sun);stroke-width:5}.gsvg .gh.cur{fill:var(--sun)}
+.gsvg .ge.bad{stroke:var(--bad);stroke-dasharray:5 5}
+.gnode circle{fill:var(--surface);stroke:var(--ink2);stroke-width:2}
+.gnode.q circle{stroke:var(--brand);stroke-width:5}
+.gnode.hi circle{stroke:var(--brand);stroke-width:4}
+.gnode.cur circle{fill:var(--sun);stroke:var(--sun)}.gnode.cur text{fill:var(--sun-ink)}
+.gnode.done circle{fill:var(--brand);stroke:var(--brand)}.gnode.done text{fill:var(--brand-ink)}
+.gnode.filled text{fill:var(--brand-ink)}
+.ivid{margin-top:10px;padding:12px 14px;background:var(--surface);border:2px solid var(--line);border-radius:16px;display:flex;flex-direction:column;gap:8px}
+.ivid>b{font-family:var(--f-display);font-weight:400;font-size:1.05rem}
+.ivid a{display:flex;flex-direction:column;gap:2px;text-decoration:none;color:var(--ink);border:2px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface2);min-width:0}
+.ivid a.ivmain{border-color:var(--ic)}
+.ivt{font-weight:700;overflow-wrap:anywhere;direction:ltr;text-align:start}
+.ivw{font-size:.85rem;color:var(--ink2)}
+.ivx{display:flex;flex-direction:column;gap:6px}
+.ivid a.alt{border-style:dashed}
+.ivn{margin:0;font-size:.82rem;color:var(--ink2)}
+#ov .scrim{z-index:55}
+.lc-think{padding:0 12px 8px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-weight:500}
+.lc-think.ok{color:var(--good);font-size:.9rem}
+.lc-think .btn{padding:8px 14px;font-size:.95rem}
+.lkn{font-size:.82rem;color:var(--ink2)}
+.lk{opacity:.55}
+.lk:hover{opacity:.85}
+.vfield textarea{font-family:var(--f-code);font-size:.9rem;color:var(--ink);background:var(--surface2);border:2px solid var(--line);border-radius:10px;padding:10px;width:100%;resize:vertical;min-height:140px}
+.aiout{margin:0;padding:12px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;overflow:auto;font-family:var(--f-code);font-size:.85rem;white-space:pre;color:var(--ink);max-height:300px;text-align:left}
+.aiout.small{max-height:200px;font-size:.78rem;white-space:pre-wrap}
+.aid{border:2px solid var(--line);border-radius:12px;padding:8px 12px;background:var(--surface2)}
+.aid summary{cursor:pointer;font-weight:700;color:var(--brand)}
+.gsteps{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;counter-reset:g}
+.gsteps li{border:2px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface2)}
+.gst{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.gsteps li p{margin:4px 0 0;font-size:.92rem;color:var(--ink2)}
+.gai{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.gai>div{border:2px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface2)}
+.gai ul{margin:6px 0 0;padding-inline-start:18px;font-size:.92rem}
+#toast{position:fixed;inset-inline:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+#toast div{background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 16px;font-weight:700;box-shadow:var(--shadow);animation:pop .35s ease-out both;max-width:420px}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:70}
+.foot{margin-top:40px;color:var(--ink2);font-size:.82rem;max-width:56ch}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+@media (max-width:420px){.irow{grid-template-columns:minmax(0,1fr) 64px 40px}.ihead h2{font-size:1.25rem}}
+</style>
+
+<div id="app"></div>
+<div id="toast" aria-live="polite"></div>
+<div id="viz"></div>
+<div id="ov"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+
+<script>
+window.DATA = /*__DATA__*/null;
+</script>
+<script>
+(function(){
+"use strict";
+var D=window.DATA, DAY=864e5, KEY="algo1-voyage-v1";
+
+/* ---------- i18n ---------- */
+var T={
+he:{
+ app:"מסע האלגוריתמים",course:"אלגוריתמים 1",lvl:"רמה",xp:"XP",days:"ימים ברצף",
+ heroH:"בחרו תחנה והתחילו לצבור כוכבים",heroP:"כל שבוע בקורס הוא אי. פתרו שאלות, פתחו את התחנה הבאה, ונצחו את הבוס בסוף האי.",
+ daily:"משימת היום",dailyGo:"שאלה אחת, בונוס 20 XP",dailyDone:"הושלמה היום",
+ review:"חזרה",reviewN:function(n){return n?n+" שאלות מחכות לחזרה":"אין שאלות לחזרה כרגע"},
+ exam:"סימולציית מבחן",examSub:"12 שאלות, 15 דקות",cont:"המשך מאיפה שהפסקת",cont2:"התחנה הבאה שלך",
+ week:"שבוע",weeks:"שבועות",boss:"בוס",startHere:"התחל כאן",locked:"נעול",
+ proposed:"מוצע",qs:"שאלות מהמבחנים",lcs:"תרגול ב-LeetCode",practice:"התחל תרגול",practiceN:function(n){return "התחל תרגול ("+n+" שאלות)"},
+ noqs:"אין עדיין שאלות מבחן בתחנה הזו.",gap:"אין שאלת Easy אמיתית בנושא הזה ב-LeetCode.",
+ learned:"קראתי והבנתי",unlearn:"בטל סימון",learnHint:"בתחנה הזו אין עדיין שאלות. סמנו אותה כשסיימתם ללמוד את החומר.",
+ softlock:"התחנה נעולה רכות. אפשר להציץ ולתרגל, אבל מומלץ להשלים קודם:",
+ solved:"פתרתי",open:"פתח ב-LeetCode",details:"הסבר ורמז",premium:"Premium, לא חובה",
+ draft:"טיוטה",official:"פתרון רשמי",single:"תשובה אחת",multi:"כמה תשובות נכונות",tf:"נכון / לא נכון",
+ check:"בדוק",next:"הבא",retry:"נסה שוב",finish:"סיום",back:"חזרה למפה",
+ right:"נכון!",wrong:"כמעט",rightDeep:"תשובה נכונה",
+ qN:function(i,n){return "שאלה "+i+" מתוך "+n},
+ bossIntro:function(n,need){return n+" שאלות, צריך "+need+" נכונות"},
+ bossNo:"בוס יפתח כשיהיו באי לפחות 3 שאלות.",bossGo:"להילחם בבוס",bossWin:"הבוס הובס!",bossLose:"הבוס עמד. נסו שוב אחרי חזרה על החומר.",
+ examDone:"המבחן הסתיים",score:"ציון",correct:"נכונות",bonus:"בונוס",
+ times:"הזמן נגמר",profile:"הפרופיל שלי",stats:"סטטיסטיקה",bestStreak:"שיא רצף",solvedQ:"שאלות נכונות",lcDone:"LeetCode",
+ islands:"התקדמות לפי אי",badges:"תגים",settings:"הגדרות",sound:"צלילים",lang:"שפה",reset:"איפוס התקדמות",resetSure:"בטוח? לחצו שוב לאיפוס",
+ levelUp:function(n){return "עלית לרמה "+n+"!"},badgeNew:"תג חדש: ",streakFreeze:"הקפאת רצף שימשה אותך",
+ starsHelp:"★ סיימת את התחנה · ★★ מעל 80% נכון בניסיון ראשון · ★★★ בלי טעויות",
+ foot:"השאלות האמריקאיות נגזרו מסעיפים פתוחים בבחינות 2022-2024. שאלות שסומנו טיוטה עדיין לא נבדקו על ידי מתרגל/ת. ההתקדמות נשמרת רק בדפדפן הזה.",
+ lcHelp:"סימון של שאלות LeetCode הוא דיווח עצמי.",
+ vidNC:"סרטון הסבר של NeetCode",vidSearch:"חפש את הסרטון של NeetCode ביוטיוב",
+ levels:["מתחיל","סייר","נווט","קברניט","אלוף הים","מאסטר אלגוריתמים","אגדה"]},
+en:{
+ app:"Algorithm Voyage",course:"Algorithms 1",lvl:"Level",xp:"XP",days:"day streak",
+ heroH:"Pick a stop and start collecting stars",heroP:"Each course week is an island. Solve questions, unlock the next stop, and beat the boss at the end.",
+ daily:"Daily quest",dailyGo:"One question, +20 XP bonus",dailyDone:"Done for today",
+ review:"Review",reviewN:function(n){return n?n+" questions waiting":"Nothing to review right now"},
+ exam:"Exam simulation",examSub:"12 questions, 15 minutes",cont:"Continue where you left off",cont2:"Your next stop",
+ week:"Week",weeks:"Weeks",boss:"Boss",startHere:"Start here",locked:"Locked",
+ proposed:"Proposed",qs:"Exam questions",lcs:"LeetCode practice",practice:"Start practice",practiceN:function(n){return "Start practice ("+n+" questions)"},
+ noqs:"No exam questions for this stop yet.",gap:"LeetCode has no real Easy question for this topic.",
+ learned:"I read and understood",unlearn:"Unmark",learnHint:"This stop has no questions yet. Mark it when you have studied the material.",
+ softlock:"This stop is softly locked. You can peek and practice, but finish these first:",
+ solved:"Solved",open:"Open on LeetCode",details:"Explanation and hint",premium:"Premium, optional",
+ draft:"Draft",official:"Official solution",single:"Single answer",multi:"Select all that apply",tf:"True / False",
+ check:"Check",next:"Next",retry:"Try again",finish:"Finish",back:"Back to map",
+ right:"Correct!",wrong:"Not quite",rightDeep:"Correct answer",
+ qN:function(i,n){return "Question "+i+" of "+n},
+ bossIntro:function(n,need){return n+" questions, "+need+" correct to win"},
+ bossNo:"The boss appears once the island has at least 3 questions.",bossGo:"Fight the boss",bossWin:"Boss defeated!",bossLose:"The boss held. Review the material and try again.",
+ examDone:"Exam finished",score:"Score",correct:"Correct",bonus:"Bonus",
+ times:"Time is up",profile:"My profile",stats:"Stats",bestStreak:"Best streak",solvedQ:"Questions solved",lcDone:"LeetCode",
+ islands:"Progress by island",badges:"Badges",settings:"Settings",sound:"Sounds",lang:"Language",reset:"Reset progress",resetSure:"Sure? Tap again to reset",
+ levelUp:function(n){return "Level "+n+" reached!"},badgeNew:"New badge: ",streakFreeze:"A streak freeze saved your streak",
+ starsHelp:"★ stop finished · ★★ over 80% right on the first try · ★★★ no mistakes",
+ foot:"The multiple-choice questions were derived from open questions in the 2022-2024 exams. Questions marked Draft have not been checked by a TA yet. Progress is stored only in this browser.",
+ lcHelp:"Ticking LeetCode questions is self-reported.",
+ vidNC:"NeetCode video explanation",vidSearch:"Find the NeetCode video on YouTube",
+ levels:["Beginner","Scout","Navigator","Captain","Sea Champion","Algorithm Master","Legend"]}
+};
+
+/* ---------- state ---------- */
+function fresh(){return {think:{},retry:{},guideSeen:0,xp:0,streak:0,best:0,last:"",freezes:1,ans:{},lc:{},learned:{},badges:{},boss:{},exam:0,daily:{},cleared:0,set:{lang:"he",sound:false}}}
+var mem=null;
+function load(){try{var s=localStorage.getItem(KEY);if(s)return Object.assign(fresh(),JSON.parse(s))}catch(e){}return mem?Object.assign(fresh(),mem):fresh()}
+var S=load();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}try{mem=JSON.parse(JSON.stringify(S))}catch(e){}}
+function L(){return S.set.lang==="en"?"en":"he"}
+function t(k){var v=T[L()][k];return v===undefined?k:v}
+function loc(o){return o?(o[L()]||o.he||""):""}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]})}
+function reduced(){try{return window.matchMedia("(prefers-reduced-motion: reduce)").matches}catch(e){return false}}
+
+/* ---------- data indexes ---------- */
+var ORDER=["w0","w1","w2","w3","w4","w5"];
+var CODE={"complexity":"O()","heap":"Heap","union-find":"∪","dc-karatsuba":"×","dc-boyer-moore":"½+","select":"k-th","graph-repr":"G","bfs":"BFS","dfs":"DFS","topo":"DAG","dp-principles":"DP","dp-fib":"F(n)","dp-mis":"MIS","dp-lcs":"LCS","dp-knapsack":"KS","greedy-knapsack":"Fr","greedy-asp":"ASP","greedy-coloring":"χ","mst":"MST","huffman":"Hf","randomized":"RNG","kmp":"KMP","suffix-trees":"$"};
+var NODES={},MCQ={},MCQ_BY={},LC_BY={},PRE={},WK={};
+D.roadmap.nodes.forEach(function(n){NODES[n.id]=n;PRE[n.id]=[]});
+D.roadmap.weeks.forEach(function(w){WK[w.id]=w});
+D.roadmap.edges.forEach(function(e){if(e.kind==="prerequisite")PRE[e.to].push(e.from)});
+D.mcq.questions.forEach(function(q){MCQ[q.id]=q;(MCQ_BY[q.node]=MCQ_BY[q.node]||[]).push(q)});
+D.lc.questions.forEach(function(q){q.nodes.forEach(function(n){(LC_BY[n]=LC_BY[n]||[]).push(q)})});
+var COL={sky:"--c-sky",emerald:"--c-emerald",violet:"--c-violet",amber:"--c-amber",rose:"--c-rose",slate:"--c-slate"};
+var GLOBAL=[];ORDER.forEach(function(w){D.roadmap.nodes.forEach(function(n){if(n.week===w)GLOBAL.push(n.id)})});
+
+function info(id){
+  var qs=MCQ_BY[id]||[],lcs=(LC_BY[id]||[]).filter(function(l){return !l.premium}),items=[];
+  qs.forEach(function(q){items.push({done:!!(S.ans[q.id]&&S.ans[q.id].ok)})});
+  lcs.forEach(function(l){items.push({done:!!S.lc[l.number]})});
+  if(!items.length)items.push({done:!!S.learned[id]});
+  var done=items.filter(function(i){return i.done}).length,total=items.length,complete=done===total,stars=0;
+  if(complete){
+    if(!qs.length)stars=2;
+    else{var f=qs.filter(function(q){return S.ans[q.id]&&S.ans[q.id].first}).length/qs.length;stars=f===1?3:f>=.8?2:1}
+  }
+  return {qs:qs,lcs:lcs,done:done,total:total,complete:complete,stars:stars,pct:Math.round(done/total*100)};
+}
+function missing(id){return PRE[id].filter(function(p){return !info(p).complete})}
+function isLocked(id){return missing(id).length>0}
+function nextStop(){
+  for(var i=0;i<GLOBAL.length;i++){var id=GLOBAL[i];if(!info(id).complete&&!isLocked(id))return id}
+  for(var j=0;j<GLOBAL.length;j++){if(!info(GLOBAL[j]).complete)return GLOBAL[j]}
+  return null;
+}
+function islandIds(w){return D.roadmap.nodes.filter(function(n){return n.week===w}).map(function(n){return n.id})}
+function islandQs(w){var a=[];islandIds(w).forEach(function(id){(MCQ_BY[id]||[]).forEach(function(q){a.push(q)})});return a}
+function islandDone(w){return islandIds(w).every(function(id){return info(id).complete})}
+
+/* ---------- xp, streak, badges ---------- */
+function today(){var d=new Date();return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2)}
+function level(xp){return Math.floor((1+Math.sqrt(1+4*xp/25))/2)}
+function lvlStart(l){return 25*l*(l-1)}
+function lvlName(l){var a=T[L()].levels;return a[Math.min(l,a.length)-1]}
+function touch(){
+  var d=today();if(S.last===d)return;
+  if(!S.last)S.streak=1;
+  else{var gap=Math.round((new Date(d)-new Date(S.last))/DAY);
+    if(gap===1)S.streak++;
+    else if(gap===2&&S.freezes>0){S.freezes--;S.streak++;toast(t("streakFreeze"))}
+    else S.streak=1}
+  S.last=d;if(S.streak>0&&S.streak%7===0)S.freezes=Math.min(2,S.freezes+1);
+  S.best=Math.max(S.best||0,S.streak);
+}
+function addXP(n){
+  if(!n)return;var before=level(S.xp);S.xp+=n;var after=level(S.xp);
+  if(after>before){toast(t("levelUp")(after)+" "+lvlName(after));confetti();tone(660,.12);setTimeout(function(){tone(880,.18)},130)}
+}
+var BADGES=[
+ {id:"first",he:["צעד ראשון","תשובה נכונה ראשונה"],en:["First step","First correct answer"],ok:function(){return Object.keys(S.ans).some(function(k){return S.ans[k].ok})}},
+ {id:"clean",he:["נקי","3 כוכבים בתחנה"],en:["Spotless","3 stars on a stop"],ok:function(){return GLOBAL.some(function(id){return info(id).stars===3&&(MCQ_BY[id]||[]).length>0})}},
+ {id:"week",he:["שבוע שלם","רצף של 7 ימים"],en:["Full week","7-day streak"],ok:function(){return (S.best||0)>=7}},
+ {id:"boss",he:["צייד בוסים","ניצחון ראשון על בוס"],en:["Boss hunter","First boss win"],ok:function(){return Object.keys(S.boss).length>0}},
+ {id:"island",he:["אי כבוש","סיימת את כל התחנות באי"],en:["Island cleared","Finished every stop on an island"],ok:function(){return ORDER.some(islandDone)}},
+ {id:"lc10",he:["מתמיד","10 שאלות LeetCode"],en:["Persistent","10 LeetCode questions"],ok:function(){return Object.keys(S.lc).length>=10}},
+ {id:"review",he:["חוזר חזק","5 שאלות חזרה נכונות"],en:["Comeback","5 review questions fixed"],ok:function(){return S.cleared>=5}},
+ {id:"exam",he:["מבחן אש","סימולציה בציון 70 ומעלה"],en:["Trial by fire","Exam simulation at 70+"],ok:function(){return S.exam>=70}}
+];
+function checkBadges(){
+  BADGES.forEach(function(b){if(!S.badges[b.id]&&b.ok()){S.badges[b.id]=today();toast(t("badgeNew")+b[L()][0]);confetti();tone(740,.15)}});
+}
+
+/* ---------- fx ---------- */
+var ac=null;
+function tone(f,d){
+  if(!S.set.sound)return;
+  try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.type="sine";g.gain.value=.06;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}
+}
+function toast(msg){
+  var box=document.getElementById("toast"),d=document.createElement("div");d.textContent=msg;box.appendChild(d);
+  setTimeout(function(){if(d.parentNode)d.parentNode.removeChild(d)},2400);
+}
+function confetti(){
+  if(reduced())return;
+  var c=document.getElementById("fx"),x=c.getContext("2d");if(!x)return;
+  c.width=window.innerWidth;c.height=window.innerHeight;
+  var cs=getComputedStyle(document.documentElement),cols=["--sun","--brand","--c-rose","--c-violet","--c-sky","--c-emerald"].map(function(v){return cs.getPropertyValue(v).trim()||"#f2b100"});
+  var ps=[],i;for(i=0;i<90;i++)ps.push({x:c.width/2,y:c.height*.35,vx:(Math.random()-.5)*12,vy:-Math.random()*11-3,w:6+Math.random()*6,h:4+Math.random()*5,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[i%cols.length]});
+  var t0=performance.now();
+  (function f(now){var e=now-t0;x.clearRect(0,0,c.width,c.height);
+    if(e>1700)return;
+    ps.forEach(function(p){p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.globalAlpha=Math.max(0,1-e/1700);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore()});
+    requestAnimationFrame(f)})(t0);
+}
+
+/* ---------- algorithm visualizer ---------- */
+function B(he,en){return L()==="he"?he:en}
+function fr(c,h){return {c:c,h:h}}
+function num(s,d){var n=parseInt(s,10);return isNaN(n)?d:n}
+function cellsRow(name,cells,ptr,cls){
+  var h='<div class="vrow"><span class="vname">'+esc(name)+'</span><div class="vcells '+(cls||"")+'">';
+  cells.forEach(function(x,i){h+='<div class="vcw"><div class="vc '+(x.c||"")+'">'+esc(x.t)+'</div><div class="vi">'+(x.i!==undefined?esc(x.i):i)+'</div><div class="vp">'+(ptr&&ptr[i]?esc(ptr[i]):"")+'</div></div>'});
+  return h+'</div></div>';
+}
+function shiftRow(name,cells,off,ptr,cls){
+  var sp=[],i;for(i=0;i<off;i++)sp.push({t:"",c:"sp",i:""});
+  var ptr2={};if(ptr)Object.keys(ptr).forEach(function(k){ptr2[+k+off]=ptr[k]});
+  return cellsRow(name,sp.concat(cells),ptr2,cls);
+}
+function gridHTML(rl,cl,cells){
+  var h='<table class="vt"><tr><th></th>'+cl.map(function(c){return '<th>'+esc(c)+'</th>'}).join("")+'</tr>';
+  cells.forEach(function(r,i){h+='<tr><th>'+esc(rl[i])+'</th>'+r.map(function(c){return '<td class="'+(c.c||"")+'">'+esc(c.t)+'</td>'}).join("")+'</tr>'});
+  return h+'</table>';
+}
+function vinfo(t){return '<div class="vinfo">'+t+'</div>'}
+var PAL=["--c-sky","--c-amber","--c-rose","--c-emerald","--c-violet","--c-slate"];
+
+/* graphs */
+var G1={W:320,H:220,nodes:[["A",40,110],["B",110,40],["C",110,180],["D",190,40],["E",190,110],["F",190,180],["G",280,110]],edges:[["A","B"],["A","C"],["B","D"],["B","E"],["C","E"],["C","F"],["D","G"],["E","G"],["F","G"]]};
+var GT={W:320,H:220,dir:1,nodes:[["A",40,50],["B",40,170],["C",130,110],["D",150,190],["E",220,70],["F",290,140]],edges:[["A","C"],["B","C"],["B","D"],["C","E"],["D","F"],["E","F"]]};
+var GK={W:320,H:220,nodes:[["A",50,50],["B",160,30],["C",270,50],["D",50,170],["E",160,190],["F",270,170]],edges:[["A","B",4],["A","D",2],["B","C",6],["B","E",1],["B","D",5],["C","E",3],["C","F",7],["D","E",8],["E","F",9]]};
+var GC={W:320,H:220,nodes:[["A",40,110],["B",110,40],["C",110,180],["D",200,40],["E",200,180],["F",285,110]],edges:[["A","B"],["A","C"],["B","C"],["B","D"],["C","E"],["D","E"],["D","F"],["E","F"]]};
+function adjU(G){var a={};G.nodes.forEach(function(n){a[n[0]]=[]});G.edges.forEach(function(e){a[e[0]].push(e[1]);a[e[1]].push(e[0])});Object.keys(a).forEach(function(k){a[k].sort()});return a}
+function adjD(G){var a={};G.nodes.forEach(function(n){a[n[0]]=[]});G.edges.forEach(function(e){a[e[0]].push(e[1])});Object.keys(a).forEach(function(k){a[k].sort()});return a}
+function graphSVG(G,st){
+  st=st||{};var nm={};G.nodes.forEach(function(n){nm[n[0]]=n});
+  var s='<svg class="gsvg" viewBox="0 0 '+G.W+' '+G.H+'" role="img">';
+  G.edges.forEach(function(e,i){
+    var a=nm[e[0]],b=nm[e[1]],cl=(st.e&&st.e[i])||"",x1=a[1],y1=a[2],x2=b[1],y2=b[2];
+    if(G.dir){var dx=x2-x1,dy=y2-y1,L2=Math.sqrt(dx*dx+dy*dy),ux=dx/L2,uy=dy/L2;x2=x2-ux*19;y2=y2-uy*19;
+      s+='<line class="ge '+cl+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';
+      s+='<polygon class="gh '+cl+'" points="'+x2+','+y2+' '+(x2-ux*10+uy*5)+','+(y2-uy*10-ux*5)+' '+(x2-ux*10-uy*5)+','+(y2-uy*10+ux*5)+'"/>';
+    }else s+='<line class="ge '+cl+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';
+    if(e[2]!==undefined)s+='<text class="gw" x="'+((x1+x2)/2)+'" y="'+((y1+y2)/2-5)+'" text-anchor="middle">'+e[2]+'</text>';
+  });
+  G.nodes.forEach(function(n){
+    var id=n[0],cl=(st.n&&st.n[id])||"",f=st.f&&st.f[id],sty=f!==undefined?' style="fill:var('+PAL[f%PAL.length]+')"':"";
+    s+='<g class="gnode '+cl+(f!==undefined?" filled":"")+'"><circle cx="'+n[1]+'" cy="'+n[2]+'" r="17"'+sty+'/><text x="'+n[1]+'" y="'+(n[2]+5)+'" text-anchor="middle">'+id+'</text>';
+    if(st.t&&st.t[id]!==undefined)s+='<text class="gtag" x="'+(n[1]+19)+'" y="'+(n[2]-16)+'">'+esc(st.t[id])+'</text>';
+    s+='</g>';
+  });
+  return s+'</svg>';
+}
+/* trees */
+function treeSVG(roots){
+  var leaf=0,maxd=0;
+  function lay(n,d){n.d=d;maxd=Math.max(maxd,d);if(!n.kids||!n.kids.length){n.x=leaf++;return}
+    n.kids.forEach(function(k){lay(k.node,d+1)});var xs=n.kids.map(function(k){return k.node.x});n.x=(Math.min.apply(null,xs)+Math.max.apply(null,xs))/2}
+  roots.forEach(function(r,i){lay(r,0);leaf+=0.35});
+  var UX=44,UY=54,W=Math.max(120,Math.ceil(leaf)*UX+20),H=(maxd+1)*UY+16,e="",nn="";
+  function draw(n){
+    n.kids&&n.kids.forEach(function(k){var x1=n.x*UX+UX/2+6,y1=n.d*UY+22,x2=k.node.x*UX+UX/2+6,y2=k.node.d*UY+22;
+      e+='<line class="ge '+(k.cls||"")+'" x1="'+x1+'" y1="'+y1+'" x2="'+x2+'" y2="'+y2+'"/>';
+      if(k.lab!==undefined)e+='<text class="gw" x="'+((x1+x2)/2+(x2<x1?-6:6))+'" y="'+((y1+y2)/2+3)+'" text-anchor="middle">'+esc(k.lab)+'</text>';
+      draw(k.node)});
+    nn+='<g class="gnode '+(n.cls||"")+'"><circle cx="'+(n.x*UX+UX/2+6)+'" cy="'+(n.d*UY+22)+'" r="'+(n.r||16)+'"/><text x="'+(n.x*UX+UX/2+6)+'" y="'+(n.d*UY+26)+'" text-anchor="middle">'+esc(n.lbl)+'</text></g>';
+  }
+  roots.forEach(draw);
+  return '<svg class="gsvg tree" viewBox="0 0 '+W+' '+H+'" style="min-width:'+Math.min(W,520)+'px;width:'+W+'px">'+e+nn+'</svg>';
+}
+
+/* ---- generators ---- */
+function genGrowth(){
+  var F=[],N=20,cap=220,W=300,H=190,sx=W/N,sy=H/cap;
+  var fns=[["log n",function(n){return Math.log(n)/Math.LN2},"--c-emerald"],["n",function(n){return n},"--c-sky"],["n log n",function(n){return n*Math.log(n)/Math.LN2},"--c-amber"],["n²",function(n){return n*n},"--c-rose"],["2ⁿ",function(n){return Math.pow(2,n)},"--c-violet"]];
+  for(var k=2;k<=N;k++){
+    var s='<svg class="gsvg" viewBox="0 0 '+(W+16)+' '+(H+14)+'"><line class="ge" x1="8" y1="'+(H+4)+'" x2="'+(W+8)+'" y2="'+(H+4)+'"/><line class="ge" x1="8" y1="4" x2="8" y2="'+(H+4)+'"/>';
+    fns.forEach(function(f){var pts=[];for(var n=1;n<=k;n++){pts.push((8+n*sx).toFixed(1)+","+(H+4-Math.min(f[1](n),cap)*sy).toFixed(1))}
+      s+='<polyline fill="none" stroke="var('+f[2]+')" stroke-width="3" stroke-linecap="round" points="'+pts.join(" ")+'"/>'});
+    s+='<line x1="'+(8+k*sx)+'" y1="4" x2="'+(8+k*sx)+'" y2="'+(H+4)+'" stroke="var(--sun)" stroke-width="2" stroke-dasharray="4 4"/></svg>';
+    var tb='<div class="vlegend">'+fns.map(function(f){var v=f[1](k);return '<span><i style="background:var('+f[2]+')"></i>'+f[0]+' = '+(v<1000?(Math.round(v*10)/10):Math.round(v))+'</span>'}).join("")+'</div>';
+    F.push(fr(B("n = "+k+". שימו לב כמה מהר 2ⁿ בורח מהגרף, בזמן שה-n log n עדיין קרוב ללינארי.","n = "+k+". Note how fast 2ⁿ leaves the chart while n log n stays near linear."),s+tb));
+  }
+  return F;
+}
+function genKara(p){
+  var x=parseInt(p.x,10),y=parseInt(p.y,10);
+  if(!(x>0&&y>0)||String(x).length>8||String(y).length>8)throw 0;
+  var lines=[],mults=0;
+  function kar(x,y,d){
+    if(x<10||y<10){mults++;var r=x*y;lines.push({d:d,he:x+" × "+y+" = "+r+"  (בסיס: כפל קטן)",en:x+" × "+y+" = "+r+"  (base case)",b:1});return r}
+    var n=Math.max(String(x).length,String(y).length),m=Math.floor(n/2),P=Math.pow(10,m);
+    var a=Math.floor(x/P),b=x%P,c=Math.floor(y/P),dd=y%P;
+    lines.push({d:d,he:"מפצלים בחצי: "+x+" = "+a+"·10^"+m+" + "+b+" ,  "+y+" = "+c+"·10^"+m+" + "+dd,en:"Split: "+x+" = "+a+"·10^"+m+" + "+b+" ,  "+y+" = "+c+"·10^"+m+" + "+dd});
+    lines.push({d:d,he:"z2 = a×c = "+a+" × "+c,en:"z2 = a×c = "+a+" × "+c});var z2=kar(a,c,d+1);
+    lines.push({d:d,he:"z0 = b×d = "+b+" × "+dd,en:"z0 = b×d = "+b+" × "+dd});var z0=kar(b,dd,d+1);
+    lines.push({d:d,he:"(a+b)×(c+d) = "+(a+b)+" × "+(c+dd)+"  (כפל שלישי במקום שניים)",en:"(a+b)×(c+d) = "+(a+b)+" × "+(c+dd)+"  (one product instead of two)"});var zs=kar(a+b,c+dd,d+1),z1=zs-z2-z0;
+    lines.push({d:d,he:"z1 = "+zs+" − "+z2+" − "+z0+" = "+z1,en:"z1 = "+zs+" − "+z2+" − "+z0+" = "+z1});
+    var r=z2*P*P+z1*P+z0;lines.push({d:d,he:"תוצאה: z2·10^"+(2*m)+" + z1·10^"+m+" + z0 = "+r,en:"Result: z2·10^"+(2*m)+" + z1·10^"+m+" + z0 = "+r,b:2});return r;
+  }
+  var res=kar(x,y,0),F=[],nn=Math.max(String(x).length,String(y).length);
+  for(var k=0;k<lines.length;k++){
+    var h='<div class="vlog">';
+    for(var j=0;j<=k;j++){var ln=lines[j];h+='<div class="vl'+(j===k?" cur":"")+(ln.b===2?" res":"")+'" style="padding-inline-start:'+(ln.d*18)+'px">'+esc(B(ln.he,ln.en))+'</div>'}
+    h+='</div>'+vinfo(B("כפלים קטנים עד כה: ","Small products so far: ")+'<b>'+lines.slice(0,k+1).filter(function(l){return l.b===1}).length+'</b>');
+    F.push(fr(B("צעד "+(k+1)+" מתוך "+lines.length,"Step "+(k+1)+" of "+lines.length),h));
+  }
+  F.push(fr(B("סיום: "+x+" × "+y+" = "+res+(res===x*y?" (תואם לכפל רגיל)":""),"Done: "+x+" × "+y+" = "+res+(res===x*y?" (matches ordinary multiplication)":"")),
+    '<div class="vlog">'+esc(x+" × "+y+" = "+res)+'</div>'+vinfo(B("כפלים קטנים: ","Small products: ")+'<b>'+mults+'</b> '+B("לעומת בערך "+(nn*nn)+" בכפל בית-ספר (n² ספרות). הפער גדל מאוד כשהמספרים ארוכים: n^1.585 מול n².","vs about "+(nn*nn)+" for schoolbook (n²). The gap grows fast with length: n^1.585 vs n².")))); 
+  return F;
+}
+function parseArr(s,lim){return String(s).split(/[\s,]+/).filter(Boolean).slice(0,lim).map(function(x){var n=parseInt(x,10);return isNaN(n)?0:n})}
+function genBoyer(p){
+  var a=parseArr(p.arr,14);if(a.length<2)throw 0;var F=[],cand=null,cnt=0,n=a.length;
+  function row(i,hi){return cellsRow(B("מערך","array"),a.map(function(v,j){return {t:v,c:(j===i?"cur":(j<i?"dim":""))+(hi&&hi(j)?" ok":"")}}),i!==null?(function(){var o={};o[i]=B("כאן","here");return o})():null)}
+  F.push(fr(B("מתחילים: מועמד ריק ומונה 0. בכל צעד זוג של שני ערכים שונים 'מבטל' זה את זה.","Start: no candidate, counter 0. Each pair of different values cancels out."),row(null)+vinfo("candidate = – , count = 0")));
+  for(var i=0;i<n;i++){
+    var msg;
+    if(cnt===0){cand=a[i];cnt=1;msg=B("המונה 0, ולכן "+a[i]+" הופך למועמד חדש (count=1).",a[i]+" becomes the candidate because count was 0 (count=1).")}
+    else if(a[i]===cand){cnt++;msg=B(a[i]+" זהה למועמד: count עולה ל-"+cnt+".",a[i]+" equals the candidate: count rises to "+cnt+".")}
+    else{cnt--;msg=B(a[i]+" שונה מהמועמד "+cand+": הזוג מתבטל, count יורד ל-"+cnt+".",a[i]+" differs from candidate "+cand+": the pair cancels, count drops to "+cnt+".")}
+    F.push(fr(msg,row(i)+vinfo("candidate = <b>"+cand+"</b> , count = <b>"+cnt+"</b>")));
+  }
+  var occ=a.filter(function(v){return v===cand}).length,ok=occ>n/2;
+  F.push(fr(B("הסריקה נגמרה. המועמד הוא "+cand+", אבל Boyer-Moore מבטיח אמת רק אם קיים רוב, ולכן סופרים את המופעים.","Scan done. The candidate is "+cand+", but Boyer-Moore is only right if a majority exists, so we count occurrences."),row(null,function(j){return a[j]===cand})+vinfo(B("מופעים של "+cand+": <b>"+occ+"</b> מתוך "+n,"Occurrences of "+cand+": <b>"+occ+"</b> of "+n))));
+  F.push(fr(ok?B(cand+" הוא איבר הרוב ("+occ+" > "+n+"/2). זמן O(n), זיכרון O(1).",cand+" is the majority ("+occ+" > "+n+"/2). O(n) time, O(1) space."):B("אין איבר רוב: "+occ+" אינו גדול מ-"+n+"/2. בדיקת האימות חיונית.","No majority: "+occ+" is not above "+n+"/2. The verification pass matters."),row(null,function(j){return ok&&a[j]===cand})+vinfo(ok?"✓ majority = <b>"+cand+"</b>":"✗")));
+  return F;
+}
+function graphReprFrames(){
+  var G=G1,F=[],adj={},ids=G.nodes.map(function(n){return n[0]}),i,E=G.edges;
+  ids.forEach(function(id){adj[id]=[]});
+  function panel(k){
+    var m='<table class="vt"><tr><th></th>'+ids.map(function(x){return '<th>'+x+'</th>'}).join("")+'</tr>';
+    ids.forEach(function(r){m+='<tr><th>'+r+'</th>'+ids.map(function(c){var on=adj[r].indexOf(c)>-1,last=k>=0&&((E[k][0]===r&&E[k][1]===c)||(E[k][1]===r&&E[k][0]===c));return '<td class="'+(last?"cur":on?"hi":"")+'">'+(on?1:0)+'</td>'}).join("")+'</tr>'});
+    m+='</table>';
+    var l='<div class="vlist">'+ids.map(function(r){return '<div><b>'+r+'</b> → '+(adj[r].length?adj[r].join(", "):"∅")+'</div>'}).join("")+'</div>';
+    return '<div class="vtwo"><div><div class="vname">'+B("רשימת סמיכויות","Adjacency list")+'</div>'+l+'</div><div><div class="vname">'+B("מטריצת סמיכויות","Adjacency matrix")+'</div>'+m+'</div></div>';
+  }
+  F.push(fr(B("גרף עם 7 צמתים ו-9 קשתות. נוסיף קשת אחר קשת ונראה איך נראים שני הייצוגים.","A graph with 7 vertices and 9 edges. We add edge by edge and watch both representations."),graphSVG(G)+panel(-1)));
+  for(i=0;i<E.length;i++){
+    adj[E[i][0]].push(E[i][1]);adj[E[i][1]].push(E[i][0]);var st={e:{}};for(var j=0;j<=i;j++)st.e[j]=j===i?"cur":"on";
+    F.push(fr(B("מוסיפים את הקשת "+E[i][0]+"–"+E[i][1]+": ברשימה נכנס שכן לשני הצדדים, ובמטריצה נדלקים שני תאים.","Add edge "+E[i][0]+"–"+E[i][1]+": both lists get a neighbor and two matrix cells light up."),graphSVG(G,st)+panel(i)));
+  }
+  F.push(fr(B("סיכום: רשימה לוקחת O(V+E) זיכרון ומתאימה לגרפים דלילים. מטריצה לוקחת O(V²) אבל בודקת קשת ב-O(1).","Summary: the list takes O(V+E) space and suits sparse graphs. The matrix takes O(V²) but tests an edge in O(1)."),graphSVG(G,{e:G.edges.map(function(){return "on"}).reduce(function(o,v,i){o[i]=v;return o},{})})+panel(-1)));
+  return F;
+}
+function genBFS(p){
+  var G=G1,adj=adjU(G),s=p.start||"A",F=[],seen={},dist={},q=[s],done={};
+  seen[s]=1;dist[s]=0;
+  function snap(cur,msg,eh){var st={n:{},t:{},e:eh||{}};Object.keys(seen).forEach(function(k){st.n[k]=done[k]?"done":"q";st.t[k]=dist[k]});if(cur)st.n[cur]="cur";
+    F.push(fr(msg,graphSVG(G,st)+cellsRow(B("תור","queue"),q.map(function(x){return {t:x,c:x===cur?"cur":"hi"}}))+vinfo(B("הערך מעל כל צומת הוא המרחק (מספר הקשתות) מהצומת "+s,"The number beside each vertex is its distance (edges) from "+s))))}
+  snap(null,B("מתחילים מ-"+s+": מכניסים לתור ומסמנים כנראה. המרחק שלו 0.","Start at "+s+": enqueue and mark seen. Its distance is 0."));
+  function eidx(a,b){for(var i=0;i<G.edges.length;i++){var e=G.edges[i];if((e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a))return i}}
+  while(q.length){
+    var u=q.shift(),found=[],eh={};
+    snap(u,B("מוציאים את "+u+" מראש התור ובודקים את שכניו.","Dequeue "+u+" and look at its neighbours."));
+    adj[u].forEach(function(v){if(!seen[v]){seen[v]=1;dist[v]=dist[u]+1;q.push(v);found.push(v);eh[eidx(u,v)]="on"}});
+    done[u]=1;
+    snap(null,found.length?B("גילינו את "+found.join(", ")+" במרחק "+(dist[u]+1)+" ומוסיפים אותם לסוף התור. "+u+" הסתיים.","Discovered "+found.join(", ")+" at distance "+(dist[u]+1)+"; they join the queue. "+u+" is finished."):B("אין שכנים חדשים. "+u+" הסתיים.","No new neighbours. "+u+" is finished."),eh);
+  }
+  F.push(fr(B("התור ריק: BFS סיים. המרחקים הם אורכי המסלולים הקצרים ביותר (בגרף לא ממושקל). זמן O(V+E).","Queue empty: BFS is done. The distances are shortest path lengths (unweighted). O(V+E) time."),graphSVG(G,{n:G.nodes.reduce(function(o,n){o[n[0]]="done";return o},{}),t:dist})));
+  return F;
+}
+function genDFS(p){
+  var G=G1,adj=adjU(G),F=[],time=0,d={},f={},stack=[],start=p.start||"A",seen={};
+  function snap(cur,msg,eh){var st={n:{},t:{},e:eh||{}};Object.keys(d).forEach(function(k){st.n[k]=f[k]?"done":"q";st.t[k]=d[k]+"/"+(f[k]||"")});if(cur)st.n[cur]="cur";
+    F.push(fr(msg,graphSVG(G,st)+cellsRow(B("מחסנית","stack"),stack.map(function(x){return {t:x,c:x===cur?"cur":"hi"}}))+vinfo(B("d/f = זמן גילוי / זמן סיום","d/f = discovery / finish time"))))}
+  function eidx(a,b){for(var i=0;i<G.edges.length;i++){var e=G.edges[i];if((e[0]===a&&e[1]===b)||(e[0]===b&&e[1]===a))return i}}
+  function visit(u,from){
+    seen[u]=1;d[u]=++time;stack.push(u);var eh={};if(from)eh[eidx(from,u)]="on";
+    snap(u,B("נכנסים ל-"+u+" (זמן גילוי "+d[u]+") ודוחפים למחסנית.","Enter "+u+" (discovered at "+d[u]+") and push it."),eh);
+    adj[u].forEach(function(v){if(!seen[v])visit(v,u);else if(v!==from&&!f[v]){}});
+    f[u]=++time;stack.pop();snap(stack.length?stack[stack.length-1]:null,B("כל שכני "+u+" נבדקו. מסיימים אותו (זמן "+f[u]+") וחוזרים אחורה.","All neighbours of "+u+" explored. Finish it (time "+f[u]+") and backtrack."));
+  }
+  visit(start,null);
+  G.nodes.forEach(function(n){if(!seen[n[0]])visit(n[0],null)});
+  F.push(fr(B("DFS הסתיים. כל צומת וכל קשת נבדקו פעם אחת: O(V+E). הזמנים d/f מראים מבנה של סוגריים מקוננים.","DFS done. Every vertex and edge examined once: O(V+E). The d/f times nest like parentheses."),graphSVG(G,{n:G.nodes.reduce(function(o,n){o[n[0]]="done";return o},{}),t:G.nodes.reduce(function(o,n){o[n[0]]=d[n[0]]+"/"+f[n[0]];return o},{})})));
+  return F;
+}
+function genTopo(){
+  var G=GT,adj=adjD(G),F=[],indeg={},q=[],order=[],done={};
+  G.nodes.forEach(function(n){indeg[n[0]]=0});G.edges.forEach(function(e){indeg[e[1]]++});
+  function snap(cur,msg){var st={n:{},t:{}};G.nodes.forEach(function(n){st.t[n[0]]=indeg[n[0]];if(done[n[0]])st.n[n[0]]="done"});q.forEach(function(x){st.n[x]="q"});if(cur)st.n[cur]="cur";
+    F.push(fr(msg,graphSVG(G,st)+cellsRow(B("תור (דרגת כניסה 0)","queue (in-degree 0)"),q.map(function(x){return {t:x,c:x===cur?"cur":"hi"}}))+cellsRow(B("סדר פלט","output"),order.map(function(x){return {t:x,c:"ok"}}))+vinfo(B("המספר ליד כל צומת הוא דרגת הכניסה שנותרה","The number beside each vertex is its remaining in-degree"))))}
+  G.nodes.forEach(function(n){if(indeg[n[0]]===0)q.push(n[0])});
+  snap(null,B("מחשבים דרגות כניסה. צמתים בלי תנאי מקדים (דרגה 0) נכנסים לתור.","Compute in-degrees. Vertices with no prerequisite (in-degree 0) enter the queue."));
+  while(q.length){
+    var u=q.shift();order.push(u);done[u]=1;
+    snap(u,B("מוציאים את "+u+" ומוסיפים לסדר. מסירים את הקשתות היוצאות ממנו.","Take "+u+" into the order and remove its outgoing edges."));
+    adj[u].forEach(function(v){indeg[v]--;if(indeg[v]===0)q.push(v)});
+    snap(null,B("הורדנו דרגת כניסה לשכנים של "+u+". מי שהגיע ל-0 נכנס לתור.","Lowered the in-degree of "+u+"'s neighbours; those reaching 0 enter the queue."));
+  }
+  F.push(fr(order.length===G.nodes.length?B("סדר טופולוגי: "+order.join(" → ")+". אם נשארו צמתים בלי להגיע ל-0, יש מעגל ואין סדר כזה. זמן O(V+E).","Topological order: "+order.join(" → ")+". If vertices remain stuck above 0 there is a cycle and no order exists. O(V+E)."):B("נשארו צמתים: יש מעגל","Vertices remain: there is a cycle"),graphSVG(G,{n:G.nodes.reduce(function(o,n){o[n[0]]="done";return o},{})})+cellsRow(B("סדר פלט","output"),order.map(function(x){return {t:x,c:"ok"}}))));
+  return F;
+}
+function genFib(p){
+  var n=Math.max(2,Math.min(10,num(p.n,6))),F=[],memo={},calls=0,fibv=[0,1];
+  for(var i=2;i<=n+1;i++)fibv[i]=fibv[i-1]+fibv[i-2];
+  var naive=2*fibv[n+1]-1;
+  function row(cur){var c=[];for(var i=0;i<=n;i++)c.push({t:memo[i]!==undefined?memo[i]:"?",c:i===cur?"cur":memo[i]!==undefined?"ok":""});var o={};if(cur!==null)o[cur]="fib("+cur+")";return cellsRow("memo",c,o)}
+  F.push(fr(B("מחשבים fib("+n+") ברקורסיה עם טבלת זיכרון. בלי הטבלה היינו מבצעים "+naive+" קריאות.","Compute fib("+n+") recursively with a memo table. Without the table we would make "+naive+" calls."),row(null)+vinfo(B("קריאות עד כה: 0","Calls so far: 0"))));
+  function f(k,depth){
+    calls++;
+    if(memo[k]!==undefined){F.push(fr(B("fib("+k+") כבר בטבלה ("+memo[k]+"): חוזרים מיד, בלי חישוב מחדש.","fib("+k+") is already in the table ("+memo[k]+"): return immediately."),row(k)+vinfo(B("קריאות עד כה: ","Calls so far: ")+calls)));return memo[k]}
+    if(k<2){memo[k]=k;F.push(fr(B("מקרה בסיס: fib("+k+") = "+k+".","Base case: fib("+k+") = "+k+"."),row(k)+vinfo(B("קריאות עד כה: ","Calls so far: ")+calls)));return k}
+    F.push(fr(B("קוראים ל-fib("+k+"): נדרש fib("+(k-1)+") + fib("+(k-2)+").","Call fib("+k+"): needs fib("+(k-1)+") + fib("+(k-2)+")."),row(k)+vinfo(B("קריאות עד כה: ","Calls so far: ")+calls)));
+    var v=f(k-1)+f(k-2);memo[k]=v;
+    F.push(fr(B("fib("+k+") = "+v+" נשמר בטבלה.","fib("+k+") = "+v+" stored in the table."),row(k)+vinfo(B("קריאות עד כה: ","Calls so far: ")+calls)));return v;
+  }
+  var r=f(n);
+  F.push(fr(B("fib("+n+") = "+r+". עם memoization: "+calls+" קריאות בלבד (O(n)), לעומת "+naive+" ללא טבלה (אקספוננציאלי). זה הרעיון של תכנון דינמי: כל תת-בעיה נפתרת פעם אחת.","fib("+n+") = "+r+". With memoization: only "+calls+" calls (O(n)) vs "+naive+" without the table (exponential). That is dynamic programming: each subproblem is solved once."),row(null)+vinfo("✓ "+r)));
+  return F;
+}
+function genMIS(p){
+  var a=parseArr(p.arr,8).map(function(x){return Math.abs(x)});if(a.length<2)throw 0;var n=a.length,dp=[],F=[];
+  function rows(cur,pick){return cellsRow(B("ערכים","values"),a.map(function(v,i){return {t:v,c:(pick&&pick[i])?"ok":(i===cur?"cur":"")}}))+cellsRow("dp",a.map(function(v,i){return {t:dp[i]!==undefined?dp[i]:"?",c:i===cur?"cur":dp[i]!==undefined?"hi":""}}))}
+  F.push(fr(B("בוחרים איברים כך שאין שני סמוכים, ומקסימום סכום. dp[i] = הסכום הטוב ביותר על i האיברים הראשונים.","Pick non-adjacent elements to maximize the sum. dp[i] = best sum using the first i+1 elements."),rows(null)));
+  for(var i=0;i<n;i++){
+    var msg;
+    if(i===0){dp[0]=a[0];msg=B("dp[0] = "+a[0]+": רק איבר אחד.","dp[0] = "+a[0]+": only one element.")}
+    else if(i===1){dp[1]=Math.max(a[0],a[1]);msg=B("dp[1] = max("+a[0]+", "+a[1]+") = "+dp[1]+": אי אפשר לקחת את שניהם.","dp[1] = max("+a[0]+", "+a[1]+") = "+dp[1]+": we cannot take both.")}
+    else{var skip=dp[i-1],take=dp[i-2]+a[i];dp[i]=Math.max(skip,take);msg=B("dp["+i+"] = max(דילוג "+skip+", לקיחה "+dp[i-2]+"+"+a[i]+"="+take+") = "+dp[i]+".","dp["+i+"] = max(skip "+skip+", take "+dp[i-2]+"+"+a[i]+"="+take+") = "+dp[i]+".")}
+    F.push(fr(msg,rows(i)));
+  }
+  var pick={},i2=n-1;
+  while(i2>=0){if(i2===0||dp[i2]!==dp[i2-1]){pick[i2]=1;i2-=2}else i2--}
+  F.push(fr(B("שחזור: הולכים אחורה. אם dp[i] שונה מ-dp[i-1], האיבר i נבחר וקופצים שניים אחורה. הסכום המקסימלי: "+dp[n-1]+".","Reconstruction: walk back. If dp[i] differs from dp[i-1], element i was taken and we jump two back. Best sum: "+dp[n-1]+"."),rows(null,pick)+vinfo("O(n) "+B("זמן","time"))));
+  return F;
+}
+function genLCS(p){
+  var s1=String(p.s1||"").toUpperCase().slice(0,8),s2=String(p.s2||"").toUpperCase().slice(0,8);if(!s1||!s2)throw 0;
+  var n=s1.length,m=s2.length,T=[],i,j,F=[];
+  for(i=0;i<=n;i++){T.push([]);for(j=0;j<=m;j++)T[i].push(null)}
+  var rl=[""].concat(s1.split("")),cl=[""].concat(s2.split(""));
+  function grid(cur,deps,path){return gridHTML(rl,cl,T.map(function(r,a){return r.map(function(v,b){var c="";if(path&&path[a+","+b])c="ok";else if(cur&&cur[0]===a&&cur[1]===b)c="cur";else if(deps&&deps.some(function(d){return d[0]===a&&d[1]===b}))c="dep";else if(v!==null)c="hi";return {t:v===null?"":v,c:c}})}))}
+  for(i=0;i<=n;i++)T[i][0]=0;for(j=0;j<=m;j++)T[0][j]=0;
+  F.push(fr(B("LCS של "+s1+" ו-"+s2+". שורה ועמודה 0 הן בסיס (מחרוזת ריקה): 0.","LCS of "+s1+" and "+s2+". Row and column 0 are the base case (empty string): 0."),grid()));
+  for(i=1;i<=n;i++)for(j=1;j<=m;j++){
+    var msg,deps;
+    if(s1[i-1]===s2[j-1]){T[i][j]=T[i-1][j-1]+1;deps=[[i-1,j-1]];msg=B("התווים "+s1[i-1]+" ו-"+s2[j-1]+" שווים: לוקחים את האלכסון + 1 = "+T[i][j]+".","Characters "+s1[i-1]+" and "+s2[j-1]+" match: diagonal + 1 = "+T[i][j]+".")}
+    else{T[i][j]=Math.max(T[i-1][j],T[i][j-1]);deps=[[i-1,j],[i,j-1]];msg=B("התווים שונים ("+s1[i-1]+" ≠ "+s2[j-1]+"): המקסימום בין למעלה ("+T[i-1][j]+") לשמאל ("+T[i][j-1]+") = "+T[i][j]+".","Different ("+s1[i-1]+" ≠ "+s2[j-1]+"): max of up ("+T[i-1][j]+") and left ("+T[i][j-1]+") = "+T[i][j]+".")}
+    F.push(fr(msg,grid([i,j],deps)));
+  }
+  var path={},res="";i=n;j=m;path[i+","+j]=1;
+  while(i>0&&j>0){
+    if(s1[i-1]===s2[j-1]){res=s1[i-1]+res;i--;j--}else if(T[i-1][j]>=T[i][j-1])i--;else j--;
+    path[i+","+j]=1;
+  }
+  F.push(fr(B("שחזור: מהפינה הימנית התחתונה הולכים אחורה, ובכל התאמה אלכסונית מוסיפים את התו. אורך ה-LCS הוא "+T[n][m]+": \""+res+"\". זמן ומקום O(nm).","Traceback from the bottom-right corner; every diagonal match adds a character. LCS length is "+T[n][m]+": \""+res+"\". O(nm) time and space."),grid(null,null,path)+vinfo("LCS = <b>"+esc(res)+"</b>")));
+  return F;
+}
+function genKnap(p){
+  var items=String(p.items||"").split(/[\s,]+/).filter(Boolean).slice(0,5).map(function(x){var a=x.split(":");return [Math.max(1,num(a[0],1)),Math.max(0,num(a[1],0))]}),W=Math.max(1,Math.min(10,num(p.W,7)));
+  if(!items.length)throw 0;var n=items.length,T=[],i,w,F=[];
+  for(i=0;i<=n;i++){T.push([]);for(w=0;w<=W;w++)T[i].push(i===0?0:null)}
+  var rl=["0"].concat(items.map(function(it,k){return B("פריט "+(k+1)+" ("+it[0]+","+it[1]+")","item "+(k+1)+" ("+it[0]+","+it[1]+")")})),cl=[];for(w=0;w<=W;w++)cl.push(w);
+  function grid(cur,deps,path){return gridHTML(rl,cl,T.map(function(r,a){return r.map(function(v,b){var c="";if(path&&path[a+","+b])c="ok";else if(cur&&cur[0]===a&&cur[1]===b)c="cur";else if(deps&&deps.some(function(d){return d[0]===a&&d[1]===b}))c="dep";else if(v!==null)c="hi";return {t:v===null?"":v,c:c}})}))}
+  F.push(fr(B("תרמיל 0/1: כל פריט (משקל,ערך) נלקח פעם אחת, קיבולת "+W+". dp[i][w] = הערך הטוב ביותר עם i הפריטים הראשונים וקיבולת w.","0/1 knapsack: each item (weight,value) once, capacity "+W+". dp[i][w] = best value using the first i items with capacity w."),grid()));
+  for(i=1;i<=n;i++)for(w=0;w<=W;w++){
+    var wi=items[i-1][0],vi=items[i-1][1],skip=T[i-1][w],msg,deps=[[i-1,w]];
+    if(wi>w){T[i][w]=skip;msg=B("הפריט (משקל "+wi+") לא נכנס בקיבולת "+w+": נשארים עם "+skip+".","The item (weight "+wi+") does not fit in capacity "+w+": keep "+skip+".")}
+    else{var take=T[i-1][w-wi]+vi;deps.push([i-1,w-wi]);T[i][w]=Math.max(skip,take);msg=B("max(לא לקחת "+skip+", לקחת "+T[i-1][w-wi]+"+"+vi+"="+take+") = "+T[i][w]+".","max(skip "+skip+", take "+T[i-1][w-wi]+"+"+vi+"="+take+") = "+T[i][w]+".")}
+    F.push(fr(msg,grid([i,w],deps)));
+  }
+  var path={},ch=[];w=W;path[n+","+w]=1;
+  for(i=n;i>=1;i--){if(T[i][w]!==T[i-1][w]){ch.push(i);w-=items[i-1][0]}path[(i-1)+","+w]=1}
+  F.push(fr(B("שחזור: אם dp[i][w] שונה מ-dp[i-1][w], הפריט i נלקח. פריטים שנבחרו: "+(ch.length?ch.reverse().join(", "):"אין")+". ערך מקסימלי: "+T[n][W]+". זמן ומקום O(nW).","Reconstruction: if dp[i][w] differs from dp[i-1][w], item i was taken. Chosen: "+(ch.length?ch.reverse().join(", "):"none")+". Best value: "+T[n][W]+". O(nW) time and space."),grid(null,null,path)+vinfo(B("ערך = ","value = ")+"<b>"+T[n][W]+"</b>")));
+  return F;
+}
+function genFrac(p){
+  var Wc=Math.max(10,Math.min(80,num(p.W,50))),items=[["A",10,60],["B",20,100],["C",30,120]],F=[],rem=Wc,val=0,segs=[];
+  items=items.map(function(x){return {n:x[0],w:x[1],v:x[2],r:x[2]/x[1]}}).sort(function(a,b){return b.r-a.r});
+  function view(cur,msg){
+    var bar='<div class="vbar" style="--cap:'+Wc+'">'+segs.map(function(s,i){return '<div class="vseg" style="flex:'+s.q+';background:var('+PAL[i]+')">'+esc(s.n)+(s.part?"*":"")+'</div>'}).join("")+(rem>0?'<div class="vseg empty" style="flex:'+rem+'">'+rem+'</div>':"")+'</div>';
+    var tb='<table class="vt"><tr><th>'+B("פריט","item")+'</th><th>'+B("משקל","weight")+'</th><th>'+B("ערך","value")+'</th><th>v/w</th></tr>'+items.map(function(x){return '<tr class="'+(cur===x.n?"curr":"")+'"><th>'+x.n+'</th><td>'+x.w+'</td><td>'+x.v+'</td><td>'+(Math.round(x.r*10)/10)+'</td></tr>'}).join("")+'</table>';
+    F.push(fr(msg,tb+'<div class="vname" style="margin-top:8px">'+B("התרמיל (קיבולת "+Wc+")","The knapsack (capacity "+Wc+")")+'</div>'+bar+vinfo(B("ערך נצבר: ","value so far: ")+'<b>'+(Math.round(val*10)/10)+'</b>')));
+  }
+  view(null,B("ממיינים לפי יחס ערך/משקל מהגבוה לנמוך. כאן מותר לקחת חלק מפריט (תרמיל שברי).","Sort by value/weight, highest first. Taking part of an item is allowed (fractional knapsack)."));
+  items.forEach(function(x){
+    if(rem<=0)return;
+    if(x.w<=rem){segs.push({n:x.n,q:x.w});rem-=x.w;val+=x.v;view(x.n,B("לוקחים את "+x.n+" במלואו (משקל "+x.w+"). נשאר מקום: "+rem+".","Take all of "+x.n+" (weight "+x.w+"). Space left: "+rem+"."))}
+    else{var q=rem,gain=x.v*q/x.w;segs.push({n:x.n,q:q,part:1});val+=gain;rem=0;view(x.n,B("נשאר מקום רק ל-"+q+" מתוך "+x.w+": לוקחים "+q+"/"+x.w+" מ-"+x.n+" ומקבלים "+(Math.round(gain*10)/10)+". התרמיל מלא.","Only "+q+" of "+x.w+" fits: take "+q+"/"+x.w+" of "+x.n+" for "+(Math.round(gain*10)/10)+". The knapsack is full."))}
+  });
+  F.push(fr(B("הערך המקסימלי: "+(Math.round(val*10)/10)+". החמדנות נכונה כאן כי אפשר לחלק פריטים. בתרמיל 0/1 היא לא תמיד נכונה, ולכן שם משתמשים בתכנון דינמי. זמן O(n log n).","Maximum value: "+(Math.round(val*10)/10)+". Greedy is correct because items can be split. For 0/1 it can fail, which is why DP is used there. O(n log n)."),F[F.length-1].h));
+  return F;
+}
+function genASP(){
+  var acts=[[1,4],[3,5],[0,6],[5,7],[3,9],[5,9],[6,10],[8,11],[8,12],[2,14],[12,16]].map(function(a,i){return {id:"a"+(i+1),s:a[0],f:a[1]}}).sort(function(a,b){return a.f-b.f}),F=[],chosen={},rej={},last=-1,cur=null;
+  var sx=17,rh=20,W=16*sx+50,H=acts.length*rh+24;
+  function view(msg){
+    var s='<svg class="gsvg" viewBox="0 0 '+W+' '+H+'">';
+    for(var t=0;t<=16;t+=2)s+='<text class="gw" x="'+(34+t*sx)+'" y="10" text-anchor="middle">'+t+'</text>';
+    if(last>=0)s+='<line x1="'+(34+last*sx)+'" y1="14" x2="'+(34+last*sx)+'" y2="'+H+'" stroke="var(--sun)" stroke-width="2" stroke-dasharray="4 4"/>';
+    acts.forEach(function(a,i){var c=chosen[a.id]?"var(--good)":rej[a.id]?"var(--bad)":cur===a.id?"var(--sun)":"var(--brand)",op=(!chosen[a.id]&&!rej[a.id]&&cur!==a.id)?.45:1;
+      s+='<text class="gw" x="2" y="'+(28+i*rh)+'">'+a.id+'</text><rect x="'+(34+a.s*sx)+'" y="'+(16+i*rh)+'" width="'+((a.f-a.s)*sx)+'" height="14" rx="4" style="fill:'+c+';opacity:'+op+'"/>'});
+    F.push(fr(msg,s+'</svg>'+vinfo(B("נבחרו: ","chosen: ")+'<b>'+(acts.filter(function(a){return chosen[a.id]}).map(function(a){return a.id}).join(", ")||"–")+'</b>')));
+  }
+  view(B("11 פעילויות. הכלל החמדני: ממיינים לפי זמן סיום, ובוחרים כל פעילות שמתחילה אחרי סיום הקודמת שנבחרה.","11 activities. Greedy rule: sort by finish time and take every activity that starts after the last chosen one ends."));
+  acts.forEach(function(a){
+    cur=a.id;
+    if(a.s>=last){chosen[a.id]=1;last=a.f;view(B(a.id+" מתחילה ב-"+a.s+" אחרי הסיום האחרון: נבחרת. קו הסיום זז ל-"+a.f+".",a.id+" starts at "+a.s+" after the last finish: chosen. The finish line moves to "+a.f+"."))}
+    else{rej[a.id]=1;view(B(a.id+" מתחילה ב-"+a.s+" לפני "+last+": חופפת, נדחית.",a.id+" starts at "+a.s+" before "+last+": overlaps, rejected."))}
+  });
+  cur=null;view(B("נבחרו "+Object.keys(chosen).length+" פעילויות, והמספר הזה מקסימלי. הסיבה: הפעילות שמסתיימת ראשונה משאירה הכי הרבה מקום לשאר (טיעון חילוף). זמן O(n log n).","Chosen "+Object.keys(chosen).length+" activities, which is optimal. The earliest finisher leaves the most room for the rest (exchange argument). O(n log n)."));
+  return F;
+}
+function genColor(p){
+  var G=GC,adj=adjU(G),ids=G.nodes.map(function(n){return n[0]}),order=p.order==="deg"?ids.slice().sort(function(a,b){return adj[b].length-adj[a].length||(a<b?-1:1)}):ids.slice(),col={},F=[];
+  function view(cur,msg){var st={n:{},f:{},t:{}};Object.keys(col).forEach(function(k){st.f[k]=col[k];st.t[k]=col[k]+1});if(cur)st.n[cur]="cur";
+    F.push(fr(msg,graphSVG(G,st)+cellsRow(B("סדר עיבוד","order"),order.map(function(x){return {t:x,c:x===cur?"cur":col[x]!==undefined?"ok":""}}))+vinfo(B("הצבעים ממוספרים 1, 2, 3…","Colours are numbered 1, 2, 3…"))))}
+  view(null,B("צביעה חמדנית: עוברים על הצמתים לפי הסדר, וכל צומת מקבל את הצבע הקטן ביותר שאף שכן שלו לא משתמש בו.","Greedy colouring: go through the vertices in order; each gets the smallest colour none of its neighbours uses."));
+  order.forEach(function(v){
+    var used=adj[v].filter(function(u){return col[u]!==undefined}).map(function(u){return col[u]}),c=0;while(used.indexOf(c)>-1)c++;
+    col[v]=c;view(v,B("שכנים צבועים משתמשים בצבעים {"+used.map(function(x){return x+1}).sort().join(",")+"}. "+v+" מקבל צבע "+(c+1)+".","Coloured neighbours use {"+used.map(function(x){return x+1}).sort().join(",")+"}. "+v+" gets colour "+(c+1)+"."));
+  });
+  var mx=Math.max.apply(null,Object.keys(col).map(function(k){return col[k]}))+1;
+  F.push(fr(B("בסך הכול "+mx+" צבעים. חסם: לעולם לא יותר מ-Δ+1 (דרגה מקסימלית ועוד 1). הסדר משפיע על התוצאה, ולכן החמדנות אינה תמיד אופטימלית. זמן O(V+E).","Total "+mx+" colours. Bound: never more than Δ+1. The order changes the result, so greedy is not always optimal. O(V+E)."),F[F.length-1].h));
+  return F;
+}
+function genKruskal(){
+  var G=GK,F=[],E=G.edges.map(function(e,i){return {i:i,a:e[0],b:e[1],w:e[2]}}).sort(function(x,y){return x.w-y.w}),par={},ec={},tot=0,cnt=0;
+  G.nodes.forEach(function(n){par[n[0]]=n[0]});
+  function find(x){while(par[x]!==x)x=par[x];return x}
+  function comps(){var m={};G.nodes.forEach(function(n){var r=find(n[0]);(m[r]=m[r]||[]).push(n[0])});return Object.keys(m).map(function(k){return "{"+m[k].join(",")+"}"}).join("  ")}
+  function view(cur,msg){var st={e:{}};Object.keys(ec).forEach(function(k){st.e[k]=ec[k]});if(cur!==null)st.e[cur.i]="cur";
+    F.push(fr(msg,graphSVG(G,st)+cellsRow(B("קשתות ממוינות","sorted edges"),E.map(function(e){return {t:e.a+e.b+":"+e.w,c:cur&&cur.i===e.i?"cur":ec[e.i]==="on"?"ok":ec[e.i]==="bad"?"no":""}}),null,"sm")+vinfo(B("רכיבים: ","components: ")+'<b>'+comps()+'</b> · '+B("משקל העץ: ","tree weight: ")+tot)))}
+  view(null,B("Kruskal: ממיינים את הקשתות לפי משקל. עוברים מהקלה לכבדה, ומוסיפים קשת רק אם היא לא סוגרת מעגל (בודקים בעזרת Union-Find).","Kruskal: sort edges by weight. Go from light to heavy and add an edge only if it does not close a cycle (checked with Union-Find)."));
+  E.forEach(function(e){
+    var ra=find(e.a),rb=find(e.b);
+    if(ra!==rb){par[ra]=rb;ec[e.i]="on";tot+=e.w;cnt++;view(e,B("הקשת "+e.a+e.b+" (משקל "+e.w+") מחברת שני רכיבים שונים: מתקבלת ונכנסת לעץ.","Edge "+e.a+e.b+" (weight "+e.w+") joins two different components: accepted."))}
+    else{ec[e.i]="bad";view(e,B("הקשת "+e.a+e.b+" (משקל "+e.w+"): "+e.a+" ו-"+e.b+" כבר באותו רכיב. היא הייתה סוגרת מעגל, ולכן נדחית.","Edge "+e.a+e.b+" (weight "+e.w+"): "+e.a+" and "+e.b+" are already in one component. It would close a cycle, so it is rejected."))}
+  });
+  F.push(fr(B("העץ הפורש המינימלי: "+cnt+" קשתות (V−1), משקל כולל "+tot+". זמן O(E log V). Prim מגיע לאותו משקל בצורה אחרת: מגדל עץ אחד מצומת התחלה.","Minimum spanning tree: "+cnt+" edges (V−1), total weight "+tot+". O(E log V). Prim reaches the same weight differently: it grows one tree from a start vertex."),F[F.length-1].h));
+  return F;
+}
+function genHuffman(p){
+  var s=String(p.s||"").slice(0,24);if(s.length<2)throw 0;var fq={};s.split("").forEach(function(c){fq[c]=(fq[c]||0)+1});
+  var uid=0,nodes=Object.keys(fq).sort().map(function(c){return {id:uid++,w:fq[c],ch:c}});if(nodes.length<2)throw 0;
+  var F=[],bitsFixed=Math.ceil(Math.log(nodes.length)/Math.LN2)*s.length;
+  function toTree(n,cls,hi){var o={lbl:n.ch?n.ch+":"+n.w:String(n.w),cls:hi&&hi[n.id]?"cur":(n.ch?"done":""),r:n.ch?18:15,kids:[]};if(n.l){o.kids.push({node:toTree(n.l,cls,hi),lab:cls?"0":undefined,cls:cls?"on":""});o.kids.push({node:toTree(n.r,cls,hi),lab:cls?"1":undefined,cls:cls?"on":""})}return o}
+  function view(msg,hi,fin){F.push(fr(msg,'<div class="vtreewrap">'+treeSVG(nodes.map(function(n){return toTree(n,fin,hi)}))+'</div>'+cellsRow(B("תור עדיפויות","priority queue"),nodes.slice().sort(function(a,b){return a.w-b.w||a.id-b.id}).map(function(n){return {t:n.ch||n.w,c:hi&&hi[n.id]?"cur":"hi",i:n.w}}),null,"sm")))}
+  view(B("מחרוזת: \""+s+"\". סופרים תדירויות ויוצרים עלה לכל תו. הרעיון: תווים נפוצים יקבלו קוד קצר.","String \""+s+"\". Count frequencies and make a leaf per character. Frequent characters will get short codes."));
+  while(nodes.length>1){
+    nodes.sort(function(a,b){return a.w-b.w||a.id-b.id});var a=nodes[0],b=nodes[1],hi={};hi[a.id]=1;hi[b.id]=1;
+    view(B("שני הקטנים ביותר: "+(a.ch||a.w)+" ("+a.w+") ו-"+(b.ch||b.w)+" ("+b.w+"). ממזגים אותם.","Two smallest: "+(a.ch||a.w)+" ("+a.w+") and "+(b.ch||b.w)+" ("+b.w+"). Merge them."),hi);
+    var m={id:uid++,w:a.w+b.w,l:a,r:b};nodes=nodes.slice(2).concat([m]);
+    view(B("נוצר צומת חדש במשקל "+m.w+" ומוחזר לתור.","A new node of weight "+m.w+" goes back into the queue."),(function(){var o={};o[m.id]=1;return o})());
+  }
+  var codes={};(function walk(n,c){if(n.ch){codes[n.ch]=c||"0";return}walk(n.l,c+"0");walk(n.r,c+"1")})(nodes[0],"");
+  var bits=0;Object.keys(codes).forEach(function(k){bits+=codes[k].length*fq[k]});
+  F.push(fr(B("העץ מוכן. קוד כל תו הוא המסלול מהשורש (0 שמאלה, 1 ימינה). "+bits+" ביטים לעומת "+bitsFixed+" בקידוד באורך קבוע. אלגוריתם Huffman אופטימלי, O(n log n).","Tree done. Each code is the path from the root (0 left, 1 right). "+bits+" bits vs "+bitsFixed+" with a fixed-length code. Huffman is optimal, O(n log n)."),'<div class="vtreewrap">'+treeSVG([toTree(nodes[0],true,null)])+'</div>'+'<table class="vt"><tr><th>'+B("תו","char")+'</th><th>'+B("תדירות","freq")+'</th><th>'+B("קוד","code")+'</th></tr>'+Object.keys(codes).sort().map(function(k){return '<tr><th>'+esc(k)+'</th><td>'+fq[k]+'</td><td>'+codes[k]+'</td></tr>'}).join("")+'</table>'));
+  return F;
+}
+function prefixFn(P){var pi=[0],k=0;for(var i=1;i<P.length;i++){while(k>0&&P[i]!==P[k])k=pi[k-1];if(P[i]===P[k])k++;pi.push(k)}return pi}
+function genKMP(p){
+  var T=String(p.t||"").slice(0,24),P=String(p.p||"").slice(0,10);if(!T||!P||P.length>T.length)throw 0;
+  var m=P.length,n=T.length,pi=[0],F=[],k=0,i,j;
+  function prow(cur,kk){return cellsRow(B("תבנית","pattern"),P.split("").map(function(c,x){return {t:c,c:x===cur?"cur":(kk!==undefined&&x===kk?"hi":"")}}),null,"sm")+cellsRow("π",P.split("").map(function(c,x){return {t:pi[x]!==undefined?pi[x]:"?",c:pi[x]!==undefined?"ok":""}}),null,"sm")}
+  F.push(fr(B("שלב 1: בונים את π. π[i] = אורך הקידומת הארוכה ביותר של התבנית שהיא גם סיפא של P[0..i]. כך לעולם לא נחזור אחורה בטקסט.","Step 1: build π. π[i] = length of the longest prefix of the pattern that is also a suffix of P[0..i]. That is why we never move backwards in the text."),prow(null)));
+  F.push(fr(B("π[0] = 0 תמיד.","π[0] = 0 always."),prow(0)));
+  for(i=1;i<m;i++){
+    while(k>0&&P[i]!==P[k]){var old=k;k=pi[k-1];F.push(fr(B("P["+i+"]="+P[i]+" לא תואם P["+old+"]="+P[old]+": נופלים ל-π["+(old-1)+"]="+k+".","P["+i+"]="+P[i]+" does not match P["+old+"]="+P[old]+": fall back to π["+(old-1)+"]="+k+"."),prow(i,k)))}
+    if(P[i]===P[k])k++;pi[i]=k;
+    F.push(fr(B("π["+i+"] = "+k+(k?" (התאמה עם P["+(k-1)+"])":" (אין קידומת תואמת)"),"π["+i+"] = "+k+(k?" (matches P["+(k-1)+"])":" (no matching prefix)")),prow(i,k)));
+  }
+  F.push(fr(B("שלב 2: חיפוש בטקסט. מצביע i רץ קדימה בלבד. בחוסר התאמה מזיזים את התבנית לפי π.","Step 2: search the text. Pointer i only moves forward. On a mismatch the pattern shifts by π."),shiftRow(B("טקסט","text"),T.split("").map(function(c){return {t:c}}),0,null,"sm")+shiftRow(B("תבנית","pattern"),P.split("").map(function(c){return {t:c}}),0,null,"sm")));
+  j=0;var found=[];
+  function view(i,j,msg,mis){
+    var tc=T.split("").map(function(c,x){var cl="";if(x>=i-j&&x<i)cl="ok";if(x===i)cl=mis?"no":"cur";return {t:c,c:cl}}),pc=P.split("").map(function(c,x){var cl="";if(x<j)cl="ok";if(x===j)cl=mis?"no":"cur";return {t:c,c:cl}});
+    F.push(fr(msg,shiftRow(B("טקסט","text"),tc,0,null,"sm")+shiftRow(B("תבנית","pattern"),pc,i-j,null,"sm")+vinfo("i = "+i+" , j = "+j+(found.length?" · "+B("נמצא במקומות: ","found at: ")+found.join(", "):""))));
+  }
+  for(i=0;i<n;i++){
+    while(j>0&&T[i]!==P[j]){view(i,j,B("T["+i+"]="+T[i]+" ≠ P["+j+"]="+P[j]+": לא חוזרים בטקסט, התבנית זזה וj הופך ל-π["+(j-1)+"]="+pi[j-1]+".","T["+i+"]="+T[i]+" ≠ P["+j+"]="+P[j]+": no backing up in the text; the pattern shifts and j becomes π["+(j-1)+"]="+pi[j-1]+"."),true);j=pi[j-1]}
+    if(T[i]===P[j]){j++;view(i+1>n?i:i,j,B("T["+i+"]="+T[i]+" תואם: j עולה ל-"+j+".","T["+i+"]="+T[i]+" matches: j rises to "+j+"."),false)}
+    else view(i,j,B("T["+i+"]="+T[i]+" לא תואם את P[0]: j נשאר 0.","T["+i+"]="+T[i]+" does not match P[0]: j stays 0."),true);
+    if(j===m){found.push(i-m+1);view(i,j,B("נמצאה התאמה מלאה במקום "+(i-m+1)+". ממשיכים עם j=π["+(m-1)+"]="+pi[m-1]+".","Full match at position "+(i-m+1)+". Continue with j=π["+(m-1)+"]="+pi[m-1]+"."),false);j=pi[j-1]}
+  }
+  F.push(fr(found.length?B("נמצאה התבנית במקומות: "+found.join(", ")+". זמן O(n+m): בניית π בזמן O(m) והחיפוש O(n).","Pattern found at: "+found.join(", ")+". O(n+m): π in O(m), search in O(n)."):B("התבנית לא נמצאה. עדיין O(n+m).","Pattern not found. Still O(n+m)."),F[F.length-1].h));
+  return F;
+}
+function genSTrie(p){
+  var s=String(p.s||"").toLowerCase().replace(/[^a-z]/g,"").slice(0,7);if(s.length<2)throw 0;s+="$";
+  var root={lbl:"",kids:{},id:0},uid=1,F=[],sufs=[];
+  function conv(n,hi,nw){var o={lbl:n.leaf!==undefined?String(n.leaf):"",cls:nw&&nw[n.id]?"cur":hi&&hi[n.id]?"hi":(n.leaf!==undefined?"done":""),r:n.leaf!==undefined?15:9,kids:[]};Object.keys(n.kids).sort().forEach(function(c){o.kids.push({node:conv(n.kids[c],hi,nw),lab:c,cls:hi&&hi[n.kids[c].id]?"on":""})});return o}
+  function view(msg,hi,nw){F.push(fr(msg,'<div class="vtreewrap">'+treeSVG([conv(root,hi,nw)])+'</div>'))}
+  view(B("בונים suffix trie של \""+s+"\": מכניסים את כל הסיפות. התו $ מבטיח שאף סיפה אינה קידומת של אחרת.","Build the suffix trie of \""+s+"\": insert every suffix. The $ guarantees no suffix is a prefix of another."));
+  for(var i=0;i<s.length;i++){
+    var cur=root,hi={},nw={},made=0;hi[0]=1;
+    for(var j=i;j<s.length;j++){var c=s[j];if(!cur.kids[c]){cur.kids[c]={lbl:"",kids:{},id:uid++};nw[cur.kids[c].id]=1;made++}cur=cur.kids[c];hi[cur.id]=1}
+    cur.leaf=i;
+    view(B("מכניסים את הסיפה "+s.slice(i)+" (מתחילה במקום "+i+"): נוצרו "+made+" צמתים חדשים. העלה מסומן במקום ההתחלה.","Insert suffix "+s.slice(i)+" (starts at "+i+"): "+made+" new nodes. The leaf stores the start index."),hi,nw);
+  }
+  var sa=[];for(var q=0;q<s.length;q++)sa.push(q);sa.sort(function(a,b){var x=s.slice(a),y=s.slice(b);return x<y?-1:x>y?1:0});
+  F.push(fr(B("קריאת העלים משמאל לימין (לפי סדר האותיות) נותנת את ה-Suffix Array. בעץ סיפות אמיתי מכווצים שרשראות של צמתים לקשת אחת עם תווית מחרוזת, וכך מגיעים לבנייה ב-O(n) ולזיכרון O(n). חיפוש תבנית באורך m לוקח O(m).","Reading the leaves left to right (alphabetical) gives the Suffix Array. A real suffix tree compresses chains into one edge labelled with a substring, giving O(n) build and O(n) space. Searching a pattern of length m takes O(m)."),
+    '<div class="vtreewrap">'+treeSVG([conv(root,null,null)])+'</div><table class="vt"><tr><th>SA</th><th>'+B("סיפה","suffix")+'</th></tr>'+sa.map(function(x){return '<tr><td>'+x+'</td><td>'+esc(s.slice(x))+'</td></tr>'}).join("")+'</table>'));
+  return F;
+}
+
+var VIZ={
+ growth:{t:["גידול סיבוכיות","Growth of complexity"],d:["כך גדלות הפונקציות שמופיעות כל הקורס. לחצו play ועקבו אחרי הקווים.","The functions you meet all course. Press play and follow the curves."],gen:genGrowth,inputs:[]},
+ karatsuba:{t:["קרצובה","Karatsuba"],d:["שלושה כפלים רקורסיביים במקום ארבעה. זמן O(n^1.585).","Three recursive products instead of four. O(n^1.585) time."],gen:genKara,inputs:[{k:"x",l:["מספר ראשון","First number"],v:"1234"},{k:"y",l:["מספר שני","Second number"],v:"5678"}]},
+ boyer:{t:["Boyer-Moore","Boyer-Moore"],d:["איבר רוב בזמן O(n) וזיכרון O(1).","Majority element in O(n) time and O(1) space."],gen:genBoyer,inputs:[{k:"arr",l:["מערך (מספרים מופרדים בפסיק)","Array (comma-separated)"],v:"2,2,1,1,2,2,1,2,2"}]},
+ grepr:{t:["ייצוג גרף","Graph representation"],d:["אותו גרף בשני ייצוגים.","One graph, two representations."],gen:graphReprFrames,inputs:[]},
+ bfs:{t:["BFS","BFS"],d:["סריקה לרוחב עם תור. מסלולים קצרים בגרף לא ממושקל.","Breadth-first with a queue. Shortest paths in unweighted graphs."],gen:genBFS,inputs:[{k:"start",s:["A","B","C","D","E","F","G"],l:["צומת התחלה","Start vertex"],v:"A"}]},
+ dfs:{t:["DFS","DFS"],d:["סריקה לעומק עם מחסנית (רקורסיה), וזמני גילוי וסיום.","Depth-first with a stack (recursion) and discovery/finish times."],gen:genDFS,inputs:[{k:"start",s:["A","B","C","D","E","F","G"],l:["צומת התחלה","Start vertex"],v:"A"}]},
+ topo:{t:["מיון טופולוגי","Topological sort"],d:["אלגוריתם Kahn על גרף מכוון חסר מעגלים.","Kahn's algorithm on a directed acyclic graph."],gen:genTopo,inputs:[]},
+ fib:{t:["Memoization","Memoization"],d:["אותה רקורסיה, אבל כל תת-בעיה נפתרת פעם אחת.","Same recursion, but each subproblem is solved once."],gen:genFib,inputs:[{k:"n",l:["n (2 עד 10)","n (2 to 10)"],v:"6"}]},
+ mis:{t:["תת-סדרה בלתי תלויה","Independent subsequence"],d:["סכום מקסימלי בלי איברים סמוכים.","Max sum with no adjacent elements."],gen:genMIS,inputs:[{k:"arr",l:["ערכים (עד 8)","Values (up to 8)"],v:"3,2,5,10,7"}]},
+ lcs:{t:["LCS","LCS"],d:["תת-סדרה משותפת ארוכה ביותר בטבלת DP.","Longest common subsequence in a DP table."],gen:genLCS,inputs:[{k:"s1",l:["מחרוזת 1 (עד 8 תווים)","String 1 (up to 8)"],v:"ABCBDAB"},{k:"s2",l:["מחרוזת 2 (עד 8 תווים)","String 2 (up to 8)"],v:"BDCABA"}]},
+ knap:{t:["תרמיל 0/1","0/1 knapsack"],d:["טבלת DP של פריטים מול קיבולת.","A DP table of items versus capacity."],gen:genKnap,inputs:[{k:"items",l:["פריטים משקל:ערך (עד 5)","Items weight:value (up to 5)"],v:"1:1,3:4,4:5,5:7"},{k:"W",l:["קיבולת (עד 10)","Capacity (up to 10)"],v:"7"}]},
+ fknap:{t:["תרמיל שברי","Fractional knapsack"],d:["חמדנות לפי יחס ערך/משקל.","Greedy by value/weight ratio."],gen:genFrac,inputs:[{k:"W",l:["קיבולת (10 עד 80)","Capacity (10 to 80)"],v:"50"}]},
+ asp:{t:["בחירת פעילויות","Activity selection"],d:["מיון לפי זמן סיום ובחירה חמדנית.","Sort by finish time and choose greedily."],gen:genASP,inputs:[]},
+ color:{t:["צביעה חמדנית","Greedy colouring"],d:["צבע קטן ביותר שאין אצל השכנים. נסו שני סדרים.","Smallest colour unused by neighbours. Try both orders."],gen:genColor,inputs:[{k:"order",s:["abc","deg"],lab:{abc:["לפי אלפבית","Alphabetical"],deg:["לפי דרגה יורדת","By degree, descending"]},l:["סדר צמתים","Vertex order"],v:"abc"}]},
+ mst:{t:["Kruskal (MST)","Kruskal (MST)"],d:["עץ פורש מינימלי בעזרת מיון קשתות ו-Union-Find.","Minimum spanning tree via sorted edges and Union-Find."],gen:genKruskal,inputs:[]},
+ huff:{t:["עץ Huffman","Huffman tree"],d:["ממזגים תמיד את שני הקטנים ביותר.","Always merge the two smallest."],gen:genHuffman,inputs:[{k:"s",l:["מחרוזת (עד 24 תווים)","String (up to 24)"],v:"abracadabra"}]},
+ kmp:{t:["KMP","KMP"],d:["חיפוש תבנית בזמן O(n+m) בלי לחזור אחורה בטקסט.","Pattern search in O(n+m) without backing up in the text."],gen:genKMP,inputs:[{k:"t",l:["טקסט (עד 24)","Text (up to 24)"],v:"ABABDABACDABABCABAB"},{k:"p",l:["תבנית (עד 10)","Pattern (up to 10)"],v:"ABABCABAB"}]},
+ strie:{t:["Suffix Trie","Suffix trie"],d:["הצעד הראשון בדרך לעץ סיפות.","The first step toward a suffix tree."],gen:genSTrie,inputs:[{k:"s",l:["מחרוזת (אותיות, עד 7)","String (letters, up to 7)"],v:"banana"}]}
+};
+var NODE_VIZ={"complexity":"growth","dc-karatsuba":"karatsuba","dc-boyer-moore":"boyer","graph-repr":"grepr","bfs":"bfs","dfs":"dfs","topo":"topo","dp-principles":"fib","dp-fib":"fib","dp-mis":"mis","dp-lcs":"lcs","dp-knapsack":"knap","greedy-knapsack":"fknap","greedy-asp":"asp","greedy-coloring":"color","mst":"mst","huffman":"huff","kmp":"kmp","suffix-trees":"strie"};
+/* ---------- LeetCode question visualizers: idea + solution ---------- */
+function cr(name,arr,hi,ptr,cls){return cellsRow(name,arr.map(function(v,i){return {t:v,c:(hi&&hi[i])||""}}),ptr,cls)}
+function ptrs(o){return o}
+function genRec(init,n,k,name){
+  var v=init.slice(),F=[];
+  function row(cur){var hi={};for(var j=1;j<=k&&cur-j>=0;j++)hi[cur-j]="hi";if(cur!==null)hi[cur]="cur";var c=[];for(var i=0;i<=n;i++)c.push({t:i<v.length?v[i]:"?",c:hi[i]||(i<v.length?"ok":"")});return cellsRow(name,c,null,n>9?"sm":"")}
+  F.push(fr(B("הערכים ההתחלתיים ידועים. כל ערך חדש הוא סכום של "+k+" הקודמים לו.","The starting values are known. Each new value is the sum of the previous "+k+"."),row(null)+vinfo(B("בכל רגע זוכרים רק "+k+" משתנים, לכן זיכרון O(1).","Only "+k+" variables are needed at a time, so O(1) space."))));
+  for(var i=init.length;i<=n;i++){
+    var s=0;for(var j=1;j<=k;j++)s+=v[i-j];v.push(s);
+    F.push(fr(B("ערך מספר "+i+" = "+(function(){var a=[];for(var j=k;j>=1;j--)a.push(v[i-j]);return a.join(" + ")})()+" = "+s+".","Value "+i+" = "+(function(){var a=[];for(var j=k;j>=1;j--)a.push(v[i-j]);return a.join(" + ")})()+" = "+s+"."),row(i)));
+  }
+  F.push(fr(B("התוצאה: "+v[n]+". זמן O(n).","Result: "+v[n]+". O(n) time."),row(null)));
+  return F;
+}
+function g509(p){return genRec([0,1],Math.max(2,Math.min(12,num(p.n,7))),2,"F")}
+function g1137(p){return genRec([0,1,1],Math.max(3,Math.min(12,num(p.n,8))),3,"T")}
+function g70(p){var n=Math.max(2,Math.min(10,num(p.n,5))),F=genRec([1,1],n,2,"ways");F[0]=fr(B("מספר הדרכים להגיע למדרגה i שווה לדרכים להגיע ל-i−1 (צעד של 1) ועוד דרכים להגיע ל-i−2 (צעד של 2). לכן ways(0)=ways(1)=1.","Ways to reach stair i = ways to reach i−1 (step of 1) + ways to reach i−2 (step of 2). So ways(0)=ways(1)=1."),F[0].h);F[F.length-1]=fr(B("יש "+(function(){var a=[1,1];for(var i=2;i<=n;i++)a.push(a[i-1]+a[i-2]);return a[n]})()+" דרכים לעלות "+n+" מדרגות. זמן O(n), מקום O(1).",(function(){var a=[1,1];for(var i=2;i<=n;i++)a.push(a[i-1]+a[i-2]);return a[n]})()+" ways to climb "+n+" stairs. O(n) time, O(1) space."),F[F.length-1].h);return F}
+function g746(p){
+  var c=parseArr(p.cost,10).map(Math.abs),n=c.length,F=[],dp=[];if(n<2)throw 0;
+  function rows(cur,fin){var hi={};if(cur!==null)hi[cur]="cur";return cr(B("מחיר","cost"),c,hi)+cellsRow("dp",c.map(function(x,i){return {t:dp[i]!==undefined?dp[i]:"?",c:i===cur?"cur":(fin&&fin[i])?"ok":dp[i]!==undefined?"hi":""}}))}
+  F.push(fr(B("dp[i] = המחיר המינימלי להגיע למדרגה i (כולל התשלום עליה). אפשר להתחיל במדרגה 0 או 1.","dp[i] = minimum cost to stand on stair i (including paying for it). You may start on stair 0 or 1."),rows(null)));
+  for(var i=0;i<n;i++){
+    if(i<2){dp[i]=c[i];F.push(fr(B("dp["+i+"] = "+c[i]+": מתחילים כאן.","dp["+i+"] = "+c[i]+": a starting stair."),rows(i)))}
+    else{dp[i]=c[i]+Math.min(dp[i-1],dp[i-2]);F.push(fr(B("dp["+i+"] = "+c[i]+" + min("+dp[i-1]+", "+dp[i-2]+") = "+dp[i]+".","dp["+i+"] = "+c[i]+" + min("+dp[i-1]+", "+dp[i-2]+") = "+dp[i]+"."),rows(i)))}
+  }
+  var fin={};fin[n-1]=1;fin[n-2]=1;
+  F.push(fr(B("הפסגה היא אחרי המדרגה האחרונה, ולכן התשובה min(dp["+(n-2)+"], dp["+(n-1)+"]) = "+Math.min(dp[n-1],dp[n-2])+".","The top is beyond the last stair, so the answer is min(dp["+(n-2)+"], dp["+(n-1)+"]) = "+Math.min(dp[n-1],dp[n-2])+"."),rows(null,fin)));
+  return F;
+}
+function g118(p){
+  var R=Math.max(2,Math.min(7,num(p.rows,5))),F=[],rows=[];
+  function tri(cur){return '<div class="vtri">'+rows.map(function(r,ri){return '<div class="vtr">'+r.map(function(v,j){var c="";if(ri===rows.length-1&&cur===true)c="cur";else if(cur&&ri===cur.p&&(j===cur.j||j===cur.j-1))c="hi";return '<div class="vc '+c+'">'+v+'</div>'}).join("")+'</div>'}).join("")+'</div>'}
+  rows.push([1]);F.push(fr(B("השורה הראשונה היא [1]. כל שורה חדשה מתחילה ומסתיימת ב-1, והאיברים באמצע הם סכום שני האיברים שמעליהם.","The first row is [1]. Every new row starts and ends with 1; inner values are the sum of the two above."),tri(null)));
+  for(var i=1;i<R;i++){
+    var prev=rows[i-1],r=[1];for(var j=1;j<i;j++)r.push(prev[j-1]+prev[j]);r.push(1);rows.push(r);
+    F.push(fr(B("שורה "+(i+1)+": "+r.join(", ")+(i>1?". למשל "+r[1]+" = "+prev[0]+" + "+prev[1]+".":"."),"Row "+(i+1)+": "+r.join(", ")+(i>1?". For example "+r[1]+" = "+prev[0]+" + "+prev[1]+".":".")),tri(true)));
+  }
+  F.push(fr(B("בנינו "+R+" שורות. זמן O(n²) כי זה מספר האיברים במשולש.","Built "+R+" rows. O(n²) time, the number of entries in the triangle."),tri(null)));
+  return F;
+}
+function g121(p){
+  var a=parseArr(p.prices,10).map(Math.abs);if(a.length<2)throw 0;var F=[],mn=0,best=0,bb=0,bs=0;
+  function row(i,fin){var hi={};hi[mn]="hi";if(i!==null)hi[i]=(i===mn?"hi":"cur");if(fin){hi={};hi[bb]="ok";hi[bs]="ok"}var o={};o[mn]=B("מינימום","min");if(i!==null&&i!==mn)o[i]=B("היום","today");return cr(B("מחיר","price"),a,hi,o)}
+  F.push(fr(B("עוברים פעם אחת. שומרים את המחיר הנמוך ביותר שראינו (יום קנייה אפשרי) ואת הרווח הטוב ביותר.","One pass. Keep the lowest price seen (a possible buy day) and the best profit."),row(0)+vinfo("min = "+a[0]+" , best = 0")));
+  for(var i=1;i<a.length;i++){
+    var msg;
+    if(a[i]<a[mn]){mn=i;msg=B("מחיר "+a[i]+" נמוך מהמינימום: זה יום הקנייה החדש.","Price "+a[i]+" is a new minimum: the new buy day.")}
+    else{var pr=a[i]-a[mn];if(pr>best){best=pr;bb=mn;bs=i;msg=B("מכירה היום: "+a[i]+" − "+a[mn]+" = "+pr+", רווח טוב יותר מכל קודם.","Selling today: "+a[i]+" − "+a[mn]+" = "+pr+", a new best profit.")}else msg=B("מכירה היום תיתן "+pr+", לא יותר מ-"+best+".","Selling today gives "+pr+", no better than "+best+".")}
+    F.push(fr(msg,row(i)+vinfo("min = "+a[mn]+" , best = "+best)));
+  }
+  F.push(fr(B("הרווח המקסימלי: "+best+(best?" (קנייה ביום "+bb+", מכירה ביום "+bs+")":" (אין רווח)")+". זמן O(n), מקום O(1).","Maximum profit: "+best+(best?" (buy day "+bb+", sell day "+bs+")":" (no profit)")+". O(n) time, O(1) space."),row(null,true)+vinfo("✓ "+best)));
+  return F;
+}
+function g303(){
+  var a=[-2,0,3,-5,2,-1],F=[],pre=[0],Q=[[0,2],[2,5],[0,5]];
+  function view(hiN,hiP,txt){return cr("nums",a,hiN)+cellsRow("prefix",[0].concat(a).map(function(_,i){return {t:pre[i]!==undefined?pre[i]:"?",c:hiP&&hiP[i]||(pre[i]!==undefined?"hi":"")}}))+(txt?vinfo(txt):"")}
+  F.push(fr(B("רוצים לענות על הרבה שאלות 'מה סכום המערך בין i ל-j'. נחשב פעם אחת מערך קידומות: prefix[k] = סכום k האיברים הראשונים.","We want to answer many 'sum between i and j' questions. Compute once a prefix array: prefix[k] = sum of the first k elements."),view()));
+  for(var i=0;i<a.length;i++){pre.push(pre[i]+a[i]);var h={};h[i]="cur";var hp={};hp[i+1]="cur";F.push(fr(B("prefix["+(i+1)+"] = prefix["+i+"] + "+a[i]+" = "+pre[i+1]+".","prefix["+(i+1)+"] = prefix["+i+"] + "+a[i]+" = "+pre[i+1]+"."),view(h,hp)))}
+  Q.forEach(function(q){var hn={},hp={};for(var i=q[0];i<=q[1];i++)hn[i]="ok";hp[q[1]+1]="cur";hp[q[0]]="no";
+    F.push(fr(B("sumRange("+q[0]+", "+q[1]+") = prefix["+(q[1]+1)+"] − prefix["+q[0]+"] = "+pre[q[1]+1]+" − "+pre[q[0]]+" = "+(pre[q[1]+1]-pre[q[0]])+". חישוב אחד בלבד, בלי לולאה.","sumRange("+q[0]+", "+q[1]+") = prefix["+(q[1]+1)+"] − prefix["+q[0]+"] = "+pre[q[1]+1]+" − "+pre[q[0]]+" = "+(pre[q[1]+1]-pre[q[0]])+". One subtraction, no loop."),view(hn,hp)))});
+  F.push(fr(B("בנייה O(n), וכל שאילתה O(1).","Build O(n), each query O(1)."),F[F.length-1].h));
+  return F;
+}
+function g392(p){
+  var s=String(p.s||"").slice(0,8),t=String(p.t||"").slice(0,14);if(!s||!t)throw 0;var F=[],i=0;
+  function view(j,ok){return shiftRow("s",s.split("").map(function(c,x){return {t:c,c:x<i?"ok":x===i&&i<s.length?"cur":""}}),0,null,"sm")+shiftRow("t",t.split("").map(function(c,x){return {t:c,c:x===j?(ok?"ok":"no"):x<j?"dim":""}}),0,null,"sm")+vinfo("i = "+i)}
+  F.push(fr(B("שני מצביעים: i ב-s ו-j ב-t. עוברים על t פעם אחת, ומקדמים את i רק כשיש התאמה.","Two pointers: i in s and j in t. Scan t once; advance i only on a match."),view(-1)));
+  for(var j=0;j<t.length&&i<s.length;j++){
+    if(t[j]===s[i]){i++;F.push(fr(B("t["+j+"]="+t[j]+" תואם: i עולה ל-"+i+".","t["+j+"]="+t[j]+" matches: i becomes "+i+"."),view(j,true)))}
+    else F.push(fr(B("t["+j+"]="+t[j]+" לא תואם: עוברים הלאה.","t["+j+"]="+t[j]+" does not match: move on."),view(j,false)));
+  }
+  F.push(fr(i===s.length?B("כל תווי s נמצאו לפי הסדר: תת-סדרה. זמן O(|t|).","Every character of s was found in order: a subsequence. O(|t|)."):B("t נגמרה ו-s לא הושלמה: לא תת-סדרה.","t ended before s was completed: not a subsequence."),view(t.length,true)));
+  return F;
+}
+function bars(segs,cap,left){return '<div class="vbar">'+segs.map(function(s,i){return '<div class="vseg" style="flex:'+s.q+';background:var('+PAL[i%PAL.length]+')">'+esc(s.n)+'</div>'}).join("")+(left>0?'<div class="vseg empty" style="flex:'+left+'">'+left+'</div>':"")+'</div>'}
+function g1710(p){
+  var T=Math.max(1,Math.min(20,num(p.truck,10))),bt=[[5,10],[2,5],[4,7],[3,9]].sort(function(a,b){return b[1]-a[1]}),F=[],segs=[],left=T,tot=0;
+  function view(cur){return '<table class="vt"><tr><th>'+B("תיבות","boxes")+'</th><th>'+B("יחידות בתיבה","units/box")+'</th></tr>'+bt.map(function(b){return '<tr class="'+(cur===b?"curr":"")+'"><td>'+b[0]+'</td><td>'+b[1]+'</td></tr>'}).join("")+'</table><div class="vname" style="margin-top:8px">'+B("המשאית (מקום ל-"+T+" תיבות)","The truck (room for "+T+" boxes)")+'</div>'+bars(segs,T,left)+vinfo(B("יחידות: ","units: ")+'<b>'+tot+'</b>')}
+  F.push(fr(B("ממיינים את סוגי התיבות לפי יחידות בתיבה, מהגבוה לנמוך.","Sort the box types by units per box, highest first."),view(null)));
+  bt.forEach(function(b){if(left<=0)return;var take=Math.min(b[0],left);segs.push({n:b[1]+"u",q:take});left-=take;tot+=take*b[1];F.push(fr(B("לוקחים "+take+" תיבות של "+b[1]+" יחידות: +"+take*b[1]+". נשאר מקום ל-"+left+".","Take "+take+" boxes of "+b[1]+" units: +"+take*b[1]+". Room left: "+left+"."),view(b)))});
+  F.push(fr(B("סך היחידות: "+tot+". זמן O(n log n) בגלל המיון.","Total units: "+tot+". O(n log n) because of the sort."),view(null)));
+  return F;
+}
+function g455(p){
+  var g=parseArr(p.g,8).map(Math.abs).sort(function(a,b){return a-b}),s=parseArr(p.s,8).map(Math.abs).sort(function(a,b){return a-b});if(!g.length||!s.length)throw 0;
+  var F=[],i=0,j=0;
+  function view(msg,ok){var o1={},o2={};if(i<g.length)o1[i]=B("ילד","child");if(j<s.length)o2[j]=B("עוגיה","cookie");
+    return cr(B("תיאבון","greed"),g,(function(){var h={};for(var x=0;x<i;x++)h[x]="ok";if(i<g.length)h[i]="cur";return h})(),o1)+cr(B("עוגיות","cookies"),s,(function(){var h={};for(var x=0;x<j;x++)h[x]="dim";if(j<s.length)h[j]=ok===true?"ok":ok===false?"no":"cur";return h})(),o2)+vinfo(B("ילדים מרוצים: ","satisfied children: ")+'<b>'+i+'</b>')}
+  F.push(fr(B("ממיינים את שניהם. לכל ילד (מהפחות תאבן) מחפשים את העוגיה הקטנה ביותר שמספיקה לו.","Sort both. For each child (least greedy first) look for the smallest cookie that is enough."),view()));
+  while(i<g.length&&j<s.length){
+    if(s[j]>=g[i]){F.push(fr(B("עוגיה "+s[j]+" ≥ תיאבון "+g[i]+": הילד מרוצה.","Cookie "+s[j]+" ≥ greed "+g[i]+": the child is satisfied."),view("",true)));i++;j++}
+    else{F.push(fr(B("עוגיה "+s[j]+" קטנה מדי לילד ("+g[i]+"): עוברים לעוגיה הבאה.","Cookie "+s[j]+" is too small for the child ("+g[i]+"): try the next cookie."),view("",false)));j++}
+  }
+  F.push(fr(B("אין עוד ילדים או עוגיות. "+i+" ילדים מרוצים. זמן O(n log n).",i+" children satisfied. O(n log n)."),view()));
+  return F;
+}
+function g860(p){
+  var a=String(p.bills||"").split(/[\s,]+/).filter(Boolean).slice(0,10).map(function(x){return parseInt(x,10)}).filter(function(x){return x===5||x===10||x===20});if(!a.length)throw 0;
+  var F=[],five=0,ten=0;
+  function view(i,ok){return cr(B("שטרות","bills"),a,(function(){var h={};for(var x=0;x<i;x++)h[x]="ok";if(i<a.length)h[i]=ok===false?"no":"cur";return h})())+vinfo(B("בקופה: ","till: ")+'<b>'+five+'</b> × 5 , <b>'+ten+'</b> × 10')}
+  F.push(fr(B("כוס לימונדה עולה 5. מחזיקים רק ספירה של שטרות 5 ו-10 בקופה.","A lemonade costs 5. We only track how many 5s and 10s are in the till."),view(0)));
+  for(var i=0;i<a.length;i++){
+    var b=a[i];
+    if(b===5){five++;F.push(fr(B("שטר 5: אין עודף. הקופה מקבלת 5.","Bill 5: no change. The 5 goes into the till."),view(i+1)))}
+    else if(b===10){if(five===0){F.push(fr(B("שטר 10 דורש עודף 5 ואין: נכשלים.","A 10 needs change of 5 and there is none: fail."),view(i,false)));return F}five--;ten++;F.push(fr(B("שטר 10: נותנים 5 עודף.","Bill 10: give back a 5."),view(i+1)))}
+    else{if(ten&&five){ten--;five--;F.push(fr(B("שטר 20: צריך עודף 15. נותנים 10+5 ושומרים שטרות 5 גמישים.","Bill 20: change 15. Give 10+5 and keep the flexible 5s."),view(i+1)))}
+      else if(five>=3){five-=3;F.push(fr(B("שטר 20: אין 10, אז נותנים 5+5+5.","Bill 20: no 10, so give 5+5+5."),view(i+1)))}
+      else{F.push(fr(B("שטר 20: אי אפשר לתת 15 עודף. נכשלים.","Bill 20: cannot give 15. Fail."),view(i,false)));return F}}
+  }
+  F.push(fr(B("כל הלקוחות קיבלו עודף: תשובה true. זמן O(n), מקום O(1).","Every customer got change: true. O(n) time, O(1) space."),view(a.length)));
+  return F;
+}
+function g2037(p){
+  var se=parseArr(p.seats,8).map(Math.abs).sort(function(a,b){return a-b}),st=parseArr(p.students,8).map(Math.abs).sort(function(a,b){return a-b}),n=Math.min(se.length,st.length),F=[],tot=0;if(n<1)throw 0;se=se.slice(0,n);st=st.slice(0,n);
+  function view(k){return cr(B("כיסאות","seats"),se,(function(){var h={};for(var x=0;x<=k&&x<n;x++)h[x]=x===k?"cur":"ok";return h})())+cr(B("תלמידים","students"),st,(function(){var h={};for(var x=0;x<=k&&x<n;x++)h[x]=x===k?"cur":"ok";return h})())+vinfo(B("הזזות עד כה: ","moves so far: ")+'<b>'+tot+'</b>')}
+  F.push(fr(B("ממיינים כיסאות ותלמידים. התלמיד ה-i הקטן ביותר מתאים לכיסא ה-i הקטן ביותר.","Sort seats and students. The i-th smallest student takes the i-th smallest seat."),view(-1)));
+  for(var i=0;i<n;i++){var d=Math.abs(se[i]-st[i]);tot+=d;F.push(fr(B("כיסא "+se[i]+" ותלמיד "+st[i]+": |"+se[i]+"−"+st[i]+"| = "+d+" הזזות.","Seat "+se[i]+" and student "+st[i]+": |"+se[i]+"−"+st[i]+"| = "+d+" moves."),view(i)))}
+  F.push(fr(B("סך הכול "+tot+" הזזות. התאמה 'צולבת' אף פעם לא טובה יותר (טיעון חילוף). זמן O(n log n).","Total "+tot+" moves. A 'crossing' pairing is never better (exchange argument). O(n log n)."),view(n)));
+  return F;
+}
+function g605(p){
+  var a=parseArr(p.bed,10).map(function(x){return x?1:0}),n=Math.max(0,Math.min(5,num(p.n,2))),F=[],cnt=0;if(a.length<1)throw 0;
+  function view(i,res){return cr(B("ערוגה","bed"),a,(function(){var h={};if(i!==null)h[i]=res===false?"no":res===true?"ok":"cur";return h})())+vinfo(B("נשתלו: ","planted: ")+'<b>'+cnt+'</b> / '+n)}
+  F.push(fr(B("מותר לשתול בתא ריק אם שני שכניו ריקים (מחוץ לגבולות נחשב ריק). שותלים בכל מקום חוקי משמאל לימין.","You may plant in an empty cell if both neighbours are empty (outside the bed counts as empty). Plant at every legal spot from the left."),view(null)));
+  for(var i=0;i<a.length;i++){
+    var can=a[i]===0&&(i===0||a[i-1]===0)&&(i===a.length-1||a[i+1]===0);
+    if(can){a[i]=1;cnt++;F.push(fr(B("תא "+i+" ושכניו ריקים: שותלים. סה״כ "+cnt+".","Cell "+i+" and its neighbours are empty: plant. Total "+cnt+"."),view(i,true)))}
+    else F.push(fr(B("תא "+i+(a[i]?" תפוס.":" צמוד לפרח: אי אפשר."),"Cell "+i+(a[i]?" is taken.":" is next to a flower: not allowed.")),view(i,false)));
+    if(cnt>=n)break;
+  }
+  F.push(fr(cnt>=n?B("הצלחנו לשתול "+n+" פרחים: true. זמן O(n).","Planted "+n+" flowers: true. O(n)."):B("נשתלו רק "+cnt+" מתוך "+n+": false.","Only "+cnt+" of "+n+" planted: false."),view(null)));
+  return F;
+}
+function g459(p){
+  var s=String(p.s||"").slice(0,10);if(s.length<2)throw 0;var D=s+s,I=D.slice(1,D.length-1),F=[],idx=I.indexOf(s);
+  function row(name,str,hi,dim){return cellsRow(name,str.split("").map(function(c,i){return {t:c,c:hi&&hi[i]?"ok":dim&&dim[i]?"dim":""}}),null,"sm")}
+  F.push(fr(B("אם s היא חזרה של תת-מחרוזת, היא תופיעה בתוך s+s גם אחרי שמוחקים את התו הראשון והאחרון.","If s is a repetition of a block, it appears inside s+s even after deleting the first and last character."),row("s",s)));
+  var dim={};dim[0]=1;dim[D.length-1]=1;
+  F.push(fr(B("בונים s+s ומוחקים את התו הראשון והאחרון (האפורים), כדי שההתאמה הטריוויאלית במקום 0 ובמקום |s| לא תספור.","Build s+s and drop the first and last character (grey) so the trivial matches at 0 and |s| do not count."),row("s+s",D,null,dim)));
+  var hi={};if(idx>=0)for(var i=0;i<s.length;i++)hi[idx+1+i]=1;
+  F.push(fr(idx>=0?B("s נמצאת ב-s+s (בלי הקצוות) במקום "+(idx+1)+": זו חזרה של בלוק קצר. תשובה true.","s occurs in s+s (without the ends) at "+(idx+1)+": it is a repetition of a shorter block. true."):B("s לא נמצאת ב-s+s בלי הקצוות: אין חזרה. תשובה false.","s does not occur in s+s without the ends: no repetition. false."),row("s+s",D,hi,dim)+vinfo(B("בדיקת התאמה בעזרת KMP: O(n).","The match test can use KMP: O(n)."))));
+  return F;
+}
+function g796(p){
+  var s=String(p.s||"").slice(0,10),g=String(p.goal||"").slice(0,10);if(!s||!g)throw 0;var D=s+s,F=[];
+  function row(name,str,hi){return cellsRow(name,str.split("").map(function(c,i){return {t:c,c:hi&&hi[i]?"ok":""}}),null,"sm")}
+  F.push(fr(B("רוטציה של s היא כל מחרוזת שמתקבלת מהעברת קידומת לסוף. בודקים קודם שהאורכים שווים.","A rotation of s moves a prefix to the end. First check that the lengths are equal."),row("s",s)+row("goal",g)));
+  if(s.length!==g.length){F.push(fr(B("האורכים שונים: אי אפשר שזו רוטציה. false.","Different lengths: it cannot be a rotation. false."),row("s",s)+row("goal",g)));return F}
+  F.push(fr(B("כל הרוטציות של s הן תת-מחרוזות באורך |s| של s+s.","Every rotation of s is a length-|s| substring of s+s."),row("s+s",D)));
+  var idx=D.indexOf(g),hi={};if(idx>=0)for(var i=0;i<g.length;i++)hi[idx+i]=1;
+  F.push(fr(idx>=0?B("goal נמצאת ב-s+s במקום "+idx+": זו רוטציה (הזזה ב-"+idx+"). true.","goal occurs in s+s at "+idx+": it is a rotation (shift "+idx+"). true."):B("goal לא נמצאת ב-s+s: לא רוטציה. false.","goal does not occur in s+s: not a rotation. false."),row("s+s",D,hi)+vinfo(B("עם KMP: O(n).","With KMP: O(n)."))));
+  return F;
+}
+function g14(p){
+  var S=String(p.strs||"").split(/[\s,]+/).filter(Boolean).slice(0,5).map(function(x){return x.slice(0,8)});if(S.length<2)throw 0;var F=[],mx=Math.max.apply(null,S.map(function(x){return x.length})),pre="";
+  function view(col,res){return S.map(function(w,r){var c=w.split("");while(c.length<mx)c.push("");return cellsRow("#"+(r+1),c.map(function(ch,i){return {t:ch,c:i<pre.length?"ok":i===col?(res===false?"no":"cur"):""}}),null,"sm")}).join("")+vinfo(B("הקידומת עד כה: ","prefix so far: ")+'<b>"'+esc(pre)+'"</b>')}
+  F.push(fr(B("סורקים עמודה אחר עמודה (תו i בכל המילים). עוצרים כשהתווים שונים או שמילה נגמרה.","Scan column by column (character i in every word). Stop at a difference or when a word ends."),view(-1)));
+  for(var i=0;i<mx;i++){
+    var ch=S[0][i],ok=ch!==undefined&&S.every(function(w){return w[i]===ch});
+    if(ok){pre+=ch;F.push(fr(B("עמודה "+i+": כולם '"+ch+"'. מוסיפים לקידומת.","Column "+i+": all are '"+ch+"'. Extend the prefix."),view(i)))}
+    else{F.push(fr(B("עמודה "+i+": התווים שונים (או שמילה נגמרה). עוצרים.","Column "+i+": the characters differ (or a word ended). Stop."),view(i,false)));break}
+  }
+  F.push(fr(B("הקידומת המשותפת הארוכה ביותר: \""+pre+"\". זמן O(סך התווים).","Longest common prefix: \""+pre+"\". O(total characters)."),view(-1)));
+  return F;
+}
+function g1455(p){
+  var sen=String(p.sentence||"").slice(0,40).split(/\s+/).filter(Boolean),w=String(p.word||"").slice(0,8);if(!sen.length||!w)throw 0;var F=[],ans=-1;
+  function view(i,res){return cellsRow(B("מילים","words"),sen.map(function(x,k){return {t:x,c:k===i?(res===true?"ok":res===false?"no":"cur"):k<i?"dim":""}}),(function(){var o={};if(i!==null)o[i]=String(i+1);return o})(),"wide")+vinfo(B("מחפשים קידומת: ","searching for prefix: ")+'<b>"'+esc(w)+'"</b>')}
+  F.push(fr(B("מפצלים את המשפט למילים ובודקים לפי הסדר אם כל מילה מתחילה ב-\""+w+"\". המקום הוא מ-1.","Split the sentence into words and test, in order, whether each starts with \""+w+"\". Positions start at 1."),view(null)));
+  for(var i=0;i<sen.length;i++){
+    var ok=sen[i].slice(0,w.length)===w;
+    F.push(fr(B("\""+sen[i]+"\" מתחילה ב-\""+sen[i].slice(0,w.length)+"\" "+(ok?"= ":"≠ ")+"\""+w+"\": "+(ok?"התאמה!":"לא."),"\""+sen[i]+"\" starts with \""+sen[i].slice(0,w.length)+"\" "+(ok?"= ":"≠ ")+"\""+w+"\": "+(ok?"match!":"no.")),view(i,ok)));
+    if(ok){ans=i+1;break}
+  }
+  F.push(fr(ans>0?B("התשובה: "+ans+" (המילה הראשונה שמתאימה).","Answer: "+ans+" (the first matching word)."):B("אף מילה לא מתאימה: -1.","No word matches: -1."),F[F.length-1].h));
+  return F;
+}
+function g67(p){
+  var a=String(p.a||"").replace(/[^01]/g,"").slice(0,8),b=String(p.b||"").replace(/[^01]/g,"").slice(0,8);if(!a||!b)throw 0;
+  var n=Math.max(a.length,b.length);a=("0000000000".slice(0,n-a.length)+a);b=("0000000000".slice(0,n-b.length)+b);
+  var F=[],res=[],carry=0,cs=[];for(var i=0;i<=n;i++)cs.push("");
+  function view(col){var cl=function(i){return i===col?"cur":""};
+    return cellsRow(B("נשא","carry"),cs.map(function(c,i){return {t:c,c:i===col?"cur":""}}),null,"sm")+cellsRow("a",[""].concat(a.split("")).map(function(c,i){return {t:c,c:i===col?"hi":""}}),null,"sm")+cellsRow("b",[""].concat(b.split("")).map(function(c,i){return {t:c,c:i===col?"hi":""}}),null,"sm")+cellsRow(B("סכום","sum"),res.map(function(c,i){return {t:c,c:i===col?"ok":"hi"}}).slice(0),null,"sm")}
+  var out=new Array(n+1).fill("");
+  function view2(col){return cellsRow(B("נשא","carry"),cs.map(function(c,i){return {t:c,c:i===col?"cur":""}}),null,"sm")+cellsRow("a",[""].concat(a.split("")).map(function(c,i){return {t:c,c:i===col?"hi":""}}),null,"sm")+cellsRow("b",[""].concat(b.split("")).map(function(c,i){return {t:c,c:i===col?"hi":""}}),null,"sm")+cellsRow(B("סכום","sum"),out.map(function(c,i){return {t:c,c:i===col?"ok":(c!==""?"hi":"")}}),null,"sm")}
+  F.push(fr(B("מחברים מימין לשמאל, עמודה אחר עמודה, כמו בכתב. נשא (carry) עובר לעמודה הבאה.","Add from right to left, column by column, like on paper. A carry moves to the next column."),view2(-1)));
+  for(var c=n;c>=1;c--){
+    var x=+a[c-1],y=+b[c-1],t=x+y+carry,bit=t%2,nc=t>>1;
+    out[c]=String(bit);cs[c-1]=nc?"1":"";
+    F.push(fr(B(x+" + "+y+" + נשא "+carry+" = "+t+": כותבים "+bit+(nc?" ונושאים 1.":".")," "+x+" + "+y+" + carry "+carry+" = "+t+": write "+bit+(nc?" and carry 1.":".")),view2(c)));carry=nc;
+  }
+  if(carry){out[0]="1";F.push(fr(B("נשאר נשא 1: הוא הספרה השמאלית ביותר.","A carry of 1 remains: it becomes the leftmost digit."),view2(0)))}
+  F.push(fr(B("התוצאה: "+out.join("")+". זמן O(max(n,m)).","Result: "+out.join("")+". O(max(n,m))."),view2(-1)));
+  return F;
+}
+function g69(p){
+  var x=Math.max(0,Math.min(2000,num(p.x,30))),F=[],lo=0,hi=x,ans=0;
+  function view(mid,msg){return cellsRow("",[{t:lo,c:"hi",i:"lo"},{t:mid===null?"–":mid,c:"cur",i:"mid"},{t:hi,c:"hi",i:"hi"}],null,"")+vinfo((mid===null?"":"mid² = "+mid*mid+" , ")+"x = "+x+" , "+B("תשובה זמנית","best so far")+" = "+ans)}
+  F.push(fr(B("השורש השלם של "+x+" נמצא בטווח [0, "+x+"]. mid² עולה עם mid, ולכן מחפשים בינארית את הגדול ביותר שעדיין מקיים mid² ≤ x.","The integer root of "+x+" lies in [0, "+x+"]. mid² grows with mid, so binary search for the largest mid with mid² ≤ x."),view(null)));
+  while(lo<=hi){
+    var mid=Math.floor((lo+hi)/2),sq=mid*mid;
+    if(sq<=x){ans=mid;F.push(fr(B(mid+"² = "+sq+" ≤ "+x+": מועמד לתשובה, מחפשים גדול יותר (lo="+(mid+1)+").",mid+"² = "+sq+" ≤ "+x+": a candidate, look higher (lo="+(mid+1)+")."),view(mid)));lo=mid+1}
+    else{F.push(fr(B(mid+"² = "+sq+" > "+x+": גדול מדי, מחפשים נמוך יותר (hi="+(mid-1)+").",mid+"² = "+sq+" > "+x+": too big, look lower (hi="+(mid-1)+")."),view(mid)));hi=mid-1}
+  }
+  F.push(fr(B("השורש השלם של "+x+" הוא "+ans+". זמן O(log x).","The integer root of "+x+" is "+ans+". O(log x)."),view(null)));
+  return F;
+}
+function g231(p){
+  var n=Math.max(1,Math.min(255,num(p.n,16))),F=[];
+  function bits(v){var a=[];for(var i=7;i>=0;i--)a.push((v>>i)&1);return a}
+  function row(name,v,cl){return cellsRow(name,bits(v).map(function(b){return {t:b,c:b?cl:""}}),null,"sm")+""}
+  F.push(fr(B("חזקה של 2 היא מספר עם ביט אחד בדיוק דולק. הנה "+n+" בבינארי.","A power of two has exactly one bit set. Here is "+n+" in binary."),row("n = "+n,n,"hi")));
+  F.push(fr(B("מחסרים 1: כל הביטים מהביט הדולק הנמוך ביותר ומטה מתהפכים.","Subtract 1: every bit from the lowest set bit downward flips."),row("n = "+n,n,"hi")+row("n−1 = "+(n-1),n-1,"cur")));
+  var r=n&(n-1);
+  F.push(fr(B("n AND (n−1) = "+r+": אם התוצאה 0, לא נשאר אף ביט, כלומר היה רק ביט אחד.","n AND (n−1) = "+r+": if it is 0, no bit remains, so only one bit was set."),row("n",n,"hi")+row("n−1",n-1,"cur")+row("AND",r,"ok")));
+  F.push(fr(r===0?B(n+" היא חזקה של 2. בדיקה אחת, O(1).",n+" is a power of two. One check, O(1)."):B(n+" אינה חזקה של 2, כי נשארו ביטים. O(1).",n+" is not a power of two: bits remain. O(1)."),row("AND",r,"ok")+vinfo(r===0?"✓ true":"✗ false")));
+  return F;
+}
+function g1150(p){
+  var a=parseArr(p.arr,12).sort(function(x,y){return x-y}),tg=num(p.target,5),n=a.length;if(n<2)throw 0;var F=[];
+  function view(lo,hi,mid,hl){var h={};for(var i=0;i<n;i++)if(a[i]===tg)h[i]="hi";if(hl)Object.keys(hl).forEach(function(k){h[k]=hl[k]});var o={};if(lo!==null){o[lo]="lo";o[hi]=(o[hi]?o[hi]+"/":"")+"hi";if(mid!==null)o[mid]=(o[mid]?o[mid]+"/":"")+"mid"}return cr(B("ממוין","sorted"),a,h,o)}
+  F.push(fr(B("המערך ממוין, ולכן כל המופעים של "+tg+" רצופים. מספיק למצוא את המקום הראשון והאחרון שלהם בעזרת חיפוש בינארי.","The array is sorted, so all copies of "+tg+" are contiguous. Two binary searches find the first and last position."),view(null,null,null)));
+  var lo=0,hi=n-1,first=-1;
+  while(lo<=hi){var mid=(lo+hi)>>1;if(a[mid]>=tg){if(a[mid]===tg)first=mid;F.push(fr(B("מחפשים מקום ראשון: a["+mid+"]="+a[mid]+" ≥ "+tg+": זזים שמאלה.","First position: a["+mid+"]="+a[mid]+" ≥ "+tg+": go left."),view(lo,hi,mid)));hi=mid-1}else{F.push(fr(B("מחפשים מקום ראשון: a["+mid+"]="+a[mid]+" < "+tg+": זזים ימינה.","First position: a["+mid+"]="+a[mid]+" < "+tg+": go right."),view(lo,hi,mid)));lo=mid+1}}
+  if(first<0){F.push(fr(B(tg+" לא מופיע: false.",tg+" does not occur: false."),view(null,null,null)));return F}
+  lo=first;hi=n-1;var last=first;
+  while(lo<=hi){var m2=(lo+hi)>>1;if(a[m2]<=tg){if(a[m2]===tg)last=m2;F.push(fr(B("מחפשים מקום אחרון: a["+m2+"]="+a[m2]+" ≤ "+tg+": זזים ימינה.","Last position: a["+m2+"]="+a[m2]+" ≤ "+tg+": go right."),view(lo,hi,m2)));lo=m2+1}else{F.push(fr(B("מחפשים מקום אחרון: a["+m2+"]="+a[m2]+" > "+tg+": זזים שמאלה.","Last position: a["+m2+"]="+a[m2]+" > "+tg+": go left."),view(lo,hi,m2)));hi=m2-1}}
+  var cnt=last-first+1,hl={};for(var i=first;i<=last;i++)hl[i]="ok";
+  F.push(fr(cnt>n/2?B("מקומות "+first+" עד "+last+": "+cnt+" מופעים, וזה יותר מ-"+n+"/2. true. זמן O(log n).",cnt+" copies (positions "+first+" to "+last+"), more than "+n+"/2. true. O(log n)."):B(cnt+" מופעים, לא יותר מ-"+n+"/2. false.",cnt+" copies, not more than "+n+"/2. false."),view(null,null,null,hl)));
+  return F;
+}
+function g1971(p){
+  var G=G1,adj=adjU(G),s=p.src||"A",d=p.dst||"G",F=[],seen={},q=[s],found=false,done={};seen[s]=1;
+  function view(cur,msg,eh){var st={n:{},e:eh||{}};Object.keys(seen).forEach(function(k){st.n[k]=done[k]?"done":"q"});st.n[s]="hi";st.n[d]=st.n[d]||"hi";if(cur)st.n[cur]="cur";st.t={};st.t[s]=B("מקור","src");st.t[d]=B("יעד","dst");
+    F.push(fr(msg,graphSVG(G,st)+cellsRow(B("תור","queue"),q.map(function(x){return {t:x,c:x===cur?"cur":"hi"}}))+vinfo(B("נראו: ","seen: ")+Object.keys(seen).sort().join(", "))))}
+  var al="<div class=\"vlist\">"+G.nodes.map(function(n){return '<b>'+n[0]+'</b> → '+adj[n[0]].join(", ")}).join("<br>")+"</div>";
+  F.push(fr(B("שלב 1: בונים רשימת סמיכויות מרשימת הקשתות (בשני הכיוונים). שלב 2: סורקים מהמקור "+s+" ומחפשים את "+d+".","Step 1: build the adjacency list from the edge list (both directions). Step 2: traverse from the source "+s+" looking for "+d+"."),graphSVG(G,{n:(function(){var o={};o[s]="hi";o[d]="hi";return o})(),t:(function(){var o={};o[s]=B("מקור","src");o[d]=B("יעד","dst");return o})()})+al));
+  while(q.length){
+    var u=q.shift();
+    if(u===d){found=true;view(u,B("הגענו ליעד "+d+": קיים מסלול.","Reached the destination "+d+": a path exists."));break}
+    var eh={},add=[];adj[u].forEach(function(v){if(!seen[v]){seen[v]=1;q.push(v);add.push(v)}});done[u]=1;
+    view(u,B("מוציאים את "+u+" ומוסיפים שכנים חדשים: "+(add.join(", ")||"אין")+".","Take "+u+" and add new neighbours: "+(add.join(", ")||"none")+"."),eh);
+  }
+  if(!found)F.push(fr(B("התור התרוקן בלי להגיע ליעד: אין מסלול.","The queue emptied without reaching the destination: no path."),F[F.length-1].h));
+  else F.push(fr(B("תשובה: true. זמן O(V+E). אפשר גם DFS או Union-Find.","Answer: true. O(V+E). DFS or Union-Find also work."),F[F.length-1].h));
+  return F;
+}
+var GJ={W:320,H:220,dir:1,nodes:[["1",60,60],["2",60,170],["3",230,115],["4",150,115]],edges:[["1","3"],["1","4"],["2","3"],["2","4"],["4","3"]]};
+function g997(){
+  var G=GJ,F=[],bal={"1":0,"2":0,"3":0,"4":0};
+  function view(i,msg){var st={e:{},t:{},n:{}};for(var j=0;j<G.edges.length;j++)st.e[j]=j<i?"on":j===i?"cur":"";Object.keys(bal).forEach(function(k){st.t[k]=bal[k]});
+    F.push(fr(msg,graphSVG(G,st)+cellsRow(B("יתרת אמון","balance"),["1","2","3","4"].map(function(k){return {t:bal[k],c:bal[k]===3?"ok":"",i:k}}))+vinfo(B("חץ a→b אומר ש-a סומך על b","arrow a→b means a trusts b"))))}
+  view(-1,B("4 אנשים, והחצים אומרים מי סומך על מי. שופט: לא סומך על אף אחד וכולם (שלושת האחרים) סומכים עליו.","4 people; arrows say who trusts whom. The judge trusts nobody and the other three all trust the judge."));
+  G.edges.forEach(function(e,i){bal[e[0]]--;bal[e[1]]++;view(i,B(e[0]+" סומך על "+e[1]+": היתרה של "+e[0]+" יורדת, ושל "+e[1]+" עולה.",e[0]+" trusts "+e[1]+": balance of "+e[0]+" drops, balance of "+e[1]+" rises."))});
+  F.push(fr(B("השופט הוא מי שיתרתו n−1 = 3: אמון מכולם ואמון בעצמו לאף אחד. כאן זה 3. זמן O(n + |trust|).","The judge is the one whose balance is n−1 = 3: trusted by everyone and trusting nobody. Here it is 3. O(n + |trust|)."),F[F.length-1].h));
+  return F;
+}
+var GS={W:320,H:220,nodes:[["1",60,60],["2",160,115],["3",260,60],["4",160,200]],edges:[["1","2"],["2","3"],["4","2"]]};
+function g1791(){
+  var G=GS,F=[];
+  function view(e,msg,nn){var st={e:{},n:nn||{}};(e||[]).forEach(function(i){st.e[i]="cur"});F.push(fr(msg,graphSVG(G,st)+vinfo(B("קשתות: ","edges: ")+G.edges.map(function(x){return "["+x[0]+","+x[1]+"]"}).join(" ")))) }
+  view([],B("בגרף כוכב יש צומת מרכזי שמחובר לכל האחרים, ולכן הוא מופיע בכל קשת.","A star graph has a centre joined to every other vertex, so the centre appears in every edge."));
+  view([0,1],B("מסתכלים רק על שתי הקשתות הראשונות: ["+G.edges[0]+"] ו-["+G.edges[1]+"].","Look at just the first two edges: ["+G.edges[0]+"] and ["+G.edges[1]+"]."));
+  view([0,1],B("הצומת היחיד שמשותף לשתיהן הוא 2: זה המרכז. זמן O(1).","The only vertex common to both is 2: the centre. O(1)."),{"2":"done"});
+  return F;
+}
+function mkT(v,l,r){return {v:v,l:l||null,r:r||null,id:0}}
+function numT(n){var c=0;(function f(x){if(!x)return;x.id=c++;f(x.l);f(x.r)})(n);return n}
+function tsvg(root,cls,lbl){
+  function cv(x){var o={lbl:lbl&&lbl[x.id]!==undefined?lbl[x.id]:String(x.v),cls:cls&&cls[x.id]||"",r:17,kids:[]};[x.l,x.r].forEach(function(k){if(k)o.kids.push({node:cv(k),cls:cls&&cls[k.id]&&cls[k.id]!=="dim"?"on":""})});return o}
+  return '<div class="vtreewrap">'+treeSVG([cv(root)])+'</div>';
+}
+function TA(){return numT(mkT(3,mkT(9),mkT(20,mkT(15),mkT(7))))}
+function g104(){
+  var R=TA(),F=[],cls={},lbl={};
+  F.push(fr(B("גובה של עץ = 1 + הגבוה מבין שני הילדים. עוברים לעומק וחוזרים, ובחזרה מחשבים את הגובה של כל צומת.","height = 1 + the larger of the two children's heights. Go down, and compute heights on the way back."),tsvg(R,cls,lbl)));
+  function rec(x){if(!x)return 0;cls[x.id]="cur";var l=rec(x.l),r=rec(x.r),h=1+Math.max(l,r);cls[x.id]="done";lbl[x.id]=x.v+":"+h;
+    F.push(fr(B("הצומת "+x.v+": 1 + max("+l+", "+r+") = "+h+".","Node "+x.v+": 1 + max("+l+", "+r+") = "+h+"."),tsvg(R,cls,lbl)));return h}
+  var h=rec(R);F.push(fr(B("עומק מקסימלי: "+h+". זמן O(n).","Maximum depth: "+h+". O(n)."),tsvg(R,cls,lbl)));
+  return F;
+}
+function g111(){
+  var R=TA(),F=[],cls={},q=[R],lvl=0;
+  F.push(fr(B("הצמתים 3, 9, 20, 15, 7. מחפשים את העלה הקרוב ביותר לשורש (עלה = צומת בלי ילדים).","Nodes 3, 9, 20, 15, 7. We look for the leaf closest to the root (a leaf has no children)."),tsvg(R,cls)));
+  while(q.length){
+    var nx=[],n=q.length,hit=null;
+    for(var i=0;i<n;i++){var x=q[i];cls[x.id]="cur";if(!x.l&&!x.r&&!hit)hit=x;if(x.l)nx.push(x.l);if(x.r)nx.push(x.r)}
+    lvl++;
+    if(hit){cls[hit.id]="ok";F.push(fr(B("רמה "+lvl+": הצומת "+hit.v+" הוא עלה. זה העלה הראשון, ולכן עומק מינימלי "+lvl+". עוצרים כאן ולא סורקים את שאר העץ. זמן O(n) במקרה הגרוע.","Level "+lvl+": node "+hit.v+" is a leaf. It is the first leaf, so min depth is "+lvl+". Stop here without scanning the rest."),tsvg(R,cls)));return F}
+    F.push(fr(B("רמה "+lvl+": אין עלים. ממשיכים לרמה הבאה.","Level "+lvl+": no leaves. Go to the next level."),tsvg(R,cls)));
+    q.forEach(function(x){cls[x.id]="done"});q=nx;
+  }
+  return F;
+}
+function g112(p){
+  var R=numT(mkT(5,mkT(4,mkT(11,mkT(7),mkT(2))),mkT(8,mkT(13),mkT(4,null,mkT(1))))),T=Math.max(0,Math.min(40,num(p.target,22))),F=[],path=[],found=null;
+  function cls(){var c={};path.forEach(function(x){c[x.id]="hi"});return c}
+  F.push(fr(B("מחפשים מסלול משורש לעלה שסכומו "+T+". בדרך למטה מורידים מהיעד את ערך הצומת, ובעלה בודקים אם נשאר 0.","Find a root-to-leaf path summing to "+T+". Going down, subtract each node from the target; at a leaf check for 0."),tsvg(R,{})));
+  function rec(x,rem){
+    if(!x||found)return false;path.push(x);var r=rem-x.v;
+    var leaf=!x.l&&!x.r,c=cls();
+    if(leaf){if(r===0){found=path.slice();var c2={};found.forEach(function(y){c2[y.id]="ok"});F.push(fr(B("עלה "+x.v+": נשאר "+rem+" − "+x.v+" = 0. נמצא מסלול!","Leaf "+x.v+": "+rem+" − "+x.v+" = 0. Path found!"),tsvg(R,c2)));return true}
+      F.push(fr(B("עלה "+x.v+": נשאר "+r+" ≠ 0. חוזרים אחורה.","Leaf "+x.v+": remaining "+r+" ≠ 0. Backtrack."),tsvg(R,c)));path.pop();return false}
+    F.push(fr(B("בצומת "+x.v+": נשאר "+rem+" − "+x.v+" = "+r+".","At node "+x.v+": remaining "+rem+" − "+x.v+" = "+r+"."),tsvg(R,c)));
+    if(rec(x.l,r)||rec(x.r,r))return true;path.pop();return false;
+  }
+  var ok=rec(R,T);
+  F.push(fr(ok?B("true: המסלול "+found.map(function(x){return x.v}).join(" → ")+". זמן O(n).","true: the path "+found.map(function(x){return x.v}).join(" → ")+". O(n)."):B("false: אין מסלול שסכומו "+T+". זמן O(n).","false: no path sums to "+T+". O(n)."),tsvg(R,{})));
+  return F;
+}
+/* heaps */
+function hUp(h,i,c){while(i>0){var p=(i-1)>>1;if(c(h[i],h[p])<0){var t=h[i];h[i]=h[p];h[p]=t;i=p}else break}}
+function hDown(h,i,c){var n=h.length;for(;;){var l=2*i+1,r=l+1,m=i;if(l<n&&c(h[l],h[m])<0)m=l;if(r<n&&c(h[r],h[m])<0)m=r;if(m===i)break;var t=h[i];h[i]=h[m];h[m]=t;i=m}}
+function hPush(h,v,c){h.push(v);hUp(h,h.length-1,c)}
+function hPop(h,c){var top=h[0],last=h.pop();if(h.length){h[0]=last;hDown(h,0,c)}return top}
+function heapView(h,hi){
+  function cv(i){var o={lbl:String(h[i]),cls:hi&&hi[i]?"cur":"",r:16,kids:[]};[2*i+1,2*i+2].forEach(function(k){if(k<h.length)o.kids.push({node:cv(k)})});return o}
+  return (h.length?'<div class="vtreewrap">'+treeSVG([cv(0)])+'</div>':'')+cr("heap",h,(function(){var o={};if(h.length)o[0]="hi";return o})(),null,"sm");
+}
+function g703(){
+  var k=3,init=[4,5,8,2],adds=[3,5,10,9,4],h=[],F=[],c=function(a,b){return a-b};
+  function view(msg,hi){F.push(fr(msg,heapView(h,hi)+vinfo(B("שורש הערימה = האיבר ה-"+k+" בגודלו: ","heap root = the "+k+"-th largest: ")+'<b>'+(h.length===k?h[0]:"–")+'</b>')))}
+  F.push(fr(B("k = "+k+". שומרים min-heap בגודל k לכל היותר. השורש הוא הקטן מבין k הגדולים, כלומר התשובה.","k = "+k+". Keep a min-heap of at most k elements. The root is the smallest of the k largest, i.e. the answer."),heapView(h)+vinfo(B("מתחילים מערימה ריקה, ומוסיפים את "+init.join(", "),"Start with an empty heap and add "+init.join(", ")))));
+  init.concat([]).forEach(function(v){hPush(h,v,c);var m="";if(h.length>k){var t=hPop(h,c);m=B(" ויוצא הקטן ביותר ("+t+").",", then the smallest ("+t+") is removed.")}view(B("מוסיפים "+v+m,"Add "+v+m),null)});
+  adds.forEach(function(v){hPush(h,v,c);var m="";if(h.length>k){var t=hPop(h,c);m=B(" ויוצא הקטן ביותר ("+t+").",", then the smallest ("+t+") is removed.")}view(B("add("+v+"): נכנס"+m+" התשובה "+h[0]+".","add("+v+"): inserted"+m+" The answer is "+h[0]+"."),null)});
+  F.push(fr(B("כל add לוקח O(log k). התוצאות: 4, 5, 5, 8, 8.","Each add costs O(log k). Results: 4, 5, 5, 8, 8."),F[F.length-1].h));
+  return F;
+}
+function g1046(){
+  var st=[2,7,4,1,8,1],F=[];
+  function view(msg,hi){return F.push(fr(msg,cr(B("אבנים (ממוינות)","stones (sorted)"),st,hi||{})+vinfo(B("בפועל זו max-heap, כאן מוצגת ממוינת להמחשה.","In code this is a max-heap; shown sorted for clarity."))))}
+  st.sort(function(a,b){return b-a});view(B("ערימת מקסימום: בכל צעד מוציאים את שתי הכבדות ביותר ומנפצים אותן. אם הן שונות, מחזירים את ההפרש.","A max-heap: each round take the two heaviest and smash them. If they differ, push the difference back."),{0:"cur",1:"cur"});
+  while(st.length>1){
+    var y=st.shift(),x=st.shift(),d=y-x;
+    if(d>0){st.push(d);st.sort(function(a,b){return b-a})}
+    view(B("מנפצים "+y+" ו-"+x+": "+(d?"נשאר "+d+" ומחזירים לערימה.":"שתיהן נעלמות."),"Smash "+y+" and "+x+": "+(d?d+" remains and goes back.":"both vanish.")),st.length>1?{0:"cur",1:"cur"}:{0:"ok"});
+  }
+  F.push(fr(st.length?B("נשארה אבן אחת במשקל "+st[0]+". זמן O(n log n).","One stone of weight "+st[0]+" remains. O(n log n)."):B("לא נשארה אף אבן: 0.","No stone remains: 0."),cr(B("אבנים","stones"),st,{0:"ok"})));
+  return F;
+}
+function g206(){
+  var v=[1,2,3,4],nx=[1,2,3,null],F=[],prev=null,curr=0;
+  function view(pt,msg){var o={};if(prev!==null)o[prev]="prev";if(curr!==null)o[curr]=(o[curr]?o[curr]+"/":"")+"curr";if(pt!==undefined&&pt!==null)o[pt]=(o[pt]?o[pt]+"/":"")+"next";
+    F.push(fr(msg,cr(B("ערך","value"),v,(function(){var h={};if(curr!==null)h[curr]="cur";if(prev!==null)h[prev]="ok";return h})(),o)+cellsRow("next →",nx.map(function(x){return {t:x===null?"∅":v[x],c:""}}))+vinfo(B("השורה 'next' מראה לאיזה ערך מצביע כל צומת","The 'next' row shows which value each node points to"))))}
+  view(undefined,B("הרשימה 1 → 2 → 3 → 4. נהפוך כל חץ, עם שלושה מצביעים: prev, curr ו-next.","The list 1 → 2 → 3 → 4. We flip every arrow using three pointers: prev, curr and next."));
+  while(curr!==null){
+    var n=nx[curr];
+    view(n,B("שומרים את next = "+(n===null?"∅":v[n])+", כדי לא לאבד את שאר הרשימה.","Save next = "+(n===null?"∅":v[n])+" so the rest of the list is not lost."));
+    nx[curr]=prev;
+    view(n,B("הופכים: החץ של "+v[curr]+" מצביע עכשיו ל-"+(prev===null?"∅":v[prev])+".","Flip: the arrow of "+v[curr]+" now points to "+(prev===null?"∅":v[prev])+"."));
+    prev=curr;curr=n;
+  }
+  view(undefined,B("curr הגיע ל-∅, ו-prev הוא הראש החדש: 4 → 3 → 2 → 1. זמן O(n), מקום O(1).","curr reached ∅ and prev is the new head: 4 → 3 → 2 → 1. O(n) time, O(1) space."));
+  return F;
+}
+function g252(){
+  var iv=[[15,20],[0,30],[5,10]],F=[],S=iv.slice().sort(function(a,b){return a[0]-b[0]}),bad=null,sx=8,W=34+30*sx+20;
+  function view(k,bd,sorted){var arr=sorted?S:iv,s='<svg class="gsvg" viewBox="0 0 '+W+' '+(arr.length*24+26)+'">';
+    for(var t=0;t<=30;t+=5)s+='<text class="gw" x="'+(34+t*sx)+'" y="10" text-anchor="middle">'+t+'</text>';
+    arr.forEach(function(a,i){var c=bd&&(i===bd[0]||i===bd[1])?"var(--bad)":(k!==null&&(i===k||i===k+1))?"var(--sun)":"var(--brand)";
+      s+='<text class="gw" x="2" y="'+(34+i*24)+'">'+(i+1)+'</text><rect x="'+(34+a[0]*sx)+'" y="'+(22+i*24)+'" width="'+((a[1]-a[0])*sx)+'" height="16" rx="4" style="fill:'+c+';opacity:.9"/><text class="gw" x="'+(34+a[0]*sx+4)+'" y="'+(34+i*24)+'" style="fill:var(--brand-ink)">'+a[0]+'-'+a[1]+'</text>'});
+    return s+'</svg>'}
+  F.push(fr(B("האם אדם אחד יכול להשתתף בכל הפגישות? פגישות הן [התחלה, סיום].","Can one person attend every meeting? Meetings are [start, end]."),view(null,null,false)));
+  F.push(fr(B("ממיינים לפי זמן התחלה. אז פגישות שחופפות הן תמיד שכנות.","Sort by start time. Overlapping meetings are then always neighbours."),view(null,null,true)));
+  for(var i=0;i<S.length-1;i++){
+    var ov=S[i][1]>S[i+1][0];
+    if(ov){bad=[i,i+1];F.push(fr(B("פגישה "+(i+1)+" נגמרת ב-"+S[i][1]+" אחרי שפגישה "+(i+2)+" מתחילה ב-"+S[i+1][0]+": חפיפה! false.","Meeting "+(i+1)+" ends at "+S[i][1]+" after meeting "+(i+2)+" starts at "+S[i+1][0]+": overlap! false."),view(i,bad,true)));break}
+    F.push(fr(B("פגישה "+(i+1)+" נגמרת ב-"+S[i][1]+" לפני ש-"+(i+2)+" מתחילה ב-"+S[i+1][0]+": בסדר.","Meeting "+(i+1)+" ends at "+S[i][1]+" before "+(i+2)+" starts at "+S[i+1][0]+": fine."),view(i,null,true)));
+  }
+  F.push(fr(bad?B("יש חפיפה, לכן אי אפשר להגיע לכולן. זמן O(n log n).","There is an overlap, so one person cannot attend all. O(n log n)."):B("אין חפיפות: true. זמן O(n log n).","No overlaps: true. O(n log n)."),F[F.length-1].h));
+  return F;
+}
+
+/* registry: idea + solution per question */
+var LCV={
+ 509:[g509,[{k:"n",l:["n (2 עד 12)","n (2 to 12)"],v:"7"}],{n:"6"},"כל מספר הוא סכום של שני הקודמים. כמה ערכים באמת צריך לזכור בכל רגע?","Each value is the sum of the previous two. How many values do you really need to remember at once?"],
+ 206:[g206,[],{},"כל חץ צריך להתהפך. אילו מצביעים מונעים לאבד את שאר הרשימה?","Every arrow must flip. Which pointers keep the rest of the list from being lost?"],
+ 231:[g231,[{k:"n",l:["מספר (1 עד 255)","Number (1 to 255)"],v:"16"}],{n:"16"},"חזקה של 2 היא מספר עם ביט אחד בדיוק דולק. איך בודקים זאת בלי לולאה?","A power of two has exactly one bit set. How can you test that without a loop?"],
+ 67:[g67,[{k:"a",l:["בינארי א (עד 8 ספרות)","Binary a (up to 8 digits)"],v:"1011"},{k:"b",l:["בינארי ב","Binary b"],v:"110"}],{a:"1011",b:"110"},"זה כמו חיבור בכתב, מימין לשמאל, עם נשא.","It is column addition from the right, with a carry."],
+ 69:[g69,[{k:"x",l:["x (0 עד 2000)","x (0 to 2000)"],v:"30"}],{x:"30"},"השורש בטווח [0,x] ו-mid² עולה. מה אפשר לעשות עם טווח מסודר?","The root lies in [0,x] and mid² is increasing. What can you do with an ordered range?"],
+ 169:[genBoyer,[{k:"arr",l:["מערך (מופרד בפסיקים)","Array (comma-separated)"],v:"2,2,1,1,2,2,1,2,2"}],{arr:"2,2,1,1,2,2,1,2,2"},"הרוב מופיע יותר מחצי מהפעמים. האם זוג ערכים שונים יכול לפגוע בו?","The majority appears more than half the time. Can a pair of different values hurt it?"],
+ 1150:[g1150,[{k:"arr",l:["מערך","Array"],v:"2,4,5,5,5,5,5,6,6"},{k:"target",l:["target","target"],v:"5"}],{arr:"2,4,5,5,5,5,5,6,6",target:"5"},"המערך ממוין, ולכן כל המופעים של מספר רצופים. מה מספיק לדעת עליהם?","The array is sorted, so all copies of a value are contiguous. What do you need to know about them?"],
+ 1971:[g1971,[{k:"src",s:["A","B","C","D","E","F","G"],l:["מקור","Source"],v:"A"},{k:"dst",s:["A","B","C","D","E","F","G"],l:["יעד","Destination"],v:"G"}],{src:"A",dst:"G"},"אם יש מסלול, סריקה מהמקור חייבת להגיע ליעד.","If a path exists, a traversal from the source must reach the destination."],
+ 997:[g997,[],{},"השופט לא סומך על אף אחד וכולם סומכים עליו. מה זה אומר על דרגות הכניסה והיציאה?","The judge trusts nobody and everybody trusts the judge. What does that say about in- and out-degree?"],
+ 1791:[g1791,[],{},"המרכז מופיע בכל קשת. כמה קשתות צריך לראות כדי לזהות אותו?","The centre is in every edge. How many edges do you need to see to identify it?"],
+ 733:[null,[],{},"תא מקבל צבע חדש אם הוא מחובר לתא ההתחלה דרך תאים בצבע המקורי.","A cell is recoloured if it connects to the start through cells of the original colour."],
+ 111:[g111,[],{},"העלה הראשון שפוגשים בסריקה לפי רמות הוא הקרוב ביותר לשורש.","The first leaf met in a level-by-level scan is the closest to the root."],
+ 463:[null,[],{},"כל תא יבשה תורם 4 צלעות, וכל זוג תאים סמוכים 'מבטל' שתי צלעות.","Each land cell has 4 sides, and every adjacent pair hides two of them."],
+ 104:[g104,[],{},"גובה עץ = 1 + הגבוה מבין הגבהים של שני הילדים.","height = 1 + the larger of the children's heights."],
+ 112:[g112,[{k:"target",l:["סכום יעד","Target sum"],v:"22"}],{target:"22"},"בדרך למטה מורידים מהיעד את ערך כל צומת. בעלה בודקים אם נשאר 0.","On the way down subtract each node from the target. At a leaf check for 0."],
+ 703:[g703,[],{},"רק k הגדולים חשובים. איזה מבנה נתונים מחזיק את הקטן מביניהם בראש?","Only the k largest matter. Which data structure keeps the smallest of them on top?"],
+ 1046:[g1046,[],{},"בכל צעד צריך את שתי האבנים הכבדות. איזה מבנה נתונים נותן מקסימום מהר?","Each step needs the two heaviest stones. Which structure gives the maximum fast?"],
+ 70:[g70,[{k:"n",l:["n (2 עד 10)","n (2 to 10)"],v:"5"}],{n:"5"},"לצעד האחרון יש שתי אפשרויות: ממדרגה n−1 או n−2.","The last step has two options: from stair n−1 or n−2."],
+ 746:[g746,[{k:"cost",l:["מחירים (עד 10)","Costs (up to 10)"],v:"1,100,1,1,1,100,1,1,100,1"}],{cost:"1,100,1,1,1,100,1,1,100,1"},"המחיר להגיע למדרגה i תלוי רק בשתי המדרגות שלפניה.","The cost to reach stair i depends only on the two stairs before it."],
+ 118:[g118,[{k:"rows",l:["שורות (2 עד 7)","Rows (2 to 7)"],v:"5"}],{rows:"5"},"כל שורה נבנית מהשורה שמעליה.","Each row is built from the row above."],
+ 1137:[g1137,[{k:"n",l:["n (3 עד 12)","n (3 to 12)"],v:"8"}],{n:"8"},"כמו פיבונאצ'י, אבל כל ערך הוא סכום של שלושה קודמים.","Like Fibonacci, but each value is the sum of three predecessors."],
+ 121:[g121,[{k:"prices",l:["מחירים (עד 10)","Prices (up to 10)"],v:"7,1,5,3,6,4"}],{prices:"7,1,5,3,6,4"},"כדי למכור ביום i, הכי כדאי שקנינו ביום הזול ביותר עד אז.","To sell on day i you should have bought on the cheapest day so far."],
+ 303:[g303,[],{},"אם נחשב מראש סכומי קידומת, כל שאילתה היא חיסור אחד.","If you precompute prefix sums, each query is one subtraction."],
+ 392:[g392,[{k:"s",l:["s","s"],v:"abc"},{k:"t",l:["t","t"],v:"ahbgdc"}],{s:"abc",t:"ahbgdc"},"עוברים על t פעם אחת ומקדמים את s רק כשיש התאמה.","Scan t once and advance in s only on a match."],
+ 1710:[g1710,[{k:"truck",l:["גודל משאית (1 עד 20)","Truck size (1 to 20)"],v:"10"}],{truck:"10"},"כדאי להעמיס קודם את התיבות עם הכי הרבה יחידות.","Load the boxes with the most units first."],
+ 455:[g455,[{k:"g",l:["תיאבון הילדים","Children's greed"],v:"1,2,3"},{k:"s",l:["גדלי עוגיות","Cookie sizes"],v:"1,1,2"}],{g:"1,2,3",s:"1,1,2"},"העוגיה הקטנה ביותר שמספיקה לילד היא ההתאמה הטובה לו.","The smallest sufficient cookie is the best fit for a child."],
+ 860:[g860,[{k:"bills",l:["שטרות (5, 10, 20)","Bills (5, 10, 20)"],v:"5,5,5,10,20"}],{bills:"5,5,5,10,20"},"עם 20 עדיף לתת 10+5 ולשמור שטרות 5, שהם גמישים יותר.","For a 20 prefer 10+5 and keep the more flexible 5s."],
+ 2037:[g2037,[{k:"seats",l:["כיסאות","Seats"],v:"3,1,5"},{k:"students",l:["תלמידים","Students"],v:"2,7,4"}],{seats:"3,1,5",students:"2,7,4"},"אחרי מיון, הכיסא ה-i הכי מתאים לתלמיד ה-i.","After sorting, the i-th seat is best for the i-th student."],
+ 252:[g252,[],{},"פגישות חופפות יהיו שכנות אחרי מיון לפי התחלה.","Overlapping meetings are neighbours after sorting by start."],
+ 605:[g605,[{k:"bed",l:["ערוגה (0/1)","Bed (0/1)"],v:"1,0,0,0,1,0,0"},{k:"n",l:["פרחים לשתילה","Flowers to plant"],v:"2"}],{bed:"1,0,0,0,1,0,0",n:"2"},"שותלים בכל מקום חוקי משמאל לימין, וזה אף פעם לא מזיק.","Plant at every legal spot from the left; it never hurts."],
+ 28:[genKMP,[{k:"t",l:["haystack","haystack"],v:"sadbutsad"},{k:"p",l:["needle","needle"],v:"sad"}],{t:"sadbutsad",p:"sad"},"השוואה נאיבית מתחילה מחדש אחרי כל כישלון. אפשר לזכור כמה כבר תאם?","Naive matching restarts after each failure. Could we remember how much already matched?"],
+ 459:[g459,[{k:"s",l:["s","s"],v:"abcabcabc"}],{s:"abcabcabc"},"מחרוזת חוזרת מופיעה בתוך עצמה אחרי הזזה.","A repeating string reappears inside itself, shifted."],
+ 796:[g796,[{k:"s",l:["s","s"],v:"abcde"},{k:"goal",l:["goal","goal"],v:"cdeab"}],{s:"abcde",goal:"cdeab"},"כל הרוטציות של s הן תת-מחרוזות של s+s.","Every rotation of s is a substring of s+s."],
+ 14:[g14,[{k:"strs",l:["מילים (מופרדות בפסיק)","Words (comma-separated)"],v:"flower,flow,flight"}],{strs:"flower,flow,flight"},"הקידומת המשותפת נגמרת בעמודה הראשונה שבה התווים שונים.","The common prefix ends at the first column where characters differ."],
+ 1455:[g1455,[{k:"sentence",l:["משפט","Sentence"],v:"i love eating burger"},{k:"word",l:["searchWord","searchWord"],v:"burg"}],{sentence:"i love eating burger",word:"burg"},"בודקים לפי הסדר אם כל מילה מתחילה ב-searchWord.","Check each word in order for starting with searchWord."]
+};
+/* grid problems */
+function gridCells(img,cls){return img.map(function(r,i){return r.map(function(v,j){return {t:v,c:cls&&cls[i+","+j]||""}})})}
+function gFlood(){
+  var img=[[1,1,1,2,2],[1,1,0,2,2],[1,0,1,1,2],[1,1,1,2,2]],sr=1,sc=1,nc=3,old=img[sr][sc],F=[],cls={},q=[[sr,sc]],seen={};
+  var rl=["0","1","2","3"],cl=["0","1","2","3","4"];
+  function view(msg,cur){F.push(fr(msg,gridHTML(rl,cl,gridCells(img,cls))+vinfo(B("מתחילים ב-("+sr+","+sc+"), צבע "+old+" הופך ל-"+nc,"Start at ("+sr+","+sc+"), colour "+old+" becomes "+nc))))}
+  view(B("התמונה היא טבלת צבעים. צובעים את תא ההתחלה ואת כל התאים שמחוברים אליו (למעלה, למטה, ימינה, שמאלה) בצבע המקורי "+old+".","The image is a grid of colours. Recolour the start cell and every cell connected to it (up, down, left, right) with the original colour "+old+"."));
+  seen[sr+","+sc]=1;
+  while(q.length){
+    var x=q.shift(),r=x[0],c=x[1];img[r][c]=nc;cls[r+","+c]="ok";var add=0;
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(function(d){var a=r+d[0],b=c+d[1];if(a>=0&&a<4&&b>=0&&b<5&&img[a][b]===old&&!seen[a+","+b]){seen[a+","+b]=1;q.push([a,b]);cls[a+","+b]=cls[a+","+b]||"cur";add++}});
+    view(B("צובעים את ("+r+","+c+"). נוספו "+add+" שכנים חדשים בצבע "+old+" לתור.","Recolour ("+r+","+c+"). "+add+" new neighbours of colour "+old+" join the queue."));
+  }
+  F.push(fr(B("הסתיים: כל האזור המחובר נצבע. זמן O(שורות × עמודות). חשוב לטפל במקרה שבו הצבע החדש שווה לישן.","Done: the whole connected region is recoloured. O(rows × cols). Handle the case where the new colour equals the old one."),F[F.length-1].h));
+  return F;
+}
+function gPerim(){
+  var g=[[0,1,0,0],[1,1,1,0],[0,1,0,0],[1,1,0,0]],F=[],cls={},tot=0,rl=["0","1","2","3"],cl=["0","1","2","3"];
+  function view(msg){F.push(fr(msg,gridHTML(rl,cl,g.map(function(r,i){return r.map(function(v,j){return {t:v,c:cls[i+","+j]||""}})}))+vinfo(B("היקף עד כה: ","perimeter so far: ")+'<b>'+tot+'</b>')))}
+  view(B("1 = יבשה. כל תא יבשה בודד מוסיף 4 צלעות, אבל כל צלע משותפת לשני תאי יבשה אינה חלק מההיקף.","1 = land. Each land cell adds 4 sides, but a side shared by two land cells is not part of the perimeter."));
+  for(var i=0;i<4;i++)for(var j=0;j<4;j++)if(g[i][j]===1){
+    var sh=0;if(i>0&&g[i-1][j])sh++;if(j>0&&g[i][j-1])sh++;
+    cls[i+","+j]="cur";var add=4-2*sh;tot+=add;
+    view(B("תא ("+i+","+j+"): 4 צלעות"+(sh?" פחות 2 על כל שכן למעלה/שמאל ("+sh+")":"")+" = "+add+". (בודקים רק למעלה ושמאלה, כדי לא לספור פעמיים.)","Cell ("+i+","+j+"): 4 sides"+(sh?" minus 2 per neighbour above/left ("+sh+")":"")+" = "+add+". (Only up and left are checked to avoid double counting.)"));
+    cls[i+","+j]="ok";
+  }
+  F.push(fr(B("ההיקף הוא "+tot+". זמן O(שורות × עמודות), בלי DFS.","The perimeter is "+tot+". O(rows × cols), no DFS needed."),F[F.length-1].h));
+  return F;
+}
+LCV[733][0]=gFlood;LCV[463][0]=gPerim;
+(function(){
+  var byN={};D.lc.questions.forEach(function(q){byN[q.number]=q});
+  Object.keys(LCV).forEach(function(n){
+    var q=byN[n],spec=LCV[n];if(!q)return;
+    var solGen=spec[0],ins=spec[1],defp=spec[2];
+    VIZ["s"+n]={t:[q.title.he+" (פתרון)",q.title.en+" (solution)"],d:["פתרון צעד אחר צעד לדוגמה. אפשר לשנות את הקלט.","Step-by-step solution on an example. You can change the input."],gen:solGen,inputs:ins,lc:n};
+    VIZ["i"+n]={t:[q.title.he+" (הרעיון)",q.title.en+" (the idea)"],d:["מבינים את הבעיה על דוגמה, לפני הפתרון.","Understand the problem on an example, before the solution."],inputs:[],lc:n,
+      gen:function(){var F=solGen(defp);return [
+        fr(B("הבעיה: ","The problem: ")+loc(q.statement),F[0].h),
+        fr(B("מה מתקבל על הדוגמה: ","Result on the example: ")+F[F.length-1].c,F[F.length-1].h),
+        fr(B("שאלה למחשבה: ","Think about it: ")+B(spec[3],spec[4]),F[0].h)]}};
+  });
+})();
+
+/* ---------- guide, think timers, AI helper ---------- */
+var THINK=30*60000,RETRY=15*60000,PEND={};
+function thinkOK(n){var t=S.think&&S.think[n];return !!(t&&(t.skip||(t.s&&Date.now()-t.s>=THINK)))}
+function retryOK(n){var t=S.retry&&S.retry[n];return !!(t&&(t.skip||(t.s&&Date.now()-t.s>=RETRY)))}
+function fmtMS(ms){ms=Math.max(0,Math.ceil(ms/1000));return Math.floor(ms/60)+":"+("0"+(ms%60)).slice(-2)}
+function thinkHTML(q){
+  var n=q.number,t=S.think&&S.think[n],r=S.retry&&S.retry[n];
+  if(!thinkOK(n)){
+    if(t&&t.s)return '<div class="lc-think"><span>⏱ '+esc(B("שלב 1, חשיבה לבד: נשארו ","Step 1, think on your own: left "))+'<b class="tk" data-n="'+n+'" data-st="1">'+fmtMS(THINK-(Date.now()-t.s))+'</b></span><button class="vbtn" data-act="tskip" data-n="'+n+'">'+esc(B("אני תקוע/ה, פתחו לי","I'm stuck, unlock"))+'</button></div>';
+    return '<div class="lc-think"><button class="btn sun" data-act="tstart" data-n="'+n+'">⏱ '+esc(B("שלב 1: 30 דקות חשיבה לבד","Step 1: 30 minutes of thinking on your own"))+'</button><span class="lkn">'+esc(B("הסרטון, ההסבר וההדגמה נעולים. אחריהם: ניסיון נוסף, ורק אז AI.","The video, explanation and solution demo stay locked. After them: try again, and only then AI."))+'</span></div>';
+  }
+  if(retryOK(n))return '<div class="lc-think ok">✓ '+esc(B("חשבתם, צפיתם ונסיתם שוב. עוזר ה-AI פתוח.","You thought, watched and tried again. The AI helper is unlocked."))+'</div>';
+  if(r&&r.s)return '<div class="lc-think"><span>⏱ '+esc(B("שלב 3, ניסיון נוסף אחרי הסרטון: נשארו ","Step 3, try again after the video: left "))+'<b class="tk" data-n="'+n+'" data-st="2">'+fmtMS(RETRY-(Date.now()-r.s))+'</b></span><button class="vbtn" data-act="rskip" data-n="'+n+'">'+esc(B("ניסיתי, פתחו AI","I tried, unlock AI"))+'</button></div>';
+  return '<div class="lc-think"><span>✓ '+esc(B("שלב 2: צפו עכשיו בסרטון המצורף (או בהדגמת הפתרון).","Step 2: now watch the attached video (or the solution demo)."))+'</span><button class="btn sun" data-act="rstart" data-n="'+n+'">'+esc(B("צפיתי. שלב 3: מנסה שוב (15 דקות)","Watched. Step 3: trying again (15 min)"))+'</button></div>';
+}
+setInterval(function(){
+  var again=false;
+  [].forEach.call(document.querySelectorAll(".tk"),function(el){
+    var n=el.getAttribute("data-n"),st=el.getAttribute("data-st"),o=st==="2"?S.retry&&S.retry[n]:S.think&&S.think[n];if(!o||!o.s)return;
+    var left=(st==="2"?RETRY:THINK)-(Date.now()-o.s);if(left<=0)again=true;else el.textContent=fmtMS(left)});
+  if(again){toast(B("השלב הסתיים.","The step is finished."));render()}
+},1000);
+
+function copyText(txt){
+  function fb(){try{var ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();var ok=document.execCommand("copy");document.body.removeChild(ta);toast(ok?B("הועתק","Copied"):B("לא הצלחתי להעתיק. סמנו ידנית.","Could not copy. Select it manually."))}catch(e){toast(B("לא הצלחתי להעתיק. סמנו ידנית.","Could not copy. Select it manually."))}}
+  try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast(B("הועתק","Copied"))},fb)}else fb()}catch(e){fb()}
+}
+var SAMPLE_HE="פונקציה climbStairs(n):\n    אם n ≤ 2 אז\n        החזר n\n    a ← 1\n    b ← 2\n    עבור i מ-3 עד n\n        c ← a + b\n        a ← b\n        b ← c\n    החזר b";
+var SAMPLE_EN="function climbStairs(n):\n    if n ≤ 2 then\n        return n\n    a ← 1\n    b ← 2\n    for i ← 3 to n\n        c ← a + b\n        a ← b\n        b ← c\n    return b";
+function aiPrompt(q,pseudo){
+  var he=L()==="he",head=q?"#"+q.number+" "+q.title.en+" ("+"https://leetcode.com/problems/"+q.slug+"/)":"";
+  var P=he?[
+   "אתה מתרגם פסאודו-קוד לקוד פייתון עבור סטודנט בקורס אלגוריתמים 1.",
+   "המשימה: לתרגם את הפסאודו-קוד שכתבתי (בעברית, באנגלית, או בערבוב) ל-Python 3 שמוכן להדבקה ב-LeetCode. השאלה: "+head+".",
+   "",
+   "כללים:",
+   "1. תרגם בנאמנות. אל תשנה את האלגוריתם, את סדר הצעדים או את שמות המשתנים. אל תציע אלגוריתם אחר ואל תיתן פתרון מלא.",
+   "2. השתמש בחתימת הפונקציה של LeetCode: class Solution, def name(self, ...). אם אינך בטוח בחתימה, שאל אותי.",
+   "3. מילון מילות מפתח: אם/if = if; אז/then = נקודתיים; אחרת/else = else; אחרת אם/else if = elif; כל עוד/while = while; עבור i מ-a עד b / for i ← a to b = for i in range(a, b + 1); for i ← b downto a = range(b, a - 1, -1); לכל x ב-S / for each x in S = for x in S; החזר/return = return; ← או := = השמה; = בתוך תנאי = ==; ≠ ≤ ≥ = != <= >=; NIL/ריק = None; אמת/שקר = True/False; A.length / אורך A = len(A); mod = %; div = //.",
+   "4. אם הפסאודו-קוד מניח מערכים שמתחילים באינדקס 1, המר ל-0 וציין בדיוק היכן.",
+   "5. אם שורה לא ברורה, אל תנחש. שאל אותי שאלה קצרה.",
+   "6. פלט: (א) בלוק קוד אחד של פייתון, (ב) טבלת התאמה בין שורות הפסאודו-קוד לשורות הקוד, (ג) רשימת 'לבדוק לפני הגשה': off-by-one, חילוק שלם, קלט ריק, קלט באורך 1, סיבוכיות זמן ומקום.",
+   "7. אם נראה שהפסאודו-קוד שגוי, אל תתקן. תן דוגמת קלט קטנה שבה הוא נכשל ושאל אותי מה קורה בצעד הזה.",
+   "",
+   "הפסאודו-קוד שלי:"
+  ]:[
+   "You translate pseudocode into Python for a student in an Algorithms 1 course.",
+   "Task: translate the pseudocode I wrote (in Hebrew, English, or a mix) into Python 3 that is ready to paste into LeetCode. The problem: "+head+".",
+   "",
+   "Rules:",
+   "1. Translate faithfully. Do not change the algorithm, the order of steps or the variable names. Do not suggest a different algorithm or give a full solution.",
+   "2. Use the LeetCode function signature: class Solution, def name(self, ...). If you are unsure of the signature, ask me.",
+   "3. Keyword dictionary: if/אם = if; then/אז = colon; else/אחרת = else; else if/אחרת אם = elif; while/כל עוד = while; for i ← a to b / עבור i מ-a עד b = for i in range(a, b + 1); for i ← b downto a = range(b, a - 1, -1); for each x in S / לכל x ב-S = for x in S; return/החזר = return; ← or := = assignment; = inside a condition = ==; ≠ ≤ ≥ = != <= >=; NIL = None; TRUE/FALSE = True/False; A.length = len(A); mod = %; div = //.",
+   "4. If the pseudocode assumes arrays start at index 1, convert to 0 and tell me exactly where.",
+   "5. If a line is unclear, do not guess. Ask me one short question.",
+   "6. Output: (a) one Python code block, (b) a table mapping pseudocode lines to code lines, (c) a 'check before you submit' list: off-by-one, integer division, empty input, one-element input, time and space complexity.",
+   "7. If the pseudocode looks wrong, do not fix it. Give one small input where it fails and ask me what happens at that step.",
+   "",
+   "My pseudocode:"
+  ];
+  return P.join("\n")+"\n```\n"+(pseudo||"")+"\n```";
+}
+var AIQ=null,AIO={txt:"",prev:false};
+function openAI(n){
+  var q=null;D.lc.questions.forEach(function(x){if(String(x.number)===String(n))q=x});AIQ=q;AIO={txt:"",prev:false};aiDraw();
+}
+function aiDraw(){
+  var box=document.getElementById("ov"),q=AIQ;if(!q){box.innerHTML="";return}
+  var h;
+  h='<div class="scrim" data-oact="scrim"><div class="sheet modal" role="dialog" aria-modal="true" aria-label="'+esc(B("פסאודו-קוד לפייתון","Pseudocode to Python"))+'"><div class="shead"><span class="core2" style="--ic:var(--brand)">AI</span><div style="min-width:0"><h2>'+esc(B("פסאודו-קוד לפייתון","Pseudocode to Python"))+'</h2><div class="chip" style="margin-top:4px">#'+q.number+' '+esc(loc(q.title))+'</div></div><button class="xbtn" data-oact="close" id="ox" aria-label="close">✕</button></div><div class="sbody">';
+  h+='<p class="warn">'+esc(B("הגעתם לשלב האחרון: חשבתם, צפיתם בסרטון וניסיתם שוב. עכשיו כתבו את הפסאודו-קוד שלכם (בעברית או באנגלית), והעתיקו פרומפט ל-AI חיצוני שיתרגם אותו לפייתון. ה-AI מתרגם, הוא לא פותר.","Last step: you thought, watched the video and tried again. Now write your pseudocode (in Hebrew or English) and copy a prompt to an external AI that turns it into Python. The AI translates, it does not solve."))+'</p>';
+  h+='<label class="vfield"><span>'+esc(B("הפסאודו-קוד שלכם, בעברית או באנגלית","Your pseudocode, in Hebrew or English"))+'</span><textarea id="aipseudo" rows="9" spellcheck="false" placeholder="'+esc(B("פונקציה name(args):\n    ...","function name(args):\n    ..."))+'">'+esc(AIO.txt||"")+'</textarea></label>';
+  h+='<div class="row2"><button class="toggle" data-oact="sample-he">'+esc("דוגמה בעברית")+'</button><button class="toggle" data-oact="sample-en">Example in English</button></div>';
+  h+='<button class="btn" data-oact="copyp">'+esc(B("העתק פרומפט ל-AI","Copy the prompt for an AI"))+'</button>';
+  h+='<div class="row2"><a class="vid" href="https://claude.ai/new" target="_blank" rel="noopener">Claude ↗</a><a class="vid" href="https://gemini.google.com/app" target="_blank" rel="noopener">Gemini ↗</a><a class="vid" href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT ↗</a></div>';
+  h+='<p class="ivn">'+esc(B("העתיקו, פתחו אחד מה-AI, והדביקו. הפרומפט כולל את השאלה, מילון מילות מפתח בעברית ובאנגלית, והכללים: תרגום נאמן, בלי אלגוריתם אחר ובלי פתרון מלא.","Copy, open one of the AIs and paste. The prompt includes the question, a Hebrew and English keyword dictionary, and the rules: faithful translation, no other algorithm, no full solution."))+'</p>';
+  h+='<div class="row2"><button class="toggle" data-oact="prev" aria-pressed="'+AIO.prev+'">'+esc(B("הצג את הפרומפט","Show the prompt"))+'</button></div>';
+  if(AIO.prev)h+='<pre class="aiout small" dir="auto">'+esc(aiPrompt(q,AIO.txt))+'</pre>';
+  h+='<div class="sub">'+esc(B("התקנה קבועה (אופציונלי)","Permanent install (optional)"))+'</div>';
+  h+='<details class="aid"><summary>'+esc(B("Skill ל-Claude (SKILL.md)","Claude skill (SKILL.md)"))+'</summary><p class="ivn">'+esc(B("ב-Claude Code שמרו כ-.claude/skills/pseudocode-to-leetcode/SKILL.md. ב-Claude.ai: Settings > Capabilities > Skills (העלו zip של התיקייה).","In Claude Code save as .claude/skills/pseudocode-to-leetcode/SKILL.md. In Claude.ai: Settings > Capabilities > Skills (upload a zip of the folder)."))+'</p><div class="row2"><button class="toggle" data-oact="cskill">'+esc(B("העתק","Copy"))+'</button></div><pre class="aiout small" dir="ltr">'+esc(D.ai.skill)+'</pre></details>';
+  h+='<details class="aid"><summary>'+esc(B("Gem ל-Gemini (הוראות)","Gemini Gem (instructions)"))+'</summary><p class="ivn">'+esc(B("ב-Gemini: Explore Gems > New Gem, והדביקו בשדה Instructions.","In Gemini: Explore Gems > New Gem, paste into the Instructions field."))+'</p><div class="row2"><button class="toggle" data-oact="cgem">'+esc(B("העתק","Copy"))+'</button></div><pre class="aiout small" dir="ltr">'+esc(D.ai.gem)+'</pre></details>';
+  h+='<p class="ivn">'+esc(B("AI יכול לטעות. הריצו את הקוד על הדוגמאות של LeetCode לפני הגשה.","AI can be wrong. Run the code on LeetCode's examples before submitting."))+'</p>';
+  h+='</div></div></div>';
+  var keep=document.querySelector("#ov .sbody"),st=keep?keep.scrollTop:0;box.innerHTML=h;var nb=document.querySelector("#ov .sbody");if(nb&&keep)nb.scrollTop=st;
+  if(!keep){var x=document.getElementById("ox");if(x)x.focus()}
+}
+function guideHTML(){
+  var steps=[
+   [B("1. קראו והבינו","1. Read and understand"),B("5 דקות","5 min"),B("הבינו קלט ופלט. פתרו ידנית שתי דוגמאות על דף. כפתור 'הרעיון' בכל שאלה מראה דוגמה שלמה.","Understand input and output. Solve two examples by hand. The 'idea' button on every question shows a full example.")],
+   [B("2. רעיון ופסאודו-קוד","2. Idea and pseudocode"),B("30 דקות, לבד","30 min, alone"),B("איזו תבנית מהאי מתאימה? כתבו פסאודו-קוד על נייר (בעברית או באנגלית). זה גם מה שנבחנים עליו בבחינה. בדקו אותו על הדוגמאות.","Which pattern from the island fits? Write pseudocode on paper (Hebrew or English). That is also what the exam tests. Trace it on the examples.")],
+   [B("3. צפו בסרטון","3. Watch the video"),B("אחרי 30 דקות","after 30 min"),B("רק עכשיו נפתחים: הסרטון המצורף, הסבר הפתרון וההדגמה 'הפתרון'. צפו, ואל תעתיקו.","Only now do these unlock: the attached video, the explanation and the 'solution' demo. Watch, do not copy.")],
+   [B("4. נסו שוב","4. Try again"),B("15 דקות","15 min"),B("סגרו את הסרטון וכתבו שוב את הפתרון מהראש, בפסאודו-קוד שלכם.","Close the video and write the solution again from memory, as your own pseudocode.")],
+   [B("5. ואז AI","5. Then AI"),B("רק עכשיו","only now"),B("הדביקו את הפסאודו-קוד שלכם בפרומפט המוכן, וה-AI יתרגם אותו לפייתון של LeetCode. הוא מתרגם, לא פותר.","Paste your pseudocode into the ready prompt and the AI turns it into LeetCode Python. It translates, it does not solve.")]
+  ];
+  var h='<div class="scrim" data-oact="scrim"><div class="sheet modal" role="dialog" aria-modal="true" aria-label="'+esc(B("איך עובדים על שאלה","How to work on a question"))+'"><div class="shead"><span class="core2" style="--ic:var(--sun);color:var(--sun-ink)">30</span><div style="min-width:0"><h2>'+esc(B("איך עובדים על שאלה","How to work on a question"))+'</h2><div class="chip" style="margin-top:4px">'+esc(B("חשיבה, סרטון, ניסיון נוסף, ואז AI","Think, video, try again, then AI"))+'</div></div><button class="xbtn" data-oact="gclose" id="ox" aria-label="close">✕</button></div><div class="sbody">';
+  h+='<p>'+esc(B("הלמידה האמיתית קורית כשמתקשים. אם תראו פתרון או תשאלו AI אחרי שתי דקות, תרגישו שהבנתם, ובבחינה (על נייר, בלי AI) זה לא יחזיק. הסדר הזה מחזיק אתכם בתוך הבעיה מספיק זמן כדי ללמוד.","Real learning happens while you struggle. If you look at a solution or ask an AI after two minutes you will feel you understood, and in the exam (on paper, no AI) it will not hold. This order keeps you inside the problem long enough to learn."))+'</p>';
+  h+='<ol class="gsteps">'+steps.map(function(s){return '<li><div class="gst"><b>'+esc(s[0])+'</b><span class="chip">'+esc(s[1])+'</span></div><p>'+esc(s[2])+'</p></li>'}).join("")+'</ol>';
+  h+='<div class="sub">'+esc(B("כללים לשימוש ב-AI","Rules for using AI"))+'</div>';
+  h+='<div class="gai"><div><b>✓ '+esc(B("כן","Do"))+'</b><ul><li>'+esc(B("לתרגם את הפסאודו-קוד שלכם לפייתון","Translate your own pseudocode to Python"))+'</li><li>'+esc(B("לבקש דוגמת קלט שבה הקוד נכשל","Ask for an input where your code fails"))+'</li></ul></div><div><b>✕ '+esc(B("לא","Don't"))+'</b><ul><li>'+esc(B("להדביק את השאלה ולבקש פתרון","Paste the question and ask for the answer"))+'</li><li>'+esc(B("להעתיק קוד שלא הבנתם","Copy code you do not understand"))+'</li></ul></div></div>';
+  h+='<p class="ivn">'+esc(B("זו תזכורת ולא חומה: לחיצה כפולה על כפתור נעול פותחת אותו בכל זאת.","It is a reminder, not a wall: tapping a locked button twice opens it anyway."))+'</p>';
+  h+='<button class="btn" data-oact="gclose">'+esc(B("הבנתי, בואו נתחיל","Got it, let's start"))+'</button></div></div></div>';
+  return h;
+}
+function openGuide(){document.getElementById("ov").innerHTML=guideHTML();var x=document.getElementById("ox");if(x)x.focus();AIQ=null}
+function closeOv(){document.getElementById("ov").innerHTML="";AIQ=null;if(!S.guideSeen){S.guideSeen=1;save()}}
+(function(){
+  var box=document.getElementById("ov");
+  box.addEventListener("click",function(e){
+    var el=e.target.closest("[data-oact]");if(!el)return;var a=el.getAttribute("data-oact");
+    if(a==="scrim"){if(e.target===el)closeOv();return}
+    if(a==="close"||a==="gclose"){closeOv();return}
+    var ta=document.getElementById("aipseudo");if(ta)AIO.txt=ta.value;
+    if(a==="sample-he"){AIO.txt=SAMPLE_HE;aiDraw();return}
+    if(a==="sample-en"){AIO.txt=SAMPLE_EN;aiDraw();return}
+    if(a==="prev"){AIO.prev=!AIO.prev;aiDraw();return}
+    if(a==="copyp"){if(!(AIO.txt||"").trim()){toast(B("כתבו קודם פסאודו-קוד.","Write your pseudocode first."));return}copyText(aiPrompt(AIQ,AIO.txt));return}
+    if(a==="cskill"){copyText(D.ai.skill);return}
+    if(a==="cgem"){copyText(D.ai.gem);return}
+  });
+  box.addEventListener("input",function(e){if(e.target.id==="aipseudo")AIO.txt=e.target.value});
+  box.addEventListener("keydown",function(e){if(e.key==="Escape"&&box.innerHTML)closeOv()});
+})();
+
+var VZ=null,vizTimer=null;
+window.__vizOpen=function(k){vizOpen(k,null)};
+function vizTitle(k){return VIZ[k].t[L()==="he"?0:1]}
+function labOf(f,x){var a=f.l;return a[L()==="he"?0:1]}
+function vizBuild(){
+  try{VZ.frames=VIZ[VZ.key].gen(VZ.p);VZ.err=false;if(VZ.i>=VZ.frames.length)VZ.i=VZ.frames.length-1}catch(e){VZ.frames=null;VZ.err=true;VZ.i=0}
+}
+function vizHTML(){
+  var def=VIZ[VZ.key],n=VZ.node?NODES[VZ.node]:null,w=n?WK[n.week]:null,ic=w?"var("+COL[w.color]+")":"var(--brand)",h;
+  h='<div class="scrim" data-vact="scrim"><div class="sheet modal" style="--ic:'+ic+'" role="dialog" aria-modal="true" aria-label="'+esc(vizTitle(VZ.key))+'"><div class="shead"><span class="core2">▶</span><div style="min-width:0"><h2>'+esc(vizTitle(VZ.key))+'</h2><div class="chip" style="margin-top:4px">'+esc(B("הדגמה שלב אחר שלב","Step-by-step demo"))+'</div></div><button class="xbtn" data-vact="close" id="vx" aria-label="close">✕</button></div><div class="sbody">';
+  h+='<p>'+esc(def.d[L()==="he"?0:1])+'</p>';
+  if(def.inputs.length){
+    h+='<div class="vform">';
+    def.inputs.forEach(function(f){
+      h+='<label class="vfield"><span>'+esc(labOf(f))+'</span>';
+      if(f.s)h+='<select class="vin" data-k="'+f.k+'">'+f.s.map(function(o){return '<option value="'+o+'"'+(String(VZ.p[f.k])===o?" selected":"")+'>'+esc(f.lab?f.lab[o][L()==="he"?0:1]:o)+'</option>'}).join("")+'</select>';
+      else h+='<input class="vin" data-k="'+f.k+'" value="'+esc(VZ.p[f.k])+'" dir="ltr" autocomplete="off">';
+      h+='</label>';
+    });
+    h+='<button class="btn" data-vact="run">'+esc(B("הרץ","Run"))+'</button></div>';
+  }
+  h+='<div class="vstage" id="vstage"></div><div class="vcap" id="vcap" aria-live="polite"></div>';
+  h+='<div class="vctl"><button class="btn ghost" data-vact="first" aria-label="'+esc(B("להתחלה","first"))+'">⏮</button><button class="btn ghost" data-vact="prev" aria-label="'+esc(B("אחורה","back"))+'">◀</button><button class="btn" data-vact="play" id="vplay" style="min-width:96px"></button><button class="btn ghost" data-vact="next" aria-label="'+esc(B("קדימה","next"))+'">▶</button><button class="btn ghost" data-vact="last" aria-label="'+esc(B("לסוף","last"))+'">⏭</button><label class="vspd"><span>'+esc(B("מהירות","Speed"))+'</span><select class="vsp"><option value="1"'+(VZ.sp===1?" selected":"")+'>1×</option><option value="2"'+(VZ.sp===2?" selected":"")+'>2×</option><option value="4"'+(VZ.sp===4?" selected":"")+'>4×</option></select></label></div>';
+  h+='<input type="range" id="vslider" min="0" max="0" value="0" aria-label="'+esc(B("שלב","step"))+'"><div class="vcount" id="vcount"></div>';
+  return h+'</div></div></div>';
+}
+function vizDraw(){
+  var st=document.getElementById("vstage"),cp=document.getElementById("vcap"),sl=document.getElementById("vslider"),ct=document.getElementById("vcount"),pl=document.getElementById("vplay");if(!st)return;
+  if(VZ.err||!VZ.frames){st.innerHTML='<p class="warn">'+esc(B("הקלט לא תקין. בדקו את אורך הקלט והתווים ונסו שוב.","Invalid input. Check the length and characters and try again."))+'</p>';cp.textContent="";sl.max=0;ct.textContent="";pl.textContent="▶";return}
+  var N=VZ.frames.length,f=VZ.frames[VZ.i];st.innerHTML=f.h;cp.textContent=f.c;sl.max=N-1;sl.value=VZ.i;ct.textContent=(VZ.i+1)+" / "+N;
+  pl.textContent=VZ.play?"⏸ "+B("עצור","Pause"):"▶ "+B("נגן","Play");
+  if(VZ.i===N-1&&!VZ.done){VZ.done=true;S.vz=S.vz||{};if(!S.vz[VZ.key]){S.vz[VZ.key]=1;addXP(5);toast(B("סיימת הדגמה! \u200E+5 XP","Demo finished! +5 XP"));save();checkBadges();save();}}
+}
+function vizStop(){VZ&&(VZ.play=false);if(vizTimer){clearInterval(vizTimer);vizTimer=null}}
+function vizPlay(){
+  if(!VZ.frames)return;if(VZ.play){vizStop();vizDraw();return}
+  if(VZ.i>=VZ.frames.length-1)VZ.i=0;VZ.play=true;vizDraw();
+  vizTimer=setInterval(function(){if(!VZ||!VZ.frames){vizStop();return}if(VZ.i<VZ.frames.length-1){VZ.i++;vizDraw()}else{vizStop();vizDraw()}},Math.round(1000/VZ.sp));
+}
+function vizOpen(key,node){
+  vizStop();var p={};VIZ[key].inputs.forEach(function(f){p[f.k]=f.v});VZ={key:key,node:node||null,p:p,i:0,play:false,sp:1,frames:null,err:false,done:false};
+  vizBuild();document.getElementById("viz").innerHTML=vizHTML();vizDraw();var x=document.getElementById("vx");if(x)x.focus();
+}
+function vizClose(){vizStop();VZ=null;document.getElementById("viz").innerHTML="";render()}
+function vizRefresh(){if(!VZ)return;vizStop();vizBuild();document.getElementById("viz").innerHTML=vizHTML();vizDraw()}
+(function(){
+  var box=document.getElementById("viz");
+  box.addEventListener("click",function(e){
+    var el=e.target.closest("[data-vact]");if(!el||!VZ)return;var a=el.getAttribute("data-vact");
+    if(a==="scrim"){if(e.target===el)vizClose();return}
+    if(a==="close"){vizClose();return}
+    if(a==="run"){vizStop();[].forEach.call(box.querySelectorAll(".vin"),function(i){VZ.p[i.getAttribute("data-k")]=i.value});VZ.i=0;VZ.done=false;vizBuild();vizDraw();return}
+    if(!VZ.frames)return;
+    if(a==="play"){vizPlay();return}
+    vizStop();
+    if(a==="first")VZ.i=0;else if(a==="prev")VZ.i=Math.max(0,VZ.i-1);else if(a==="next")VZ.i=Math.min(VZ.frames.length-1,VZ.i+1);else if(a==="last")VZ.i=VZ.frames.length-1;
+    vizDraw();
+  });
+  box.addEventListener("input",function(e){if(e.target.id==="vslider"&&VZ&&VZ.frames){vizStop();VZ.i=+e.target.value;vizDraw()}});
+  box.addEventListener("change",function(e){if(e.target.classList.contains("vsp")&&VZ){VZ.sp=+e.target.value;if(VZ.play){vizStop();vizPlay()}}});
+  box.addEventListener("keydown",function(e){if(!VZ||e.target.tagName==="INPUT"&&e.target.type!=="range"||e.target.tagName==="SELECT")return;
+    if(e.key==="Escape"){vizClose()}else if(e.key==="ArrowRight"||e.key==="ArrowLeft"){var d=(e.key==="ArrowRight")===(L()!=="he")?1:-1;if(VZ.frames){vizStop();VZ.i=Math.max(0,Math.min(VZ.frames.length-1,VZ.i+d));vizDraw()}}});
+})();
+
+/* ---------- view state ---------- */
+var V={sheet:null,profile:false,quiz:null,res:null,confirmReset:false};
+var app=document.getElementById("app"),timerId=null;
+
+function stats(){var ok=0;Object.keys(S.ans).forEach(function(k){if(S.ans[k].ok)ok++});return {ok:ok}}
+function dueIds(){var n=Date.now();return Object.keys(S.ans).filter(function(k){return S.ans[k].due&&S.ans[k].due<=n&&MCQ[k]})}
+function dailyQ(){var d=today(),h=0;for(var i=0;i<d.length;i++)h=(h*31+d.charCodeAt(i))>>>0;return D.mcq.questions[h%D.mcq.questions.length]}
+function wkLabel(w){var a=w.weeks;if(!a[0])return t("course");return (a[0]===a[1]?t("week")+" "+a[0]:t("weeks")+" "+a[0]+"–"+a[1])}
+
+function ytUrl(v){return v.list?'https://www.youtube.com/playlist?list='+v.list:'https://www.youtube.com/watch?v='+v.id}
+function islandVideoHTML(wid){
+  var V0=D.videos&&D.videos.islands&&D.videos.islands[wid];if(!V0)return "";
+  var lg=L(),h='<div class="ivid"><b>'+esc(B("סרטון מומלץ לאי","Recommended video for this island"))+'</b>';
+  h+='<a class="ivmain" href="'+ytUrl(V0.main)+'" target="_blank" rel="noopener"><span class="ivt">▶ '+esc(V0.main.title)+'</span><span class="ivw">'+esc(V0.main.why[lg])+'</span></a>';
+  if(V0.extra.length||V0.search.length){
+    h+='<div class="ivx">'+V0.extra.map(function(x){return '<a href="'+ytUrl(x)+'" target="_blank" rel="noopener"><span class="ivt">+ '+esc(x.title)+'</span><span class="ivw">'+esc(x.why[lg])+'</span></a>'}).join("")+V0.search.map(function(x){return '<a class="alt" href="https://www.youtube.com/results?search_query='+encodeURIComponent(x.q)+'" target="_blank" rel="noopener"><span class="ivt">⌕ '+esc(x[lg])+'</span></a>'}).join("")+'</div>';
+  }
+  h+='<p class="ivn">'+esc(V0.gaps[lg])+' '+esc(B("הקישורים לא נבדקו: ייתכן שהתוכן שונה מהצפוי.","Links are unchecked: the content may differ from expectations."))+'</p></div>';
+  return h;
+}
+function vlabHTML(wid){
+  var seen={},chips="";
+  islandIds(wid).forEach(function(id){var k=NODE_VIZ[id];if(k&&!seen[k]){seen[k]=1;chips+='<button class="vchip" data-act="viz" data-k="'+k+'" data-id="'+id+'">▶ '+esc(vizTitle(k))+(S.vz&&S.vz[k]?" ✓":"")+'</button>'}});
+  return (chips?'<div class="vlab"><b>'+esc(B("מעבדת הדגמות","Visual lab"))+'</b><span class="vlh">'+esc(B("צפו באלגוריתם צעד אחר צעד לפני שמתחילים","Watch the algorithm step by step before you start"))+'</span><div class="vchips">'+chips+'</div></div>':"")+islandVideoHTML(wid);
+}
+/* ---------- map ---------- */
+var XS=[200,98,200,302];
+function islandHTML(wid){
+  var w=WK[wid],ids=islandIds(wid),nxt=nextStop(),col="var("+COL[w.color]+")",ROW=132,top=78;
+  var qs=islandQs(wid),hasBoss=qs.length>=3,k=ids.length;
+  var pts=ids.map(function(id,i){return {id:id,x:XS[i%4],y:top+i*ROW}});
+  var bossY=top+k*ROW+6;if(hasBoss||true)pts.push({id:"__boss",x:200,y:bossY});
+  var H=bossY+110,path="";
+  var infos=pts.map(function(p){return p.id==="__boss"?null:info(p.id)});
+  var dn=0,tot=0;ids.forEach(function(id,i){var f=infos[i];dn+=f.done;tot+=f.total});
+  var lines="";
+  for(var i=1;i<pts.length;i++){
+    var a=pts[i-1],b=pts[i],d="M"+a.x+" "+a.y+" C"+a.x+" "+(a.y+ROW*.55)+" "+b.x+" "+(b.y-ROW*.55)+" "+b.x+" "+b.y;
+    var done=i-1<ids.length&&infos[i-1].complete;
+    lines+='<path d="'+d+'" fill="none" stroke="'+(done?col:"var(--line)")+'" stroke-width="'+(done?7:5)+'" stroke-linecap="round" '+(done?"":'stroke-dasharray="2 12"')+'/>';
+  }
+  var stops=pts.map(function(p,i){
+    if(p.id==="__boss"){
+      var won=!!S.boss[wid],can=hasBoss,allDone=ids.every(function(id){return info(id).complete});
+      var cls="stop boss "+(won?"done":(!can?"locked":""));
+      return '<button class="'+cls+'" style="left:'+(p.x/4)+'%;top:'+(p.y/H*100)+'%" data-act="boss" data-w="'+wid+'" aria-label="'+esc(t("boss")+" "+loc(w.title))+'"><span class="disc" style="--p:'+(won?100:0)+'"><span class="core">'+(can?"BOSS":"?")+'</span></span><span class="lbl">'+esc(t("boss"))+'</span>'+(won?'<span class="stars"><span>★</span></span>':"")+(can&&allDone&&!won?'<span class="tag">'+esc(t("bossGo"))+'</span>':"")+'</button>';
+    }
+    var n=NODES[p.id],f=infos[i],lock=isLocked(p.id);
+    var cls="stop"+(f.complete?" done":"")+(lock&&!f.complete?" locked":"")+(p.id===nxt?" next":"");
+    var st="";if(f.complete){for(var s=1;s<=3;s++)st+='<span class="'+(s<=f.stars?"":"off")+'">★</span>';st='<span class="stars">'+st+'</span>'}
+    return '<button class="'+cls+'" style="left:'+(p.x/4)+'%;top:'+(p.y/H*100)+'%" data-act="node" data-id="'+p.id+'" aria-label="'+esc(loc(n.title))+', '+f.pct+'%"><span class="disc" style="--p:'+f.pct+'"><span class="core">'+esc(CODE[p.id]||"•")+'</span></span>'+st+'<span class="lbl">'+esc(loc(n.title))+'</span>'+(p.id===nxt?'<span class="tag">'+esc(t("startHere"))+'</span>':"")+'</button>';
+  }).join("");
+  return '<section class="island" style="--ic:'+col+'" id="isl-'+wid+'"><div class="ihead"><div><div class="wk">'+esc(wkLabel(w))+'</div><h2>'+esc(loc(w.title))+'</h2></div><div class="pr">'+dn+'/'+tot+'<span class="mini"><i style="width:'+Math.round(dn/tot*100)+'%"></i></span></div></div>'
+   +vlabHTML(wid)+'<div class="path" style="aspect-ratio:400/'+H+'"><svg viewBox="0 0 400 '+H+'" aria-hidden="true">'+lines+'</svg>'+stops+'</div></section>';
+}
+function mapHTML(){
+  var lv=level(S.xp),a=lvlStart(lv),b=lvlStart(lv+1),pc=Math.round((S.xp-a)/(b-a)*100);
+  var dq=dailyQ(),dDone=!!S.daily[today()],due=dueIds().length,nx=nextStop();
+  var flame='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="var(--c-amber)"/></svg>';
+  var h='<div class="bar"><div class="bar-in"><div class="lvl" aria-label="'+esc(t("lvl"))+' '+lv+'">'+lv+'</div><div class="xpbox"><div class="xprow"><b>'+esc(lvlName(lv))+'</b><span dir="ltr">'+S.xp+' / '+b+' '+t("xp")+'</span></div><div class="track"><i style="width:'+pc+'%"></i></div></div><div class="pill" title="'+esc(t("days"))+'">'+flame+(S.streak||0)+'</div><button class="xbtn" data-act="profile" aria-label="'+esc(t("profile"))+'">☰</button></div></div>';
+  h+='<div class="wrap"><div class="hero"><h1>'+esc(t("app"))+'</h1><p>'+esc(t("heroP"))+'</p><button class="btn ghost" data-act="guide" style="margin-top:10px">'+esc(B("איך עובדים על שאלה? כלל 30 הדקות","How to work on a question: the 30-minute rule"))+'</button></div>';
+  h+='<div class="quests">';
+  h+='<button class="quest hot" data-act="cont"><b>'+esc(t("cont"))+'</b><span>'+(nx?esc(loc(NODES[nx].title)):"")+'</span></button>';
+  h+='<button class="quest'+(dDone?" done":"")+'" data-act="daily"'+(dDone?" disabled":"")+'><b>'+esc(t("daily"))+'</b><span>'+esc(dDone?t("dailyDone"):t("dailyGo"))+'</span></button>';
+  h+='<button class="quest" data-act="review"'+(due?"":" disabled")+'><b>'+esc(t("review"))+'</b><span>'+esc(t("reviewN")(due))+'</span></button>';
+  h+='<button class="quest" data-act="exam"><b>'+esc(t("exam"))+'</b><span>'+esc(t("examSub"))+'</span></button></div>';
+  h+='<p class="chip" style="margin-top:6px">'+esc(t("starsHelp"))+'</p>';
+  ORDER.forEach(function(w,i){h+=islandHTML(w);if(i<ORDER.length-1)h+='<svg class="wave" viewBox="0 0 400 28" preserveAspectRatio="none" aria-hidden="true"><path d="M0 14 Q25 0 50 14 T100 14 T150 14 T200 14 T250 14 T300 14 T350 14 T400 14" fill="none" stroke="currentColor" stroke-width="3"/></svg>'});
+  h+='<p class="foot">'+esc(t("foot"))+'</p></div>';
+  return h;
+}
+
+/* ---------- node sheet ---------- */
+function vidLink(q,id){
+  var u=q.video?'https://www.youtube.com/watch?v='+q.video:'https://www.youtube.com/results?search_query='+encodeURIComponent('neetcode '+q.title.en+' leetcode '+q.number);
+  var lk=thinkOK(q.number)?"":" lk",la=thinkOK(q.number)?"":' data-lock="'+q.number+'"',lic=thinkOK(q.number)?"":"🔒 ";
+  var h='<div class="lc-vid">';
+  if(VIZ["s"+q.number])h+='<button class="vbtn" data-act="viz" data-k="i'+q.number+'" data-id="'+id+'">▶ '+esc(B("הרעיון","The idea"))+'</button><button class="vbtn'+lk+'"'+la+' data-act="viz" data-k="s'+q.number+'" data-id="'+id+'">'+lic+'▶ '+esc(B("הפתרון","The solution"))+'</button>';
+  var lk2=retryOK(q.number)?"":" lk",la2=retryOK(q.number)?"":' data-lock2="'+q.number+'"',lic2=retryOK(q.number)?"":"🔒 ";
+  h+='<button class="vbtn'+lk2+'"'+la2+' data-act="ai" data-n="'+q.number+'">'+lic2+esc(B("פסאודו-קוד לפייתון (AI)","Pseudocode to Python (AI)"))+'</button>';
+  return h+'<a class="vid'+(q.video?'':' alt')+lk+'"'+la+' href="'+u+'" target="_blank" rel="noopener">'+lic+'▶ '+esc(q.video?t('vidNC'):t('vidSearch'))+'</a></div>';
+}
+function sheetHTML(id){
+  var n=NODES[id],f=info(id),w=WK[n.week],col="var("+COL[w.color]+")",ms=missing(id);
+  var h='<div class="scrim" data-act="closeSheet"><div class="sheet" style="--ic:'+col+'" role="dialog" aria-modal="true" aria-label="'+esc(loc(n.title))+'" data-stop="1"><div class="shead"><span class="core2">'+esc(CODE[id]||"•")+'</span><div style="min-width:0"><h2>'+esc(loc(n.title))+'</h2><div class="row2" style="margin-top:4px"><span class="chip">'+esc(wkLabel(w))+'</span>'+(n.proposed?'<span class="chip draft">'+esc(t("proposed"))+'</span>':"")+'<span class="chip">'+f.done+'/'+f.total+'</span>'+(f.complete?'<span class="chip" style="color:var(--sun)">'+"★".repeat(f.stars)+'</span>':"")+'</div></div><button class="xbtn" data-act="closeSheet" id="sx" aria-label="close">✕</button></div><div class="sbody">';
+  h+='<p>'+esc(loc(n.summary))+'</p>';
+  if(ms.length)h+='<div class="warn">'+esc(t("softlock"))+' <b>'+ms.map(function(m){return esc(loc(NODES[m].title))}).join(", ")+'</b></div>';
+  if(NODE_VIZ[id])h+='<button class="btn sun" data-act="viz" data-id="'+id+'" data-k="'+NODE_VIZ[id]+'">▶ '+esc(B("הדגמה: ","Demo: ")+vizTitle(NODE_VIZ[id]))+'</button>';
+  h+='<div class="sub">'+esc(t("qs"))+'</div>';
+  if(f.qs.length){h+='<button class="btn" data-act="practice" data-id="'+id+'">'+esc(t("practiceN")(f.qs.length))+'</button>'}
+  else h+='<p class="chip" style="align-self:flex-start">'+esc(t("noqs"))+'</p>';
+  var lcs=LC_BY[id]||[];
+  h+='<div class="sub">'+esc(t("lcs"))+'</div>';
+  if(lcs.length){
+    h+='<ul class="lcl">'+lcs.map(function(q){
+      var on=!!S.lc[q.number];
+      return '<li class="lc'+(on?" on":"")+'"><div class="lc-top"><input type="checkbox" id="lc'+q.number+'" data-act="lc" data-n="'+q.number+'"'+(on?" checked":"")+'><label for="lc'+q.number+'"><span class="num">#'+q.number+'</span> '+esc(loc(q.title))+(q.premium?' <span class="chip">'+esc(t("premium"))+'</span>':"")+'</label><a href="https://leetcode.com/problems/'+q.slug+'/" target="_blank" rel="noopener" aria-label="'+esc(t("open"))+'">↗</a></div>'+thinkHTML(q)+vidLink(q,id)+'<details><summary'+(thinkOK(q.number)?"":' data-lock="'+q.number+'"')+'>'+(thinkOK(q.number)?"":"🔒 ")+esc(t("details"))+'</summary><p><b>'+esc(loc(q.statement))+'</b></p><p>'+esc(loc(q.explanation))+'</p></details></li>';
+    }).join("")+'</ul><p class="chip" style="align-self:flex-start">'+esc(t("lcHelp"))+'</p>';
+  }else{
+    h+='<p class="chip" style="align-self:flex-start">'+esc(t("gap"))+'</p>';
+  }
+  if(!f.qs.length&&!f.lcs.length){
+    h+='<p>'+esc(t("learnHint"))+'</p><button class="btn '+(S.learned[id]?"ghost":"sun")+'" data-act="learn" data-id="'+id+'">'+esc(S.learned[id]?t("unlearn"):t("learned"))+'</button>';
+  }
+  h+='</div></div></div>';
+  return h;
+}
+
+/* ---------- quiz ---------- */
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),x=a[i];a[i]=a[j];a[j]=x}return a}
+function startQuiz(mode,ids,o){
+  o=o||{};V.sheet=null;V.profile=false;V.res=null;
+  V.quiz={mode:mode,ids:ids,i:0,sel:[],checked:false,last:null,res:[],left:o.time||0,need:o.need||0,w:o.w||null,fb:(mode!=="boss"&&mode!=="exam")};
+  if(timerId)clearInterval(timerId);
+  if(V.quiz.left){timerId=setInterval(function(){
+    if(!V.quiz){clearInterval(timerId);return}
+    V.quiz.left--;var el=document.getElementById("timer");if(el)el.textContent=fmt(V.quiz.left);
+    if(V.quiz.left<=0){clearInterval(timerId);finish(true)}},1000)}
+  window.scrollTo(0,0);render();
+}
+function fmt(s){s=Math.max(0,s);return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2)}
+function cur(){return MCQ[V.quiz.ids[V.quiz.i]]}
+function record(q,correct,mode){
+  var a=S.ans[q.id]=S.ans[q.id]||{tries:0,first:false,ok:false,due:null},gain=0;
+  a.tries++;if(a.tries===1)a.first=correct;
+  if(correct){if(!a.ok){gain=a.tries===1?10:5;a.ok=true}if(mode==="review"){if(a.due&&a.due<=Date.now())S.cleared++;a.due=null}}
+  else a.due=Date.now()+DAY;
+  touch();return gain;
+}
+function check(){
+  var Q=V.quiz,q=cur();if(Q.checked)return;
+  var sel=Q.sel.slice().sort().join(","),ans=q.answer.slice().sort().join(","),ok=sel===ans;
+  var gain=record(q,ok,Q.mode);
+  if(Q.mode==="daily"&&ok&&!S.daily[today()]){S.daily[today()]=1;gain+=20}
+  addXP(gain);Q.checked=true;Q.last={ok:ok,gain:gain};
+  tone(ok?740:220,.14);
+  save();checkBadges();save();
+  if(!Q.fb){Q.res.push({id:q.id,ok:ok});advance();return}
+  render();
+}
+function advance(){
+  var Q=V.quiz;Q.i++;Q.sel=[];Q.checked=false;Q.last=null;
+  if(Q.i>=Q.ids.length){finish(false);return}
+  window.scrollTo(0,0);render();
+}
+function next(){var Q=V.quiz;if(Q.fb&&Q.last)Q.res.push({id:cur().id,ok:Q.last.ok});advance()}
+function retry(){var Q=V.quiz;Q.checked=false;Q.sel=[];Q.last=null;render()}
+function finish(timeUp){
+  var Q=V.quiz;if(timerId)clearInterval(timerId);
+  var q;while(Q.res.length<Q.ids.length){q=MCQ[Q.ids[Q.res.length]];Q.res.push({id:q.id,ok:false})}
+  var n=Q.ids.length,c=Q.res.filter(function(r){return r.ok}).length,pass=true,bonus=0,score=Math.round(c/n*100);
+  if(Q.mode==="boss"){pass=c>=Q.need;if(pass){bonus=S.boss[Q.w]?20:50;S.boss[Q.w]=today()}}
+  if(Q.mode==="exam"){bonus=c*3;pass=score>=70;S.exam=Math.max(S.exam,score)}
+  addXP(bonus);touch();
+  V.res={mode:Q.mode,n:n,c:c,pass:pass,bonus:bonus,score:score,list:Q.res,w:Q.w,timeUp:!!timeUp};V.quiz=null;
+  save();checkBadges();save();
+  if(pass&&(Q.mode==="boss"||Q.mode==="exam")){confetti();tone(880,.2)}
+  window.scrollTo(0,0);render();
+}
+function optLabel(i){return "אבגדהו"[i]||String(i+1)}
+function quizHTML(){
+  var Q=V.quiz,q=cur(),n=Q.ids.length,last=Q.last;
+  var dots=Q.ids.map(function(id,i){var r=Q.res[i];return '<i class="'+(r?(r.ok?"ok":"no"):(i===Q.i?"cur":""))+'"></i>'}).join("");
+  var h='<div class="wrap"><div class="qtop"><button class="xbtn" data-act="quit" aria-label="'+esc(t("back"))+'">✕</button><div class="dots" role="img" aria-label="'+esc(t("qN")(Q.i+1,n))+'">'+dots+'</div>'+(Q.left||Q.mode==="boss"||Q.mode==="exam"?'<div class="timer" id="timer">'+fmt(Q.left)+'</div>':"")+'</div>';
+  var tl=q.type==="tf"?t("tf"):q.type==="multi"?t("multi"):t("single");
+  h+='<div class="qcard"><div class="qmeta"><span class="chip">'+esc(t("qN")(Q.i+1,n))+'</span><span class="chip">'+esc(tl)+'</span>'+(q.basis==="derived"?'<span class="chip draft">'+esc(t("draft"))+'</span>':"")+'<span class="chip">'+esc(loc(NODES[q.node].title))+'</span></div>';
+  h+='<p class="stem">'+esc(loc(q.stem))+'</p><div class="opts" role="'+(q.type==="multi"?"group":"radiogroup")+'">';
+  q.options.forEach(function(o,i){
+    var cls="opt",selOn=Q.sel.indexOf(i)>-1;
+    if(Q.checked&&Q.fb){if(q.answer.indexOf(i)>-1)cls+=" right";else if(selOn)cls+=" wrong"}
+    else if(selOn)cls+=" sel";
+    h+='<button class="'+cls+'" data-act="opt" data-i="'+i+'"'+(Q.checked?" disabled":"")+' role="'+(q.type==="multi"?"checkbox":"radio")+'" aria-checked="'+selOn+'"><span class="k">'+(q.type==="tf"?(i===0?"✓":"✕"):optLabel(i))+'</span><span class="tx">'+esc(loc(o))+'</span></button>';
+  });
+  h+='</div>';
+  if(Q.checked&&Q.fb&&last){
+    h+='<div class="fb '+(last.ok?"ok":"no")+'">'+(last.gain?'<span class="gain">+'+last.gain+' '+t("xp")+'</span>':"")+'<h3>'+esc(last.ok?t("right"):t("wrong"))+'</h3><p>'+esc(loc(q.explanation))+'</p></div>';
+    h+='<div class="actions">'+(!last.ok?'<button class="btn ghost" data-act="retry">'+esc(t("retry"))+'</button>':"")+'<button class="btn" data-act="next">'+esc(Q.i===n-1?t("finish"):t("next"))+'</button></div>';
+  }else if(q.type==="multi"){
+    h+='<div class="actions"><button class="btn" data-act="check"'+(Q.sel.length?"":" disabled")+'>'+esc(t("check"))+'</button></div>';
+  }
+  return h+'</div></div>';
+}
+function resHTML(){
+  var R=V.res,title,sub="";
+  if(R.mode==="boss"){title=R.pass?t("bossWin"):t("bossLose")}
+  else if(R.mode==="exam"){title=t("examDone")}
+  else title=t("finish");
+  if(R.timeUp)sub=t("times");
+  var h='<div class="wrap"><div class="res"><h1>'+esc(title)+'</h1>'+(sub?'<p class="chip">'+esc(sub)+'</p>':"")+'<div class="big">'+R.c+'/'+R.n+'</div><p>'+esc(t("correct"))+(R.mode==="exam"?' · '+esc(t("score"))+' '+R.score:"")+(R.bonus?' · '+esc(t("bonus"))+' +'+R.bonus+' '+t("xp"):"")+'</p>';
+  h+='<div class="rlist">'+R.list.map(function(r){var q=MCQ[r.id];return '<details><summary><span class="'+(r.ok?"y":"n")+'">'+(r.ok?"✓":"✕")+'</span> '+esc(loc(q.stem).slice(0,90))+'…</summary><p>'+esc(loc(q.explanation))+'</p></details>'}).join("")+'</div>';
+  h+='<div class="actions" style="justify-content:center"><button class="btn" data-act="home">'+esc(t("back"))+'</button></div></div></div>';
+  return h;
+}
+
+/* ---------- profile ---------- */
+function profileHTML(){
+  var lv=level(S.xp),st=stats();
+  var h='<div class="scrim" data-act="closeProfile"><div class="sheet modal" data-stop="1" role="dialog" aria-modal="true" aria-label="'+esc(t("profile"))+'"><div class="shead"><span class="core2" style="--ic:var(--brand)">'+lv+'</span><div><h2>'+esc(t("profile"))+'</h2><div class="chip" style="margin-top:4px">'+esc(lvlName(lv))+'</div></div><button class="xbtn" data-act="closeProfile" id="sx" aria-label="close">✕</button></div><div class="sbody">';
+  h+='<div class="stats"><div><b>'+S.xp+'</b><span>'+esc(t("xp"))+'</span></div><div><b>'+(S.streak||0)+'</b><span>'+esc(t("days"))+'</span></div><div><b>'+(S.best||0)+'</b><span>'+esc(t("bestStreak"))+'</span></div><div><b>'+st.ok+'/'+D.mcq.questions.length+'</b><span>'+esc(t("solvedQ"))+'</span></div><div><b>'+Object.keys(S.lc).length+'/'+D.lc.questions.length+'</b><span>'+esc(t("lcDone"))+'</span></div><div><b>'+Object.keys(S.boss).length+'</b><span>'+esc(t("boss"))+'</span></div></div>';
+  h+='<div class="sub">'+esc(t("islands"))+'</div><div class="ibar">'+ORDER.map(function(w){var ids=islandIds(w),d=0,tt=0;ids.forEach(function(id){var f=info(id);d+=f.done;tt+=f.total});var p=Math.round(d/tt*100);return '<div class="irow" style="--ic:var('+COL[WK[w].color]+')"><span>'+esc(loc(WK[w].title))+'</span><div class="track"><i style="width:'+p+'%"></i></div><em>'+p+'%</em></div>'}).join("")+'</div>';
+  h+='<div class="sub">'+esc(t("badges"))+'</div><div class="badges">'+BADGES.map(function(b){var on=!!S.badges[b.id];return '<div class="badge '+(on?"on":"off")+'"><b>'+esc(b[L()][0])+'</b><span>'+esc(b[L()][1])+'</span></div>'}).join("")+'</div>';
+  h+='<div class="sub">'+esc(t("settings"))+'</div><div class="row2"><button class="toggle" data-act="lang" aria-pressed="false">'+(L()==="he"?"English":"עברית")+'</button><button class="toggle" data-act="sound" aria-pressed="'+!!S.set.sound+'">'+esc(t("sound"))+'</button><button class="toggle danger" data-act="reset">'+esc(V.confirmReset?t("resetSure"):t("reset"))+'</button></div></div></div></div>';
+  return h;
+}
+
+/* ---------- render + events ---------- */
+function render(){
+  var keep=null,had=false,sb=document.querySelector(".scrim .sbody");if(sb){keep=sb.scrollTop;had=true}
+  var dir=L()==="he"?"rtl":"ltr";app.setAttribute("dir",dir);document.documentElement.lang=L();
+  var h=V.quiz?quizHTML():V.res?resHTML():mapHTML();
+  if(!V.quiz&&!V.res){if(V.sheet)h+=sheetHTML(V.sheet);if(V.profile)h+=profileHTML()}
+  app.innerHTML=h;
+  var nb=document.querySelector(".scrim .sbody");if(nb&&keep!=null)nb.scrollTop=keep;
+  if(!had){var x=document.getElementById("sx");if(x)x.focus()}
+}
+app.addEventListener("click",function(e){
+  var lk=e.target.closest("[data-lock]");
+  if(lk){var ln=lk.getAttribute("data-lock");if(!thinkOK(ln)){var nw=Date.now();if(!PEND[ln]||nw-PEND[ln]>8000){e.preventDefault();e.stopPropagation();PEND[ln]=nw;toast(B("קודם 30 דקות חשיבה לבד. לחצו שוב תוך כמה שניות כדי לפתוח בכל זאת.","Think on your own for 30 minutes first. Tap again within seconds to open anyway."));return}delete PEND[ln]}}
+  var lk2=e.target.closest("[data-lock2]");
+  if(lk2){var l2=lk2.getAttribute("data-lock2");if(!retryOK(l2)){var n2=Date.now(),key2="r"+l2;if(!PEND[key2]||n2-PEND[key2]>8000){e.preventDefault();e.stopPropagation();PEND[key2]=n2;toast(thinkOK(l2)?B("קודם צפו בסרטון ונסו שוב. לחצו שוב תוך כמה שניות כדי לפתוח בכל זאת.","Watch the video and try again first. Tap again within seconds to open anyway."):B("קודם 30 דקות חשיבה, סרטון וניסיון נוסף. לחצו שוב כדי לפתוח בכל זאת.","First 30 minutes of thinking, the video and another try. Tap again to open anyway."));return}delete PEND[key2]}}
+  var el=e.target.closest("[data-act]");if(!el)return;
+  var act=el.getAttribute("data-act");
+  if((act==="closeSheet"||act==="closeProfile")&&e.target.closest("[data-stop]")&&el.classList.contains("scrim"))return;
+  if(act==="lc")return;
+  var id=el.getAttribute("data-id");
+  switch(act){
+   case "node":V.sheet=id;render();break;
+   case "viz":vizOpen(el.getAttribute("data-k"),id);break;
+   case "guide":openGuide();break;
+   case "ai":openAI(el.getAttribute("data-n"));break;
+   case "tstart":S.think[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("הטיימר התחיל. בהצלחה!","Timer started. Good luck!"));render();break;
+   case "rstart":S.retry[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("בהצלחה בניסיון השני!","Good luck on the second try!"));render();break;
+   case "rskip":{var rn=el.getAttribute("data-n");S.retry[rn]=Object.assign(S.retry[rn]||{s:Date.now()},{skip:1});save();render();break}
+   case "tskip":{var tn=el.getAttribute("data-n");S.think[tn]=Object.assign(S.think[tn]||{s:Date.now()},{skip:1});save();render();break}
+   case "closeSheet":V.sheet=null;render();break;
+   case "profile":V.profile=true;V.confirmReset=false;render();break;
+   case "closeProfile":V.profile=false;render();break;
+   case "practice":startQuiz("practice",shuffle(info(id).qs.map(function(q){return q.id})));break;
+   case "daily":startQuiz("daily",[dailyQ().id]);break;
+   case "review":startQuiz("review",shuffle(dueIds()).slice(0,8));break;
+   case "exam":startQuiz("exam",shuffle(D.mcq.questions.map(function(q){return q.id})).slice(0,12),{time:900});break;
+   case "boss":{var w=el.getAttribute("data-w"),qs=islandQs(w);
+     if(qs.length<3){toast(t("bossNo"));break}
+     var ids=shuffle(qs.map(function(q){return q.id})).slice(0,5),n=ids.length,need=n>=5?4:Math.max(2,n-1);
+     startQuiz("boss",ids,{time:n*45,need:need,w:w});toast(t("bossIntro")(n,need));break}
+   case "cont":{var nx=nextStop();if(nx){var w2=NODES[nx].week,node=document.querySelector('[data-id="'+nx+'"]');if(node)node.scrollIntoView({behavior:reduced()?"auto":"smooth",block:"center"});setTimeout(function(){V.sheet=nx;render()},reduced()?0:450)}break}
+   case "opt":{var Q=V.quiz;if(Q.checked)break;var i=+el.getAttribute("data-i"),q=cur();
+     if(q.type==="multi"){var p=Q.sel.indexOf(i);if(p>-1)Q.sel.splice(p,1);else Q.sel.push(i);render()}
+     else{Q.sel=[i];check()}break}
+   case "check":check();break;
+   case "next":next();break;
+   case "retry":retry();break;
+   case "quit":if(timerId)clearInterval(timerId);V.quiz=null;render();break;
+   case "home":V.res=null;render();break;
+   case "learn":S.learned[id]=S.learned[id]?0:1;if(S.learned[id]){addXP(15);touch();tone(740,.12);confetti()}save();checkBadges();save();render();break;
+   case "lang":S.set.lang=L()==="he"?"en":"he";save();render();vizRefresh();break;
+   case "sound":S.set.sound=!S.set.sound;save();render();if(S.set.sound)tone(660,.1);break;
+   case "reset":if(V.confirmReset){S=fresh();V.confirmReset=false;V.profile=false;save()}else V.confirmReset=true;render();break;
+  }
+});
+app.addEventListener("change",function(e){
+  var el=e.target;if(el.getAttribute("data-act")!=="lc")return;
+  var n=el.getAttribute("data-n");
+  if(el.checked){if(!S.lc[n]){S.lc[n]=1;addXP(15);touch();tone(740,.12)}}else{delete S.lc[n]}
+  save();checkBadges();save();render();
+});
+document.addEventListener("keydown",function(e){if(e.key==="Escape"){if(VZ){vizClose();return}if(V.profile){V.profile=false;render()}else if(V.sheet){V.sheet=null;render()}}});
+render();
+if(!S.guideSeen)setTimeout(openGuide,350);
+})();
+</script>
