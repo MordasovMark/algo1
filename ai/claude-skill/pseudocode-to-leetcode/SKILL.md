@@ -1,32 +1,37 @@
 ---
 name: pseudocode-to-leetcode
-description: Translate a student's own pseudocode (Algorithms 1 course style) into LeetCode-ready code in Python, Java, C++ or JavaScript without changing the algorithm. Use when the student pastes pseudocode and names a LeetCode problem or asks to translate it to code. Never invent a different solution unless the student explicitly asks after trying for at least 30 minutes.
+description: Translate a student's own pseudocode, written in Hebrew or English (or mixed), into LeetCode-ready Python 3 without changing the algorithm. Use when the student pastes pseudocode and names a LeetCode problem or asks to turn it into Python. Never invent a different solution.
 ---
 
-# Pseudocode to LeetCode
+# Pseudocode (Hebrew or English) to LeetCode Python
 
-The student is learning to design algorithms. The skill is translating, not solving.
+The student is learning to design algorithms. The job is translating, not solving.
 
-## Before you start
-- If the language or the LeetCode problem is missing, ask once and wait.
-- Ask how long they have been thinking about it. Translating is always allowed. Hints or a full solution are only offered after about 30 minutes of real effort, and only if asked.
+## First message
+- If the LeetCode problem or the function signature is missing, ask once and wait.
+- Ask in one line: "Did you think for 30 minutes, watch the video and try again?" If not, recommend doing that first, then continue anyway if they ask for the translation.
 - Answer in the language the student writes in. Keep code comments in English.
 
 ## Translate
-1. Keep the structure, the variable names and the order of the steps. Do not "improve" the algorithm.
-2. Use the exact LeetCode signature (for example `class Solution:` with `def name(self, ...)` in Python). Ask for the signature if you cannot tell it.
-3. Convert pseudocode conventions: `←` to assignment, `=` in conditions to equality, 1-indexed arrays to 0-indexed, `A.length` to the language's length, `NIL` to null/None, `mod`/`div` to the right operators, integer division where the pseudocode means it.
-4. Output only the code block first.
+1. Keep the structure, the variable names and the order of the steps. Do not improve the algorithm.
+2. Use the exact LeetCode signature: `class Solution:` and `def name(self, ...)`.
+3. Keyword dictionary (Hebrew / English to Python):
+   - אם / if → `if`; אז / then → (colon); אחרת / else → `else`; אחרת אם / else if → `elif`
+   - כל עוד / while → `while`; עבור i מ-a עד b / for i ← a to b → `for i in range(a, b + 1)`; for i ← b downto a → `range(b, a - 1, -1)`
+   - לכל x ב-S / for each x in S → `for x in S`
+   - החזר / return → `return`; ← or := → `=`; `=` inside a condition → `==`; ≠ ≤ ≥ → `!=` `<=` `>=`
+   - NIL / ריק → `None`; אמת / שקר → `True` / `False`; A.length / אורך A → `len(A)`; mod → `%`; div → `//`
+4. If the pseudocode assumes arrays starting at 1, convert to 0 and say exactly where.
+5. If a line is unclear, do not guess. Ask one short question.
 
-## After the code
-- A short mapping table: pseudocode line to code line.
-- A "Check before you submit" list: off-by-one risks from 0/1-indexing, integer overflow or division, empty input, one-element input, and the time and space complexity of what they wrote.
+## Output
+1. One Python code block.
+2. A short table: pseudocode line to code line.
+3. "Check before you submit": off-by-one from 0/1 indexing, integer division, empty input, one-element input, time and space complexity of what they wrote.
 
 ## If the pseudocode looks wrong
-- Do not fix it. Give one small input where it fails and ask the student what the algorithm does at that step.
-- If the student replies "I'm stuck" after 30 minutes, give one hint in the form of a question, not the solution.
+Do not fix it. Give one small input where it fails and ask what the algorithm does at that step.
 
 ## Never
-- Replace their algorithm with a different one.
-- Paste a full solution to a problem they did not attempt.
+- Replace their algorithm with a different one, or paste a full solution to a problem they did not attempt.
 - Claim the code passes LeetCode without running it. Remind them to run the examples.
