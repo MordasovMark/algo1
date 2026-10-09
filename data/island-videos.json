@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "status": "UNVERIFIED. These picks come from web search results. YouTube is blocked from the build environment, so view counts, channel names, spoken accent and the exact chapters could not be checked. Titles are copied as they appeared in the results. A TA should open each link once before students see it.",
+    "selection": "One main video (or playlist) per island that overlaps the most with the syllabus items, plus extras for what the main one does not cover. No video found covers a whole island, so each island lists its gaps."
+  },
+  "islands": {
+    "w1": {
+      "main": { "id": "cLzBMGa6ss8", "title": "CSE201, Lec 15: Karatsuba multiplication and Strassen's matrix multiplication", "why": { "he": "הרצאה אוניברסיטאית על קרצובה, עם ניתוח הסיבוכיות.", "en": "A university lecture on Karatsuba with the complexity analysis." } },
+      "extra": [
+        { "id": "AZUyORvvIGA", "title": "Karatsuba's algorithm for integer mult - Divide and Conquer - Design and Analysis of Algorithms", "why": { "he": "הסבר נוסף על קרצובה ועל משפט האב.", "en": "A second explanation of Karatsuba and the Master theorem." } },
+        { "id": "7pnhv842keE", "title": "Majority Element - Leetcode 169 - Python", "why": { "he": "Boyer-Moore בפועל. זוהה בחיפוש כסרטון של NeetCode.", "en": "Boyer-Moore in practice. Identified by search as a NeetCode video." } }
+      ],
+      "gaps": { "he": "לא נמצא סרטון ייעודי ל-Boyer-Moore מעבר לשאלה 169.", "en": "No dedicated Boyer-Moore video was found beyond question 169." },
+      "search": [ { "q": "Boyer-Moore majority vote algorithm explained", "he": "חפשו: Boyer-Moore Voting", "en": "Search: Boyer-Moore voting" } ]
+    },
+    "w2": {
+      "main": { "id": "09_LlHjoEiY", "title": "Algorithms Course - Graph Theory Tutorial from a Google Engineer", "why": { "he": "קורס מלא בתורת הגרפים. לפי הזיכרון שלי הוא כולל BFS, DFS, מיון טופולוגי ו-MST, אבל לא אימתי את הפרקים. בדקו את רשימת הפרקים בתיאור.", "en": "A full graph theory course. From memory it includes BFS, DFS, topological sort and MST, but I could not verify the chapters. Check the chapter list in the description." } },
+      "extra": [],
+      "gaps": { "he": "ייצוג גרף כנושא נפרד אינו מובטח בקורס.", "en": "Graph representation as a separate topic is not guaranteed in the course." },
+      "search": []
+    },
+    "w3": {
+      "main": { "list": "PLBZBJbE_rGRU5PrgZ9NBHJwcaZsNpf8yD", "title": "Dynamic Programming Tutorial Series", "why": { "he": "סדרה שלפי תוצאות החיפוש עוברת על פיבונאצ'י, תרמיל 0/1 ו-LCS.", "en": "A series that, per the search results, walks through Fibonacci, 0/1 knapsack and LCS." } },
+      "extra": [
+        { "id": "OQ5jsbhAv_M", "title": "Lecture 19: Dynamic Programming I: Fibonacci, Shortest Paths", "why": { "he": "הרצאת MIT על העקרונות ו-memoization.", "en": "MIT lecture on the principles and memoization." } },
+        { "id": "KLBCUx1is2c", "title": "16. Dynamic Programming, Part 2: LCS, LIS, Coins", "why": { "he": "הרצאת MIT על LCS ועל מטבעות (דומה ל-Knapsack).", "en": "MIT lecture on LCS and coins (close to knapsack)." } }
+      ],
+      "gaps": { "he": "תת-סדרה בלתי תלויה מקסימלית אין לה סרטון ייעודי. היא דומה לבעיית House Robber.", "en": "Max independent subsequence has no dedicated video; it is the House Robber pattern." },
+      "search": [ { "q": "house robber dynamic programming explained", "he": "חפשו: House Robber", "en": "Search: House Robber" } ]
+    },
+    "w4": {
+      "main": { "id": "wm8UJGEm_eU", "title": "Activity Selection, Huffman Coding, Caching", "why": { "he": "בחירת פעילויות ו-Huffman באותה הרצאה.", "en": "Activity selection and Huffman in one lecture." } },
+      "extra": [
+        { "id": "CRSkj4a8Obw", "title": "CSE201, Lec 8: Greedy Algorithms; the Fractional Knapsack Problem and introduction to Huffman Coding", "why": { "he": "תרמיל שברי עם הוכחת אופטימליות, ומבוא ל-Huffman.", "en": "Fractional knapsack with the optimality proof, and an intro to Huffman." } },
+        { "id": "09_LlHjoEiY", "title": "Algorithms Course - Graph Theory Tutorial from a Google Engineer", "why": { "he": "בקורס הגרפים אמור להופיע גם Kruskal/Prim. אימות נדרש.", "en": "The graph course should also include Kruskal/Prim. Needs checking." } }
+      ],
+      "gaps": { "he": "צביעה חמדנית אין לה סרטון שנמצא.", "en": "No video was found for greedy colouring." },
+      "search": [ { "q": "greedy graph coloring algorithm explained", "he": "חפשו: צביעה חמדנית", "en": "Search: greedy colouring" } ]
+    },
+    "w5": {
+      "main": { "id": "V5-7GzOfADQ", "title": "9.1 Knuth-Morris-Pratt KMP String Matching Algorithm", "why": { "he": "הסבר על KMP ועל טבלת ה-LPS (π).", "en": "Explains KMP and the LPS (π) table." } },
+      "extra": [
+        { "id": "NSUkjgcFOUo", "title": "When to Use KMP or Suffix Trees for String Searching", "why": { "he": "השוואה בין KMP לעצי סיפות.", "en": "Compares KMP with suffix trees." } }
+      ],
+      "gaps": { "he": "לא נמצא סרטון בנייה של עץ סיפות (Ukkonen). השתמשו בחיפוש.", "en": "No suffix tree construction (Ukkonen) video was found. Use the search link." },
+      "search": [ { "q": "suffix tree construction explained", "he": "חפשו: בניית Suffix Tree", "en": "Search: suffix tree construction" } ]
+    }
+  }
+}
