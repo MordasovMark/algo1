@@ -33,3 +33,8 @@ assert marker in tpl, 'data marker missing in template'
 out = root / 'site/dist/index.html'
 out.write_text(tpl.replace(marker, blob), encoding='utf8')
 print('wrote', out, len(out.read_text(encoding='utf8')), 'chars')
+
+# Small lookup used by teacher.html (question text and node per MCQ id).
+meta = {'mcq': [{'id': q['id'], 'node': q['node'], 'stem': q['stem']['he']} for q in D['mcq']['questions']]}
+(root / 'site/dist/data.json').write_text(json.dumps(meta, ensure_ascii=False), encoding='utf8')
+print('wrote site/dist/data.json')

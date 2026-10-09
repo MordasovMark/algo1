@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>לוח מרצה</title>
+<style>
+:root{--bg:#e8f3f1;--surface:#fff;--ink:#0f2a3f;--ink2:#486174;--line:#c9dddb;--brand:#0b7f86;--brand-ink:#fff;--bad:#cf3f3f}
+@media (prefers-color-scheme:dark){:root{--bg:#09192a;--surface:#10283b;--ink:#e7f2f6;--ink2:#9db5c4;--line:#22425a;--brand:#3cc4c9;--brand-ink:#04222a;--bad:#ff8080;color-scheme:dark}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Arial,sans-serif;padding:16px}
+main{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2{margin:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;overflow-x:auto}
+button{font:inherit;background:var(--brand);color:var(--brand-ink);border:0;border-radius:10px;padding:8px 14px;font-weight:700;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stats div{background:var(--bg);border-radius:10px;padding:10px;text-align:center}
+.stats b{display:block;font-size:1.6rem}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:start;white-space:nowrap}
+th{color:var(--ink2);font-weight:600}
+.bad{color:var(--bad);font-weight:700}
+.muted{color:var(--ink2)}
+</style>
+</head>
+<body>
+<main>
+  <h1>לוח מרצה: מסע האלגוריתמים</h1>
+  <div class="card" id="auth"><p class="muted">התחברו עם חשבון Google של צוות הקורס. הגישה נקבעת בכללי Firestore (firebase/firestore.rules).</p><button id="login" hidden>התחברות עם Google</button><span id="who"></span> <button id="logout" hidden>התנתקות</button></div>
+  <div id="out" hidden>
+    <div class="card"><div class="stats" id="stats"></div></div>
+    <div class="card"><h2>השאלות הקשות ביותר</h2><p class="muted">אחוז התשובות הנכונות בניסיון ראשון (רק שאלות שנענו לפחות 3 פעמים).</p><table id="hard"></table></div>
+    <div class="card"><h2>סטודנטים</h2><button id="csv">העתק כ-CSV</button><table id="users"></table></div>
+  </div>
+  <p id="msg" class="muted"></p>
+</main>
+<script src="config.js"></script>
+<script>
+(function(){
+  var cfg=window.FIREBASE_CONFIG,msg=document.getElementById("msg");
+  if(!cfg||!cfg.apiKey){msg.textContent="config.js ריק: מלאו את הגדרות Firebase (ראו docs/DEPLOY.md).";return}
+  var B="https://www.gstatic.com/firebasejs/10.12.2/";
+  Promise.all([import(B+"firebase-app.js"),import(B+"firebase-auth.js"),import(B+"firebase-firestore.js"),fetch("data.json").then(function(r){return r.json()})]).then(function(m){
+    var app=m[0].initializeApp(cfg),A=m[1],F=m[2],auth=A.getAuth(app),db=F.getFirestore(app),meta=m[3];
+    var login=document.getElementById("login"),logout=document.getElementById("logout"),who=document.getElementById("who");
+    login.hidden=false;
+    login.onclick=function(){A.signInWithPopup(auth,new A.GoogleAuthProvider()).catch(function(e){msg.textContent=String(e.message||e)})};
+    logout.onclick=function(){A.signOut(auth)};
+    A.onAuthStateChanged(auth,function(u){
+      login.hidden=!!u;logout.hidden=!u;who.textContent=u?u.email:"";
+      document.getElementById("out").hidden=true;
+      if(!u)return;msg.textContent="טוענים...";
+      F.getDocs(F.collection(db,"users")).then(function(snap){render(snap.docs.map(function(d){return d.data()}),meta);msg.textContent=""}).catch(function(e){msg.textContent="אין הרשאה או שגיאה: "+(e.message||e)});
+    });
+  }).catch(function(e){msg.textContent="טעינה נכשלה: "+e});
+  function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function render(rows,meta){
+    var today=new Date(),cut=new Date(today.getTime()-7*864e5),active=0,xp=0;
+    var users=rows.map(function(r){var st={};try{st=JSON.parse(r.state||"{}")}catch(e){}return {name:r.name||"",email:r.email||"",xp:r.xp||0,streak:r.streak||0,last:r.lastActive||"",mcq:r.mcqSolved||0,lc:r.lcSolved||0,open:r.openDone||0,ans:st.ans||{}}});
+    users.forEach(function(u){xp+=u.xp;if(u.last&&new Date(u.last)>=cut)active++});
+    document.getElementById("stats").innerHTML='<div><b>'+users.length+'</b>נרשמו</div><div><b>'+active+'</b>פעילים ב-7 ימים</div><div><b>'+(users.length?Math.round(xp/users.length):0)+'</b>XP ממוצע</div>';
+    var agg={};users.forEach(function(u){Object.keys(u.ans).forEach(function(id){var a=u.ans[id];agg[id]=agg[id]||{n:0,first:0};agg[id].n++;if(a.first)agg[id].first++})});
+    var hard=Object.keys(agg).filter(function(id){return agg[id].n>=3}).map(function(id){return {id:id,n:agg[id].n,rate:agg[id].first/agg[id].n}}).sort(function(a,b){return a.rate-b.rate}).slice(0,10);
+    var qm={};(meta.mcq||[]).forEach(function(q){qm[q.id]=q});
+    document.getElementById("hard").innerHTML='<tr><th>שאלה</th><th>נושא</th><th>ענו</th><th>נכון בניסיון ראשון</th></tr>'+(hard.length?hard.map(function(h){var q=qm[h.id]||{};return '<tr><td>'+esc((q.stem||h.id).slice(0,70))+'</td><td>'+esc(q.node||"")+'</td><td>'+h.n+'</td><td class="'+(h.rate<.5?"bad":"")+'">'+Math.round(h.rate*100)+'%</td></tr>'}).join(""):'<tr><td class="muted" colspan="4">עוד אין מספיק נתונים.</td></tr>');
+    users.sort(function(a,b){return b.xp-a.xp});
+    document.getElementById("users").innerHTML='<tr><th>שם</th><th>מייל</th><th>XP</th><th>רצף</th><th>אמריקאיות</th><th>LeetCode</th><th>פתוחות</th><th>פעילות אחרונה</th></tr>'+users.map(function(u){return '<tr><td>'+esc(u.name)+'</td><td dir="ltr">'+esc(u.email)+'</td><td>'+u.xp+'</td><td>'+u.streak+'</td><td>'+u.mcq+'</td><td>'+u.lc+'</td><td>'+u.open+'</td><td>'+esc(u.last)+'</td></tr>'}).join("");
+    document.getElementById("csv").onclick=function(){var t=["name,email,xp,streak,mcq,leetcode,open,lastActive"].concat(users.map(function(u){return [u.name,u.email,u.xp,u.streak,u.mcq,u.lc,u.open,u.last].map(function(x){return '"'+String(x).replace(/"/g,'""')+'"'}).join(",")})).join("\n");navigator.clipboard.writeText(t).then(function(){msg.textContent="הועתק"},function(){msg.textContent="לא הצלחתי להעתיק"})};
+    document.getElementById("out").hidden=false;
+  }
+})();
+</script>
+</body>
+</html>

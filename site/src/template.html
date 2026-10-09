@@ -298,6 +298,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0
 .otxt[readonly]{opacity:.8}
 .omodel{border:2px solid var(--good);border-radius:12px;padding:10px 12px;background:var(--surface)}
 .omodel p{margin:6px 0 0}
+.cbanner{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;margin-top:12px;padding:10px 14px;background:var(--surface);border:2px dashed var(--brand);border-radius:14px;font-weight:500}
 #toast{position:fixed;inset-inline:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 #toast div{background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 16px;font-weight:700;box-shadow:var(--shadow);animation:pop .35s ease-out both;max-width:420px}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:70}
@@ -312,6 +313,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0
 <div id="ov"></div>
 <canvas id="fx" aria-hidden="true"></canvas>
 
+<script src="config.js"></script>
 <script>
 window.DATA = /*__DATA__*/null;
 </script>
@@ -383,7 +385,7 @@ function fresh(){return {open:{},openDone:{},think:{},retry:{},guideSeen:0,xp:0,
 var mem=null;
 function load(){try{var s=localStorage.getItem(KEY);if(s)return Object.assign(fresh(),JSON.parse(s))}catch(e){}return mem?Object.assign(fresh(),mem):fresh()}
 var S=load();
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}try{mem=JSON.parse(JSON.stringify(S))}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}try{mem=JSON.parse(JSON.stringify(S))}catch(e){}cloudDirty()}
 function L(){return S.set.lang==="en"?"en":"he"}
 function t(k){var v=T[L()][k];return v===undefined?k:v}
 function loc(o){return o?(o[L()]||o.he||""):""}
@@ -1529,6 +1531,62 @@ BADGES.push({id:"open3",he:["כותבים על נייר","3 שאלות מבחן 
   box.addEventListener("input",function(e){var t=e.target;if(t.classList&&t.classList.contains("otxt")){oGet(t.getAttribute("data-q"),t.getAttribute("data-p")).txt=t.value;save()}});
 })();
 
+/* ---------- accounts and sync (optional: active only when config.js provides a Firebase config) ---------- */
+var CL={user:null,timer:null,last:0,busy:false,err:""};
+function cloudOn(){return !!window.CloudBackend}
+function mergeStates(a,b){
+  var r=Object.assign(fresh(),a),i,k;
+  r.xp=Math.max(a.xp||0,b.xp||0);r.best=Math.max(a.best||0,b.best||0);r.exam=Math.max(a.exam||0,b.exam||0);r.cleared=Math.max(a.cleared||0,b.cleared||0);
+  if((b.last||"")>(a.last||"")){r.streak=b.streak||0;r.last=b.last;r.freezes=b.freezes}
+  r.guideSeen=(a.guideSeen||b.guideSeen)?1:0;
+  ["lc","learned","badges","boss","daily","vz","openDone"].forEach(function(key){r[key]=Object.assign({},b[key]||{},a[key]||{})});
+  r.ans=Object.assign({},b.ans||{});
+  Object.keys(a.ans||{}).forEach(function(id){var x=a.ans[id],y=r.ans[id];
+    if(!y){r.ans[id]=x;return}
+    if(x.ok&&!y.ok)r.ans[id]=x;else if(x.ok===y.ok&&(x.first&&!y.first||(x.first===y.first&&(x.tries||0)>(y.tries||0))))r.ans[id]=x});
+  ["think","retry"].forEach(function(key){r[key]=Object.assign({},b[key]||{});Object.keys(a[key]||{}).forEach(function(n){var x=a[key][n],y=r[key][n];if(!y||(x.skip&&!y.skip)||(!y.skip&&x.s&&y.s&&x.s<y.s))r[key][n]=x})});
+  r.open=JSON.parse(JSON.stringify(b.open||{}));
+  Object.keys(a.open||{}).forEach(function(q){r.open[q]=r.open[q]||{};Object.keys(a.open[q]).forEach(function(p){var x=a.open[q][p],y=r.open[q][p];
+    if(!y||(x.rev&&x.self&&!(y.rev&&y.self))||((x.rev?1:0)===(y.rev?1:0)&&String(x.txt||"").length>String(y.txt||"").length))r.open[q][p]=x})});
+  r.set=a.set;
+  return r;
+}
+function cloudPayload(){
+  var ok=0;Object.keys(S.ans).forEach(function(k){if(S.ans[k].ok)ok++});
+  return {state:JSON.stringify(S),xp:S.xp,streak:S.streak||0,lastActive:S.last||"",mcqSolved:ok,lcSolved:Object.keys(S.lc).length,openDone:Object.keys(S.openDone||{}).length,v:1};
+}
+function cloudDirty(){if(!CL.user||!cloudOn())return;if(CL.timer)clearTimeout(CL.timer);CL.timer=setTimeout(cloudPush,20000)}
+function cloudPush(){
+  if(!CL.user||!cloudOn()||CL.busy)return Promise.resolve();
+  if(CL.timer){clearTimeout(CL.timer);CL.timer=null}
+  CL.busy=true;
+  return window.CloudBackend.save(CL.user,cloudPayload()).then(function(){CL.last=Date.now();CL.err=""}).catch(function(e){CL.err=String(e&&e.message||e)}).then(function(){CL.busy=false;if(V.profile)render()});
+}
+function cloudPull(){
+  if(!CL.user||!cloudOn())return;
+  window.CloudBackend.load(CL.user).then(function(remote){
+    if(remote&&remote.state){try{S=Object.assign(fresh(),mergeStates(S,JSON.parse(remote.state)));try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}catch(e){}}
+    return cloudPush();
+  }).then(function(){toast(B("מחוברים. ההתקדמות מסונכרנת.","Signed in. Progress is synced."));render()}).catch(function(e){CL.err=String(e&&e.message||e);render()});
+}
+window.__onUser=function(u){CL.user=u||null;if(u)cloudPull();else render()};
+window.__renderAgain=function(){render()};
+document.addEventListener("visibilitychange",function(){if(document.visibilityState==="hidden"&&CL.user&&CL.timer)cloudPush()});
+function accountHTML(){
+  if(!cloudOn())return "";
+  var h='<div class="sub">'+esc(B("חשבון","Account"))+'</div>';
+  if(!CL.user){
+    h+='<p class="ivn">'+esc(B("התחברו כדי לשמור את ההתקדמות בין מכשירים. נשמרים: השם, כתובת המייל וההתקדמות שלכם. הנתונים נראים לכם ולצוות הקורס בלבד.","Sign in to keep your progress across devices. Stored: your name, email and progress. Visible only to you and the course staff."))+'</p><button class="btn" data-act="cloud-in">'+esc(B("התחברות עם Google","Sign in with Google"))+'</button>';
+  }else{
+    h+='<p>'+esc(B("מחוברים כ: ","Signed in as: "))+'<b dir="ltr">'+esc(CL.user.email||CL.user.name||"")+'</b></p><div class="row2"><button class="toggle" data-act="cloud-sync">'+esc(B("סנכרן עכשיו","Sync now"))+'</button><button class="toggle" data-act="cloud-out">'+esc(B("התנתקות","Sign out"))+'</button></div><p class="ivn">'+esc(CL.last?B("סונכרן לאחרונה: ","Last synced: ")+new Date(CL.last).toLocaleTimeString():B("עדיין לא סונכרן בסשן הזה.","Not synced yet in this session."))+(CL.err?" · "+esc(CL.err):"")+'</p>';
+  }
+  return h;
+}
+function cloudBanner(){
+  if(!cloudOn()||CL.user)return "";
+  return '<div class="cbanner"><span>'+esc(B("שמרו את ההתקדמות בין מכשירים","Keep your progress across devices"))+'</span><button class="btn sun" data-act="cloud-in">'+esc(B("התחברות עם Google","Sign in with Google"))+'</button></div>';
+}
+
 var VZ=null,vizTimer=null;
 window.__vizOpen=function(k){vizOpen(k,null)};
 function vizTitle(k){return VIZ[k].t[L()==="he"?0:1]}
@@ -1653,7 +1711,7 @@ function mapHTML(){
   var dq=dailyQ(),dDone=!!S.daily[today()],due=dueIds().length,nx=nextStop();
   var flame='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="var(--c-amber)"/></svg>';
   var h='<div class="bar"><div class="bar-in"><div class="lvl" aria-label="'+esc(t("lvl"))+' '+lv+'">'+lv+'</div><div class="xpbox"><div class="xprow"><b>'+esc(lvlName(lv))+'</b><span dir="ltr">'+S.xp+' / '+b+' '+t("xp")+'</span></div><div class="track"><i style="width:'+pc+'%"></i></div></div><div class="pill" title="'+esc(t("days"))+'">'+flame+(S.streak||0)+'</div><button class="xbtn" data-act="profile" aria-label="'+esc(t("profile"))+'">☰</button></div></div>';
-  h+='<div class="wrap"><div class="hero"><h1>'+esc(t("app"))+'</h1><p>'+esc(t("heroP"))+'</p><button class="btn ghost" data-act="guide" style="margin-top:10px">'+esc(B("איך עובדים על שאלה? כלל 30 הדקות","How to work on a question: the 30-minute rule"))+'</button></div>';
+  h+='<div class="wrap"><div class="hero"><h1>'+esc(t("app"))+'</h1><p>'+esc(t("heroP"))+'</p><button class="btn ghost" data-act="guide" style="margin-top:10px">'+esc(B("איך עובדים על שאלה? כלל 30 הדקות","How to work on a question: the 30-minute rule"))+'</button></div>'+cloudBanner();
   h+='<div class="quests">';
   h+='<button class="quest hot" data-act="cont"><b>'+esc(t("cont"))+'</b><span>'+(nx?esc(loc(NODES[nx].title)):"")+'</span></button>';
   h+='<button class="quest'+(dDone?" done":"")+'" data-act="daily"'+(dDone?" disabled":"")+'><b>'+esc(t("daily"))+'</b><span>'+esc(dDone?t("dailyDone"):t("dailyGo"))+'</span></button>';
@@ -1795,6 +1853,7 @@ function profileHTML(){
   var h='<div class="scrim" data-act="closeProfile"><div class="sheet modal" data-stop="1" role="dialog" aria-modal="true" aria-label="'+esc(t("profile"))+'"><div class="shead"><span class="core2" style="--ic:var(--brand)">'+lv+'</span><div><h2>'+esc(t("profile"))+'</h2><div class="chip" style="margin-top:4px">'+esc(lvlName(lv))+'</div></div><button class="xbtn" data-act="closeProfile" id="sx" aria-label="close">✕</button></div><div class="sbody">';
   h+='<div class="stats"><div><b>'+S.xp+'</b><span>'+esc(t("xp"))+'</span></div><div><b>'+(S.streak||0)+'</b><span>'+esc(t("days"))+'</span></div><div><b>'+(S.best||0)+'</b><span>'+esc(t("bestStreak"))+'</span></div><div><b>'+st.ok+'/'+D.mcq.questions.length+'</b><span>'+esc(t("solvedQ"))+'</span></div><div><b>'+Object.keys(S.lc).length+'/'+D.lc.questions.length+'</b><span>'+esc(t("lcDone"))+'</span></div><div><b>'+Object.keys(S.boss).length+'</b><span>'+esc(t("boss"))+'</span></div></div>';
   h+='<div class="sub">'+esc(t("islands"))+'</div><div class="ibar">'+ORDER.map(function(w){var ids=islandIds(w),d=0,tt=0;ids.forEach(function(id){var f=info(id);d+=f.done;tt+=f.total});var p=Math.round(d/tt*100);return '<div class="irow" style="--ic:var('+COL[WK[w].color]+')"><span>'+esc(loc(WK[w].title))+'</span><div class="track"><i style="width:'+p+'%"></i></div><em>'+p+'%</em></div>'}).join("")+'</div>';
+  h+=accountHTML();
   h+='<div class="sub">'+esc(t("badges"))+'</div><div class="badges">'+BADGES.map(function(b){var on=!!S.badges[b.id];return '<div class="badge '+(on?"on":"off")+'"><b>'+esc(b[L()][0])+'</b><span>'+esc(b[L()][1])+'</span></div>'}).join("")+'</div>';
   h+='<div class="sub">'+esc(t("settings"))+'</div><div class="row2"><button class="toggle" data-act="lang" aria-pressed="false">'+(L()==="he"?"English":"עברית")+'</button><button class="toggle" data-act="sound" aria-pressed="'+!!S.set.sound+'">'+esc(t("sound"))+'</button><button class="toggle danger" data-act="reset">'+esc(V.confirmReset?t("resetSure"):t("reset"))+'</button></div></div></div></div>';
   return h;
@@ -1824,6 +1883,9 @@ app.addEventListener("click",function(e){
    case "node":V.sheet=id;render();break;
    case "viz":vizOpen(el.getAttribute("data-k"),id);break;
    case "guide":openGuide();break;
+   case "cloud-in":if(window.CloudBackend)window.CloudBackend.signIn().catch(function(e){CL.err=String(e&&e.message||e);toast(B("ההתחברות נכשלה: ","Sign-in failed: ")+CL.err)});break;
+   case "cloud-out":if(window.CloudBackend)cloudPush().then(function(){return window.CloudBackend.signOut()}).then(function(){CL.user=null;render()});break;
+   case "cloud-sync":cloudPull();break;
    case "openlist":openOList(null);break;
    case "openq-node":openOList(el.getAttribute("data-id"));break;
    case "ai":openAI(el.getAttribute("data-n"));break;
@@ -1866,5 +1928,27 @@ app.addEventListener("change",function(e){
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){if(VZ){vizClose();return}if(V.profile){V.profile=false;render()}else if(V.sheet){V.sheet=null;render()}}});
 render();
 if(!S.guideSeen)setTimeout(openGuide,350);
+})();
+</script>
+
+<script>
+/* Firebase adapter: loaded only when config.js defines window.FIREBASE_CONFIG */
+(function(){
+  var cfg=window.FIREBASE_CONFIG;
+  if(!cfg||!cfg.apiKey)return;
+  var V="10.12.2",B="https://www.gstatic.com/firebasejs/"+V+"/";
+  Promise.all([import(B+"firebase-app.js"),import(B+"firebase-auth.js"),import(B+"firebase-firestore.js")]).then(function(m){
+    var app=m[0].initializeApp(cfg),auth=m[1].getAuth(app),db=m[2].getFirestore(app),A=m[1],F=m[2];
+    function shape(u){return u?{uid:u.uid,email:u.email||"",name:u.displayName||""}:null}
+    window.CloudBackend={
+      signIn:function(){var p=new A.GoogleAuthProvider();if(cfg.allowedDomain)p.setCustomParameters({hd:cfg.allowedDomain});return A.signInWithPopup(auth,p).then(function(r){
+        if(cfg.allowedDomain&&!String(r.user.email||"").toLowerCase().endsWith("@"+cfg.allowedDomain)){return A.signOut(auth).then(function(){throw new Error("Use your @"+cfg.allowedDomain+" account")})}})},
+      signOut:function(){return A.signOut(auth)},
+      load:function(u){return F.getDoc(F.doc(db,"users",u.uid)).then(function(d){return d.exists()?d.data():null})},
+      save:function(u,payload){var d=Object.assign({},payload,{name:u.name,email:u.email,updatedAt:F.serverTimestamp()});return F.setDoc(F.doc(db,"users",u.uid),d)}
+    };
+    A.onAuthStateChanged(auth,function(u){if(window.__onUser)window.__onUser(shape(u))});
+    if(window.__renderAgain)window.__renderAgain();
+  }).catch(function(e){console.warn("Firebase failed to load",e)});
 })();
 </script>

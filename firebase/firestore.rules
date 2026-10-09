@@ -1,0 +1,26 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Put the lecturer / TA Google emails here.
+    function isStaff() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email in ['LECTURER@example.com', 'TA@example.com'];
+    }
+
+    match /users/{uid} {
+      // A student reads and writes only their own document.
+      allow read: if request.auth != null && request.auth.uid == uid;
+      allow create, update: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.state is string
+        && request.resource.data.state.size() < 200000
+        && request.resource.data.keys().hasOnly(
+             ['state','xp','streak','lastActive','mcqSolved','lcSolved','openDone','v','name','email','updatedAt']);
+      allow delete: if request.auth != null && request.auth.uid == uid;
+
+      // Staff can read everyone (for the teacher dashboard).
+      allow read: if isStaff();
+    }
+  }
+}
