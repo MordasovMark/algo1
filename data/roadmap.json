@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "course": { "he": "אלגוריתמים 1", "en": "Algorithms 1" },
+    "version": 1,
+    "notes": "nodes with proposed=true are NOT in the official syllabus you sent, but appear repeatedly in the past exams (2022-2024). Remove them if you do not want them."
+  },
+  "weeks": [
+    { "id": "w1", "weeks": [1, 1], "title": { "he": "הפרד ומשול", "en": "Divide and Conquer" }, "color": "sky" },
+    { "id": "w2", "weeks": [2, 3], "title": { "he": "גרפים", "en": "Graphs" }, "color": "emerald" },
+    { "id": "w3", "weeks": [4, 6], "title": { "he": "תכנון דינמי", "en": "Dynamic Programming" }, "color": "violet" },
+    { "id": "w4", "weeks": [7, 9], "title": { "he": "אלגוריתמים חמדניים", "en": "Greedy Algorithms" }, "color": "amber" },
+    { "id": "w5", "weeks": [10, 11], "title": { "he": "התאמת מחרוזות", "en": "String Matching" }, "color": "rose" },
+    { "id": "w0", "weeks": [0, 0], "title": { "he": "תשתית (Extra)", "en": "Foundations (Extra)" }, "color": "slate" }
+  ],
+  "nodes": [
+    { "id": "complexity", "week": "w0", "kind": "extra", "title": { "he": "סיבוכיות ורקורסיה", "en": "Complexity & Recursion" }, "summary": { "he": "סימון אסימפטוטי, נוסחאות נסיגה ומשפט האב. הבסיס לכל שאר הנושאים.", "en": "Asymptotic notation, recurrences and the Master theorem." } },
+    { "id": "heap", "week": "w0", "kind": "extra", "title": { "he": "ערימה / תור עדיפויות", "en": "Heap / Priority Queue" }, "summary": { "he": "מבנה נתונים שנדרש ל-Huffman ול-Prim.", "en": "Data structure needed by Huffman and Prim." } },
+    { "id": "union-find", "week": "w0", "kind": "extra", "title": { "he": "Union-Find", "en": "Union-Find" }, "summary": { "he": "קבוצות זרות. נדרש ל-Kruskal.", "en": "Disjoint sets. Needed by Kruskal." } },
+
+    { "id": "dc-karatsuba", "week": "w1", "kind": "topic", "title": { "he": "קרצובה", "en": "Karatsuba" }, "summary": { "he": "כפל מספרים גדולים ב-O(n^1.585) במקום O(n²) בעזרת שלוש כפלות רקורסיביות.", "en": "Multiply big integers in O(n^1.585) using three recursive products." } },
+    { "id": "dc-boyer-moore", "week": "w1", "kind": "topic", "title": { "he": "Boyer-Moore (איבר רוב)", "en": "Boyer-Moore (Majority)" }, "summary": { "he": "מציאת איבר שמופיע יותר מ-n/2 פעמים בזמן O(n) וזיכרון O(1).", "en": "Find an element appearing more than n/2 times in O(n) time, O(1) space." } },
+    { "id": "select", "week": "w1", "kind": "topic", "proposed": true, "title": { "he": "Select (סטטיסטי סדר)", "en": "Select (Order Statistic)" }, "summary": { "he": "מציאת האיבר ה-k בגודלו ב-O(n). מופיע הרבה בבחינות יחד עם Boyer-Moore.", "en": "k-th smallest in O(n). Appears often in exams next to Boyer-Moore." } },
+
+    { "id": "graph-repr", "week": "w2", "kind": "topic", "title": { "he": "ייצוג גרפים", "en": "Graph Representation" }, "summary": { "he": "רשימת סמיכויות מול מטריצת סמיכויות, ודרגות כניסה ויציאה.", "en": "Adjacency list vs matrix, in/out degree." } },
+    { "id": "bfs", "week": "w2", "kind": "topic", "title": { "he": "BFS", "en": "BFS" }, "summary": { "he": "סריקה לרוחב, מסלולים קצרים בגרף לא ממושקל.", "en": "Breadth-first search, shortest paths in unweighted graphs." } },
+    { "id": "dfs", "week": "w2", "kind": "topic", "title": { "he": "DFS", "en": "DFS" }, "summary": { "he": "סריקה לעומק, רכיבי קשירות, זיהוי מעגלים וצמתי הפרדה.", "en": "Depth-first search, components, cycles, cut vertices." } },
+    { "id": "topo", "week": "w2", "kind": "topic", "title": { "he": "מיון טופולוגי", "en": "Topological Sort" }, "summary": { "he": "סידור צמתי DAG כך שכל קשת הולכת קדימה.", "en": "Order DAG vertices so all edges go forward." } },
+
+    { "id": "dp-principles", "week": "w3", "kind": "topic", "title": { "he": "עקרונות התכנון הדינמי", "en": "DP Principles" }, "summary": { "he": "תת-בעיות חופפות, תת-מבנה אופטימלי, memoization מול טבלה.", "en": "Overlapping subproblems, optimal substructure, memoization vs tabulation." } },
+    { "id": "dp-fib", "week": "w3", "kind": "topic", "title": { "he": "פיבונאצ'י", "en": "Fibonacci" }, "summary": { "he": "ארבע גרסאות: רקורסיה נאיבית, memo, טבלה, O(1) זיכרון.", "en": "Four versions: naive, memo, table, O(1) space." } },
+    { "id": "dp-mis", "week": "w3", "kind": "topic", "title": { "he": "תת-סדרה בלתי תלויה מקסימלית", "en": "Max Independent Subsequence" }, "summary": { "he": "בחירת איברים ללא שכנים סמוכים. המבחנים משתמשים בגרסאות עם מרחק מינימלי k.", "en": "Pick non-adjacent items. Exams use the min-distance-k variant." } },
+    { "id": "dp-lcs", "week": "w3", "kind": "topic", "title": { "he": "LCS ושכנותיה", "en": "LCS and relatives" }, "summary": { "he": "תת-סדרה משותפת ארוכה ביותר, פלינדרום ארוך ביותר, ספירת תת-סדרות.", "en": "Longest common subsequence, palindromic subsequence, counting subsequences." } },
+    { "id": "dp-knapsack", "week": "w3", "kind": "topic", "title": { "he": "בעיית התרמיל (DP)", "en": "Knapsack (DP)" }, "summary": { "he": "0/1 ו-unbounded, מקום O(W) מול שחזור פתרון.", "en": "0/1 and unbounded, O(W) space vs reconstruction." } },
+
+    { "id": "greedy-knapsack", "week": "w4", "kind": "topic", "title": { "he": "תרמיל חמדני", "en": "Greedy Knapsack" }, "summary": { "he": "תרמיל שברי, ותרמיל 0/1 במקרים מיוחדים שבהם חמדנות עובדת.", "en": "Fractional knapsack and special 0/1 cases where greedy works." } },
+    { "id": "greedy-asp", "week": "w4", "kind": "topic", "title": { "he": "בחירת פעילויות (ASP)", "en": "Activity Selection (ASP)" }, "summary": { "he": "מיון לפי זמן סיום. כולל וריאציות: מעגלים זרים, כיסוי נקודות, מסעדות.", "en": "Sort by finish time. Variants: disjoint circles, point cover, restaurants." } },
+    { "id": "greedy-coloring", "week": "w4", "kind": "topic", "title": { "he": "צביעה חמדנית", "en": "Greedy Coloring" }, "summary": { "he": "צביעה לפי סדר, חסם Δ+1, ותלות בסדר הצמתים.", "en": "Coloring in order, Δ+1 bound, order dependence." } },
+    { "id": "mst", "week": "w4", "kind": "topic", "title": { "he": "עץ פורש מינימלי (MST)", "en": "MST" }, "summary": { "he": "Kruskal ו-Prim, יחידות העץ, ועץ צוואר בקבוק.", "en": "Kruskal, Prim, uniqueness, bottleneck trees." } },
+    { "id": "huffman", "week": "w4", "kind": "topic", "title": { "he": "עץ Huffman", "en": "Huffman Tree" }, "summary": { "he": "קוד קדומות אופטימלי, מיזוג שני הקטנים, הוכחת הבחירה החמדנית.", "en": "Optimal prefix codes, merge two smallest, greedy-choice proof." } },
+    { "id": "randomized", "week": "w4", "kind": "topic", "proposed": true, "title": { "he": "אלגוריתמים הסתברותיים", "en": "Randomized Algorithms" }, "summary": { "he": "Monte Carlo מול Las Vegas, אימות מכפלת מטריצות. מופיע בבחינות אך לא בסילבוס ששלחת.", "en": "Monte Carlo vs Las Vegas, matrix product verification. In exams but not in the syllabus you sent." } },
+
+    { "id": "kmp", "week": "w5", "kind": "topic", "title": { "he": "KMP", "en": "KMP" }, "summary": { "he": "פונקציית הקידומת (π), חיפוש תבנית בזמן O(n+m), ושימושים בטריקים.", "en": "Prefix function (π), O(n+m) matching, and tricks." } },
+    { "id": "suffix-trees", "week": "w5", "kind": "topic", "title": { "he": "עצי סיפות ו-Suffix Array", "en": "Suffix Trees & Suffix Array" }, "summary": { "he": "בנייה ב-O(n), תת-מחרוזת חוזרת ארוכה ביותר, תת-מחרוזת משותפת ארוכה ביותר.", "en": "O(n) construction, longest repeated and longest common substring." } }
+  ],
+  "edges": [
+    { "from": "complexity", "to": "dc-karatsuba", "kind": "prerequisite" },
+    { "from": "complexity", "to": "graph-repr", "kind": "prerequisite" },
+    { "from": "complexity", "to": "dp-principles", "kind": "prerequisite" },
+    { "from": "dc-karatsuba", "to": "dc-boyer-moore", "kind": "recommended" },
+    { "from": "dc-boyer-moore", "to": "select", "kind": "recommended" },
+    { "from": "dc-karatsuba", "to": "dp-principles", "kind": "recommended" },
+    { "from": "graph-repr", "to": "bfs", "kind": "prerequisite" },
+    { "from": "graph-repr", "to": "dfs", "kind": "prerequisite" },
+    { "from": "dfs", "to": "topo", "kind": "prerequisite" },
+    { "from": "topo", "to": "dp-principles", "kind": "related" },
+    { "from": "dp-principles", "to": "dp-fib", "kind": "prerequisite" },
+    { "from": "dp-fib", "to": "dp-mis", "kind": "prerequisite" },
+    { "from": "dp-fib", "to": "dp-lcs", "kind": "prerequisite" },
+    { "from": "dp-lcs", "to": "dp-knapsack", "kind": "recommended" },
+    { "from": "dp-knapsack", "to": "greedy-knapsack", "kind": "related" },
+    { "from": "greedy-knapsack", "to": "greedy-asp", "kind": "prerequisite" },
+    { "from": "greedy-asp", "to": "greedy-coloring", "kind": "recommended" },
+    { "from": "bfs", "to": "greedy-coloring", "kind": "prerequisite" },
+    { "from": "dfs", "to": "mst", "kind": "prerequisite" },
+    { "from": "union-find", "to": "mst", "kind": "prerequisite" },
+    { "from": "heap", "to": "mst", "kind": "recommended" },
+    { "from": "heap", "to": "huffman", "kind": "prerequisite" },
+    { "from": "greedy-asp", "to": "huffman", "kind": "recommended" },
+    { "from": "greedy-asp", "to": "mst", "kind": "recommended" },
+    { "from": "greedy-knapsack", "to": "randomized", "kind": "related" },
+    { "from": "dp-principles", "to": "kmp", "kind": "recommended" },
+    { "from": "kmp", "to": "suffix-trees", "kind": "prerequisite" }
+  ]
+}

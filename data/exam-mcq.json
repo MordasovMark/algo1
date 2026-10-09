@@ -1,0 +1,1361 @@
+{
+  "meta": {
+    "note": "The exams you sent contain no multiple-choice questions. Every item here is DERIVED from an open question (or a sub-question) in those exams. basis=official-solution means the answer matches the official solution that was in the PDFs. basis=derived means no official solution was available for that item and the answer was worked out by me: please have the TA verify those before publishing.",
+    "sources": {
+      "2022-A-sample": "סמסטר א' 2022 - מבחן לדוגמא",
+      "2022-A-moedB": "סמסטר א' 2022 מועד ב' 16.2.2022",
+      "2022-B-moedA": "סמסטר ב' 2022 מועד א' 16.6.2022",
+      "2022-B-moedB": "סמסטר ב' 2022 מועד ב' 14.7.2022",
+      "2023-A-moedA": "סמסטר א' 2023 מועד א' 25.1.2023",
+      "2023-A-moedB": "סמסטר א' 2023 מועד ב' 15.2.2023",
+      "2024-A-moedA": "סמסטר א' 2024 מועד א' 18.3.2024",
+      "2024-A-miluim": "סמסטר א' 2024 מועד מילואים",
+      "2024-B-moedA": "סמסטר ב' 2024 מועד א'"
+    },
+    "types": {
+      "single": "תשובה אחת",
+      "multi": "כמה תשובות נכונות",
+      "tf": "נכון או לא נכון"
+    }
+  },
+  "questions": [
+    {
+      "id": "mcq-001",
+      "node": "dp-mis",
+      "source": "2024-B-moedA",
+      "ref": "שאלה 3",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "IGreg בוחר מיקומים לאורך כביש (d1<d2<…<dn) לפתיחת מסעדות. רווח pᵢ במיקום i, ומרחק מינימלי k בין כל שתי מסעדות. מהי נוסחת הנסיגה הנכונה? נגדיר prev(i) כאינדקס הגדול ביותר j עם d_j ≤ d_i − k (או 0 אם אין).",
+        "en": "IGreg picks restaurant sites on a road (d1<…<dn) with profit p_i at site i and minimum distance k between any two. Which recurrence is correct? Let prev(i) be the largest j with d_j ≤ d_i − k (0 if none)."
+      },
+      "options": [
+        {
+          "he": "T(i) = max( T(i−1), pᵢ + T(prev(i)) ),  T(0)=0",
+          "en": "T(i) = max( T(i−1), p_i + T(prev(i)) ),  T(0)=0"
+        },
+        {
+          "he": "T(i) = pᵢ + T(i−1)",
+          "en": "T(i) = p_i + T(i−1)"
+        },
+        {
+          "he": "T(i) = max( T(i−1), pᵢ + T(i−2) )",
+          "en": "T(i) = max( T(i−1), p_i + T(i−2) )"
+        },
+        {
+          "he": "T(i) = pᵢ + min( T(i−1), T(prev(i)) )",
+          "en": "T(i) = p_i + min( T(i−1), T(prev(i)) )"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "בכל מיקום יש שתי אפשרויות. לא פותחים במיקום i, ואז הרווח הוא T(i−1). פותחים בו, ואז מותר לשלב רק מסעדות במרחק k לפחות, כלומר מיקומים עד prev(i), ולכן pᵢ + T(prev(i)). בוחרים את המקסימום. אפשרות ג' נכונה רק כש-k מתאים בדיוק להפרש של שני מיקומים (זה House Robber). אפשרות ב' מתעלמת מהאילוץ.",
+        "en": "Skip site i: T(i−1). Open at i: only sites up to prev(i) remain compatible: p_i + T(prev(i)). Take the max."
+      }
+    },
+    {
+      "id": "mcq-002",
+      "node": "greedy-asp",
+      "source": "2024-B-moedA",
+      "ref": "שאלה 4א",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "derived",
+      "stem": {
+        "he": "אותה בעיה, אבל הרווח p זהה בכל מיקום. מיקומים: [1, 2, 15, 20, 26, 27, 30, 35] ו-k=10. הפתרון [2, 20, 30] הוא אופטימלי (3 מסעדות). איזו קבוצה היא גם פתרון אופטימלי?",
+        "en": "Same problem but every site has the same profit. Sites: [1,2,15,20,26,27,30,35], k=10. [2,20,30] is optimal (3 restaurants). Which set is also optimal?"
+      },
+      "options": [
+        {
+          "he": "[1, 15, 26]",
+          "en": "[1, 15, 26]"
+        },
+        {
+          "he": "[1, 2, 30]",
+          "en": "[1, 2, 30]"
+        },
+        {
+          "he": "[15, 20, 35]",
+          "en": "[15, 20, 35]"
+        },
+        {
+          "he": "[20, 26, 35]",
+          "en": "[20, 26, 35]"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "ב-[1,15,26] כל הפערים לפחות 10 (14 ו-11), ויש 3 מסעדות. בשאר האפשרויות יש זוג קרוב מדי: 1 ו-2, 15 ו-20, 20 ו-26. מסקנה: אין פתרון אופטימלי יחיד. אלגוריתם חמדני שפותח במקום הראשון ואז בראשון שרחוק k לפחות מניב את [1,15,26].",
+        "en": "[1,15,26] has gaps 14 and 11. The others contain a pair closer than 10. So the optimum is not unique; the greedy gives [1,15,26]."
+      }
+    },
+    {
+      "id": "mcq-003",
+      "node": "greedy-asp",
+      "source": "2024-A-moedA",
+      "ref": "שאלה 2",
+      "type": "multi",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "נתונות n נקודות על ציר המספרים. רוצים מספר מינימלי של מקטעים באורך 1 שמכסים את כולן. אילו טענות נכונות?",
+        "en": "Given n points on the line, cover them with the minimum number of unit-length segments. Which statements are true?"
+      },
+      "options": [
+        {
+          "he": "ממיינים את הנקודות, ובכל פעם מניחים מקטע שמתחיל בנקודה השמאלית ביותר שעדיין לא מכוסה",
+          "en": "Sort the points; repeatedly place a segment starting at the leftmost uncovered point"
+        },
+        {
+          "he": "הסיבוכיות היא O(n log n) בגלל המיון, והמעבר עצמו הוא O(n)",
+          "en": "O(n log n) because of the sort; the sweep itself is O(n)"
+        },
+        {
+          "he": "מניחים מקטעים צמודים [m,m+1], [m+1,m+2], … על כל הטווח, בלי להסתכל על מיקום הנקודות",
+          "en": "Place back-to-back segments [m,m+1], [m+1,m+2], … over the whole range, ignoring where the points are"
+        },
+        {
+          "he": "הבחירה החמדנית לא יכולה להיות מוכחת בטיעון חילוף",
+          "en": "The greedy choice cannot be proved by an exchange argument"
+        }
+      ],
+      "answer": [
+        0,
+        1
+      ],
+      "explanation": {
+        "he": "הנקודה השמאלית ביותר חייבת להיות מכוסה על ידי מקטע כלשהו. הצבת המקטע כך שיתחיל בה מרחיקה אותו ימינה ככל האפשר ולא פוגעת בכיסוי (טיעון חילוף). לכן אחרי כל מקטע מדלגים על הנקודות שכוסו וממשיכים. מיון O(n log n) ואחריו מעבר אחד O(n). מקטעים צמודים על כל הטווח מבזבזים מקטעים על אזורים ריקים ולא מינימליים.",
+        "en": "The leftmost point must be covered; starting the segment there pushes it as far right as possible (exchange argument). Sort O(n log n), then one sweep O(n). Back-to-back segments waste segments on empty areas."
+      }
+    },
+    {
+      "id": "mcq-004",
+      "node": "greedy-asp",
+      "source": "2024-A-moedA",
+      "ref": "שאלת בונוס",
+      "type": "tf",
+      "difficulty": "easy",
+      "basis": "official-solution",
+      "stem": {
+        "he": "בבעיית תזמון מקטעים, הגישה החמדנית שבוחרת תמיד את המקטע הקצר ביותר מניבה בהכרח פתרון אופטימלי.",
+        "en": "In interval scheduling, always picking the shortest interval is guaranteed to give an optimal solution."
+      },
+      "options": [
+        {
+          "he": "נכון",
+          "en": "True"
+        },
+        {
+          "he": "לא נכון",
+          "en": "False"
+        }
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": {
+        "he": "דוגמה נגדית: המקטעים [1,4] ו-[5,8] זרים זה לזה, והמקטע הקצר [3,6] חותך את שניהם. בחירה בקצר ביותר נותנת מקטע אחד בלבד, בעוד שהאופטימום הוא שניים. הכלל הנכון הוא לבחור את המקטע עם זמן הסיום המוקדם ביותר.",
+        "en": "Counterexample: [1,4] and [5,8] are disjoint and the short [3,6] overlaps both. Shortest-first picks 1 interval, the optimum is 2. The correct rule is earliest finish time."
+      }
+    },
+    {
+      "id": "mcq-005",
+      "node": "greedy-asp",
+      "source": "2022-A-sample",
+      "ref": "שאלה 4",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "n מעגלים עם מרכזים על ציר x (מרכז c, רדיוס r). רוצים את המספר המקסימלי של מעגלים זרים בזוגות (אין חיתוך, השקה או הכלה). לאיזו בעיה מוכרת זה מצטמצם, ואיזה כלל חמדני נכון?",
+        "en": "n circles centered on the x-axis (center c, radius r). Find the maximum number of pairwise disjoint circles (no crossing, tangency or containment). Which known problem is it and which greedy rule is correct?"
+      },
+      "options": [
+        {
+          "he": "בחירת פעילויות על המקטעים [c−r, c+r]. ממיינים לפי הקצה הימני ובוחרים בכל פעם מעגל שהקצה השמאלי שלו גדול ממש מהקצה הימני של האחרון שנבחר",
+          "en": "Activity selection on [c−r, c+r]: sort by right end, pick a circle whose left end is strictly greater than the last chosen right end"
+        },
+        {
+          "he": "אותו דבר, אבל מותר שהתחלה תהיה שווה לקצה הקודם (≥) כי השקה מותרת",
+          "en": "Same, but ≥ is allowed since tangency is fine"
+        },
+        {
+          "he": "ממיינים לפי רדיוס עולה ובוחרים את הקטנים קודם",
+          "en": "Sort by radius ascending and take small circles first"
+        },
+        {
+          "he": "בעיית תרמיל שברי עם משקל r",
+          "en": "Fractional knapsack with weight r"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "כל מעגל על הציר הוא מקטע [c−r, c+r], ושני מעגלים זרים אם ורק אם המקטעים שלהם זרים. בבעיה השקה אסורה, לכן אי-שוויון חד. מיון לפי רדיוס הוא אותה טעות כמו הבחירה בקצר ביותר. הפתרון אינו יחיד.",
+        "en": "Each circle is the interval [c−r, c+r]; circles are disjoint iff intervals are disjoint. Tangency is forbidden, so the inequality is strict. Sorting by radius repeats the shortest-first mistake."
+      }
+    },
+    {
+      "id": "mcq-006",
+      "node": "greedy-knapsack",
+      "source": "2024-A-miluim",
+      "ref": "שאלה 2",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "תרמיל 0/1 שבו ככל שהפריט כבד יותר, הוא פחות יקר (המשקלים עולים והערכים יורדים). מהו האלגוריתם החמדני הנכון?",
+        "en": "0/1 knapsack where heavier items are always less valuable. What is the correct greedy algorithm?"
+      },
+      "options": [
+        {
+          "he": "ממיינים לפי משקל עולה, ומכניסים פריטים מהקל לכבד כל עוד יש מקום",
+          "en": "Sort by weight ascending, add items lightest-first while they fit"
+        },
+        {
+          "he": "ממיינים לפי משקל יורד ומכניסים את הכבדים קודם",
+          "en": "Sort by weight descending, add heaviest first"
+        },
+        {
+          "he": "ממיינים לפי ערך לליטר (v/w) ומכניסים עד שהתרמיל מלא, כולל חלקים משבר",
+          "en": "Sort by v/w and fill, including fractions"
+        },
+        {
+          "he": "בעיה כזו חייבת תכנון דינמי ולא ניתן לפתור אותה בחמדנות",
+          "en": "This needs DP and cannot be solved greedily"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "הפריט הקל ביותר הוא גם היקר ביותר, ולכן יש פתרון אופטימלי שמכיל אותו (טיעון חילוף: מחליפים את הפריט הראשון בפתרון באיבר 1, לא גרוע במשקל ולא גרוע בערך). אחרי שמכניסים אותו נשארת בעיה קטנה מאותו סוג (תת-מבנה אופטימלי). שימו לב שזה נכון רק בגלל הקשר המיוחד בין משקל לערך.",
+        "en": "The lightest item is also the most valuable, so some optimum contains it (exchange argument), and the rest is a smaller instance (optimal substructure). Valid only because of the weight/value relation."
+      }
+    },
+    {
+      "id": "mcq-007",
+      "node": "greedy-knapsack",
+      "source": "2023-A-moedA",
+      "ref": "שאלה 4",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "derived",
+      "stem": {
+        "he": "משקלי הפריטים הם חזקות של 5: 25, 5, 1 (כל משקל מחלק את הקודם), כמות בלתי מוגבלת מכל סוג. מה מספר הפריטים המינימלי שממלא בדיוק שק בקיבולת 35?",
+        "en": "Item weights are powers of 5: 25, 5, 1 (each divides the previous), unlimited quantity. Minimum number of items to fill a bag of capacity 35 exactly?"
+      },
+      "options": [
+        {
+          "he": "3",
+          "en": "3"
+        },
+        {
+          "he": "5",
+          "en": "5"
+        },
+        {
+          "he": "7",
+          "en": "7"
+        },
+        {
+          "he": "11",
+          "en": "11"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "חמדנות: לוקחים כמה שאפשר מהמשקל הגדול. 35 = 25 + 5 + 5, כלומר 3 פריטים. החמדנות נכונה כאן כי כל משקל מחלק את הגדול ממנו; עבור משקלים כמו 1, 3, 4 היא לא נכונה (6 = 3+3 ולא 4+1+1).",
+        "en": "Greedy: take as many of the largest as possible: 35 = 25+5+5, 3 items. Works because each weight divides the next; fails for weights like 1,3,4."
+      }
+    },
+    {
+      "id": "mcq-008",
+      "node": "huffman",
+      "source": "2022-B-moedA",
+      "ref": "שאלה 1ג",
+      "type": "single",
+      "difficulty": "hard",
+      "basis": "official-solution",
+      "stem": {
+        "he": "במחרוזת S: b מופיעה 2 פעמים, d מופיעה 5 פעמים, c מופיעה x פעמים ו-a מופיעה y פעמים. קוד Huffman: a=0, b=100, c=101, d=11 (0 = אח שמאלי, 1 = אח ימני, והשכיחות של האח השמאלי לא גדולה מזו של הימני). איזה זוג (x, y) אפשרי?",
+        "en": "In S: b appears 2 times, d 5 times, c x times, a y times. Huffman code: a=0, b=100, c=101, d=11 (0=left sibling, 1=right; left frequency ≤ right). Which (x, y) is possible?"
+      },
+      "options": [
+        {
+          "he": "x=3, y=10",
+          "en": "x=3, y=10"
+        },
+        {
+          "he": "x=1, y=5",
+          "en": "x=1, y=5"
+        },
+        {
+          "he": "x=4, y=6",
+          "en": "x=4, y=6"
+        },
+        {
+          "he": "x=2, y=10",
+          "en": "x=2, y=10"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "c ימני ל-b ולכן x ≥ 2. הצומת של b ו-c (משקל x+2) הוא אח שמאלי של d, ולכן x+2 ≤ 5, כלומר x ≤ 3. האלגוריתם מזג קודם את b,c ואחר כך את d, ולכן y ≥ 5. לבסוף a הוא האח השמאלי של כל השאר (משקל x+7): y ≤ x+7. עבור x=2: 5≤y≤9. עבור x=3: 5≤y≤10. לכן רק (3,10) מתאים.",
+        "en": "x≥2 (c right of b), x+2≤5 (BC left of d) so x≤3; y≥5 (Huffman merged b,c,d first); y≤x+7 (a is the left child of the root). x=2: 5≤y≤9; x=3: 5≤y≤10."
+      }
+    },
+    {
+      "id": "mcq-009",
+      "node": "huffman",
+      "source": "2022-B-moedB",
+      "ref": "שאלה 1ב",
+      "type": "multi",
+      "difficulty": "hard",
+      "basis": "official-solution",
+      "stem": {
+        "he": "במחרוזת מעל {a,b,c}: b מופיעה 2 פעמים, a מופיעה x פעמים, c מופיעה y פעמים, ו-2+x+y=10. קוד Huffman: a=1, b=00, c=01. אילו זוגות (x, y) אפשריים? (סמנו את כל הנכונים)",
+        "en": "Over {a,b,c}: b appears 2 times, a x times, c y times, 2+x+y=10. Huffman code a=1, b=00, c=01. Which (x,y) are possible? (select all)"
+      },
+      "options": [
+        {
+          "he": "x=6, y=2",
+          "en": "x=6, y=2"
+        },
+        {
+          "he": "x=5, y=3",
+          "en": "x=5, y=3"
+        },
+        {
+          "he": "x=4, y=4",
+          "en": "x=4, y=4"
+        },
+        {
+          "he": "x=7, y=1",
+          "en": "x=7, y=1"
+        }
+      ],
+      "answer": [
+        0,
+        1
+      ],
+      "explanation": {
+        "he": "c ימני ל-b, ולכן y ≥ 2. a הוא האח הימני של הצומת (b,c) שמשקלו y+2, ולכן x ≥ y+2. עם x+y=8 מקבלים 8 ≥ 2y+2, כלומר y ≤ 3. לכן y∈{2,3}, שנותנים (6,2) ו-(5,3). האפשרות (4,4) מפרה x ≥ y+2, ו-(7,1) מפרה y ≥ 2.",
+        "en": "y≥2 and x≥y+2 with x+y=8 gives y≤3, so y∈{2,3}: (6,2) and (5,3)."
+      }
+    },
+    {
+      "id": "mcq-010",
+      "node": "huffman",
+      "source": "2022-A-moedB",
+      "ref": "שאלה 4",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "official-solution",
+      "stem": {
+        "he": "מלחימים חבלים. עלות הלחמה היא סכום אורכי שני החבלים, והתוצאה היא חבל באורך הסכום. נתונים חבלים באורכים 4, 3, 2, 6. מה העלות המינימלית לחבר אותם לחבל אחד?",
+        "en": "Welding ropes costs the sum of the two lengths and yields a rope of that length. Ropes: 4, 3, 2, 6. Minimum total cost to join them into one?"
+      },
+      "options": [
+        {
+          "he": "27",
+          "en": "27"
+        },
+        {
+          "he": "29",
+          "en": "29"
+        },
+        {
+          "he": "31",
+          "en": "31"
+        },
+        {
+          "he": "33",
+          "en": "33"
+        }
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": {
+        "he": "חמדנות Huffman: מחברים תמיד את שני הקצרים. 2+3=5 (עלות 5), 4+5=9 (עלות 9), 6+9=15 (עלות 15). סך הכול 29. הסדר 4+3, אחר כך 7+2, ואז 9+6 נותן 31. זה בדיוק קוד Huffman בתחפושת.",
+        "en": "Always join the two shortest: 5 + 9 + 15 = 29. The order 4+3, 7+2, 9+6 costs 31. This is Huffman in disguise."
+      }
+    },
+    {
+      "id": "mcq-011",
+      "node": "huffman",
+      "source": "2022-A-moedB",
+      "ref": "שאלה 4",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "derived",
+      "stem": {
+        "he": "מהי הסיבוכיות של האלגוריתם החמדני לבעיית חיבור החבלים כשמשתמשים בערימת מינימום?",
+        "en": "What is the running time of the greedy rope-joining algorithm with a min-heap?"
+      },
+      "options": [
+        {
+          "he": "O(n)",
+          "en": "O(n)"
+        },
+        {
+          "he": "O(n log n)",
+          "en": "O(n log n)"
+        },
+        {
+          "he": "O(n²)",
+          "en": "O(n²)"
+        },
+        {
+          "he": "O(n log² n)",
+          "en": "O(n log² n)"
+        }
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": {
+        "he": "בונים ערימה ב-O(n), ואז n−1 פעמים מבצעים שתי הוצאות מינימום והכנסה אחת, כל אחת ב-O(log n). סך הכול O(n log n), כמו Huffman.",
+        "en": "Build the heap in O(n), then n−1 rounds of 2 extract-mins and 1 insert, each O(log n): O(n log n)."
+      }
+    },
+    {
+      "id": "mcq-012",
+      "node": "kmp",
+      "source": "2022-B-moedA",
+      "ref": "שאלה 1א",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "פונקציית הקידומת π של מחרוזת P מעל {a,b} היא [0,0,0,0,0,1]. איזו מחרוזת P מתאימה?",
+        "en": "The prefix function π of a string P over {a,b} is [0,0,0,0,0,1]. Which P fits?"
+      },
+      "options": [
+        {
+          "he": "abbbba",
+          "en": "abbbba"
+        },
+        {
+          "he": "abbbab",
+          "en": "abbbab"
+        },
+        {
+          "he": "aabbba",
+          "en": "aabbba"
+        },
+        {
+          "he": "ababba",
+          "en": "ababba"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "π[i] הוא אורך הקידומת הארוכה ביותר שהיא גם סיפא של P[1..i]. ב-abbbba התו האחרון a תואם את התו הראשון, ולכן π[6]=1 ושאר הערכים 0. ב-abbbab מתקבל [0,0,0,0,1,2], ב-aabbba מתקבל π[2]=1, וב-ababba מתקבל π[3]=1.",
+        "en": "In abbbba only the last a matches P[1], so π=[0,0,0,0,0,1]. The others give a nonzero value earlier."
+      }
+    },
+    {
+      "id": "mcq-013",
+      "node": "kmp",
+      "source": "2022-B-moedA",
+      "ref": "שאלה 1ב",
+      "type": "tf",
+      "difficulty": "hard",
+      "basis": "official-solution",
+      "stem": {
+        "he": "קיימת מחרוזת P מעל {a,b} שפונקציית הקידומת שלה היא [0,0,1,1,2,1].",
+        "en": "There exists a string P over {a,b} whose prefix function is [0,0,1,1,2,1]."
+      },
+      "options": [
+        {
+          "he": "נכון",
+          "en": "True"
+        },
+        {
+          "he": "לא נכון",
+          "en": "False"
+        }
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": {
+        "he": "π[1]=π[2]=0 ולכן P[1]≠P[2], נניח P=ab… . π[3]=1 נותן P[3]=a, π[4]=1 נותן P[4]=a, π[5]=2 נותן P[5]=b, π[6]=1 נותן P[6]=a. אבל אז המחרוזת היא abaaba והקידומת aba היא גם סיפא, כלומר π[6]=3. סתירה.",
+        "en": "Forcing characters gives P=abaaba, whose π[6] would be 3, not 1. Contradiction."
+      }
+    },
+    {
+      "id": "mcq-014",
+      "node": "kmp",
+      "source": "2022-A-sample",
+      "ref": "שאלה 2",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "derived",
+      "stem": {
+        "he": "KMP(T,P) מחזירה 1 אם P מופיעה ב-T. השלימו את Is_Rotation(T1,T2) שבודקת אם T2 היא רוטציה מעגלית של T1 (שתיהן באורך n): return KMP( ____ ).",
+        "en": "KMP(T,P) returns 1 if P occurs in T. Complete Is_Rotation(T1,T2): return KMP( ____ )."
+      },
+      "options": [
+        {
+          "he": "T1 T1 , T2",
+          "en": "T1 T1 , T2"
+        },
+        {
+          "he": "T1 , T2",
+          "en": "T1 , T2"
+        },
+        {
+          "he": "T1 , T2 T2",
+          "en": "T1 , T2 T2"
+        },
+        {
+          "he": "T1 T2 , T1",
+          "en": "T1 T2 , T1"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "כל הרוטציות של T1 הן תת-מחרוזות באורך n של T1T1. לכן T2 רוטציה של T1 אם ורק אם T2 מופיעה ב-T1T1. סיבוכיות O(n) כי הטקסט באורך 2n והתבנית באורך n.",
+        "en": "Every rotation of T1 is a length-n substring of T1T1. O(n) total."
+      }
+    },
+    {
+      "id": "mcq-015",
+      "node": "kmp",
+      "source": "2022-A-moedB",
+      "ref": "שאלה 3",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "טקסט T ותבנית P מעל {a,b}. מחפשים את כל המקומות שבהם P אינה מתאימה בשום תו: P[j] ≠ T[i+j−1] לכל j. מהו האלגוריתם היעיל ביותר וסיבוכיות הזמן?",
+        "en": "Text T and pattern P over {a,b}. Find all positions where P mismatches in every character. Best algorithm and time?"
+      },
+      "options": [
+        {
+          "he": "מחליפים בתבנית כל a ב-b וכל b ב-a, ומריצים KMP: Θ(n)",
+          "en": "Swap a and b in P and run KMP: Θ(n)"
+        },
+        {
+          "he": "מריצים KMP על P ומחסירים את התוצאות: Θ(n)",
+          "en": "Run KMP on P and subtract the results: Θ(n)"
+        },
+        {
+          "he": "בדיקה נאיבית בכל מקום: Θ(nm)",
+          "en": "Naive check at each position: Θ(nm)"
+        },
+        {
+          "he": "בונים עץ סיפות ל-P: Θ(n log n)",
+          "en": "Build a suffix tree for P: Θ(n log n)"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "מעל א״ב בגודל 2, ״שונה״ שקול ל״שווה למשלים״. P' היא התבנית עם אותיות מוחלפות, והבעיה היא חיפוש מדויק של P' ב-T. KMP פותר ב-Θ(n).",
+        "en": "Over a binary alphabet, 'different' means 'equal to the complement', so exact-match the swapped pattern with KMP: Θ(n)."
+      }
+    },
+    {
+      "id": "mcq-016",
+      "node": "suffix-trees",
+      "source": "2022-B-moedB",
+      "ref": "שאלה 1ג–ד",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "derived",
+      "stem": {
+        "he": "מהי תת-המחרוזת החוזרת (מופיעה לפחות פעמיים) הארוכה ביותר במחרוזת T = ABABABA?",
+        "en": "What is the longest substring of T = ABABABA that occurs at least twice?"
+      },
+      "options": [
+        {
+          "he": "ABABA",
+          "en": "ABABA"
+        },
+        {
+          "he": "ABABAB",
+          "en": "ABABAB"
+        },
+        {
+          "he": "BABAB",
+          "en": "BABAB"
+        },
+        {
+          "he": "ABA",
+          "en": "ABA"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "ABABA מופיעה במקום 1 ובמקום 3 (חופפות). ABABAB מופיעה רק פעם אחת. BABAB גם פעם אחת. ABA מופיעה אבל קצרה יותר. בעץ סיפות מחפשים את הצומת הפנימי העמוק ביותר (לפי אורך המחרוזת מהשורש).",
+        "en": "ABABA occurs at positions 1 and 3. In a suffix tree it is the internal node of greatest string depth."
+      }
+    },
+    {
+      "id": "mcq-017",
+      "node": "suffix-trees",
+      "source": "2023-A-moedA",
+      "ref": "שאלה 2",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "כדי למצוא תת-מחרוזת משותפת ארוכה ביותר של S1 ו-S2, בונים עץ סיפות משותף ל-S1$ ול-S2* (בא״ב קבוע). איך קוראים את התשובה, ומה הסיבוכיות?",
+        "en": "To find the longest common substring of S1 and S2, build a generalized suffix tree of S1$ and S2*. How is the answer read and what is the time?"
+      },
+      "options": [
+        {
+          "he": "הצומת הפנימי העמוק ביותר שבתת-העץ שלו עלים משתי המחרוזות. זמן O(n)",
+          "en": "The deepest internal node whose subtree contains leaves of both strings. O(n)"
+        },
+        {
+          "he": "העלה העמוק ביותר. זמן O(n)",
+          "en": "The deepest leaf. O(n)"
+        },
+        {
+          "he": "הצומת הפנימי העמוק ביותר מכל סוג. זמן O(n²)",
+          "en": "The deepest internal node of any kind. O(n²)"
+        },
+        {
+          "he": "השורש. זמן O(1)",
+          "en": "The root. O(1)"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "סימון הסיפות עם $ ו-* מבטיח שאין סיפה שהיא קידומת של אחרת וגם מאפשר לדעת מאיזו מחרוזת הגיע כל עלה. מסמנים כל צומת פנימי בסוג העלים מתחתיו, ובוחרים את העמוק ביותר עם שני הסוגים. בנייה ב-O(n) ומעבר ב-O(n).",
+        "en": "Mark each internal node with the string types of its leaves; take the deepest node with both. Linear build and traversal."
+      }
+    },
+    {
+      "id": "mcq-018",
+      "node": "suffix-trees",
+      "source": "2022-A-sample",
+      "ref": "שאלת בונוס",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "מהו ה-Suffix Array (אינדקסים מ-1) של banana?",
+        "en": "What is the Suffix Array (1-indexed) of banana?"
+      },
+      "options": [
+        {
+          "he": "[6, 4, 2, 1, 5, 3]",
+          "en": "[6, 4, 2, 1, 5, 3]"
+        },
+        {
+          "he": "[1, 2, 3, 4, 5, 6]",
+          "en": "[1, 2, 3, 4, 5, 6]"
+        },
+        {
+          "he": "[6, 2, 4, 1, 3, 5]",
+          "en": "[6, 2, 4, 1, 3, 5]"
+        },
+        {
+          "he": "[4, 6, 2, 1, 5, 3]",
+          "en": "[4, 6, 2, 1, 5, 3]"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "הסיפות בסדר לקסיקוגרפי: a (6), ana (4), anana (2), banana (1), na (5), nana (3). המערך מכיל את אינדקסי ההתחלה בסדר הזה.",
+        "en": "Sorted suffixes: a(6), ana(4), anana(2), banana(1), na(5), nana(3)."
+      }
+    },
+    {
+      "id": "mcq-019",
+      "node": "mst",
+      "source": "2022-B-moedB",
+      "ref": "שאלה 3ב",
+      "type": "tf",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "אם כל צלעות הגרף הקשיר בעלות משקלים שונים, קיים בדיוק עץ פורש מינימלי אחד.",
+        "en": "If all edge weights of a connected graph are distinct, there is exactly one MST."
+      },
+      "options": [
+        {
+          "he": "נכון",
+          "en": "True"
+        },
+        {
+          "he": "לא נכון",
+          "en": "False"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "אם היו שני עצים מינימליים, אפשר היה להחליף צלע אחת בצלע אחרת שאינה סוגרת מעגל ולקבל אותו משקל כולל, כלומר להצריך שני משקלים שווים. משקלים שונים אינם מאפשרים זאת, ולכן העץ יחיד. (השיטה של Kruskal גם נותנת סדר חד-משמעי.)",
+        "en": "Two different MSTs would need an exchange of two equal-weight edges; distinct weights rule that out."
+      }
+    },
+    {
+      "id": "mcq-020",
+      "node": "mst",
+      "source": "2022-B-moedA",
+      "ref": "שאלה 3",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "עץ צוואר בקבוק מינימלי (MBST) הוא עץ פורש שהצלע הכבדה ביותר בו קלה ככל האפשר. מה נכון?",
+        "en": "A minimum bottleneck spanning tree (MBST) minimizes the weight of the heaviest edge. Which is true?"
+      },
+      "options": [
+        {
+          "he": "כל MST הוא MBST, אבל לא כל MBST הוא MST",
+          "en": "Every MST is an MBST, but not every MBST is an MST"
+        },
+        {
+          "he": "כל MBST הוא MST, אבל לא כל MST הוא MBST",
+          "en": "Every MBST is an MST, but not every MST is an MBST"
+        },
+        {
+          "he": "הם אותו דבר",
+          "en": "They are the same"
+        },
+        {
+          "he": "אין קשר ביניהם",
+          "en": "They are unrelated"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "הוכחה (מתמצית הפתרון): אילו קיים MST שאינו MBST, הצלע הכבדה שלו e₀ כבדה מכל צלעות עץ ה-MBST. בהסרת e₀ נוצרים שני חלקים, ולמסלול ב-MBST ביניהם יש צלע e₁ קלה יותר. החלפת e₀ ב-e₁ נותנת עץ קל יותר, בסתירה למינימליות. בכיוון ההפוך, בגרף משולש עם משקלים 1,2,2 יש MBST שאינו MST.",
+        "en": "If an MST were not an MBST, swapping its heaviest edge for a lighter crossing edge from the MBST gives a lighter tree: contradiction. The converse fails, e.g. a triangle with weights 1,2,2."
+      }
+    },
+    {
+      "id": "mcq-021",
+      "node": "dc-boyer-moore",
+      "source": "2022-A-moedB",
+      "ref": "שאלה 2א",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "נתונות n נקודות במישור. רוצים לדעת אם קיים ישר דרך ראשית הצירים שעליו לפחות 51% מהנקודות. איך פותרים בזמן לינארי?",
+        "en": "Given n points in the plane, is there a line through the origin containing at least 51% of them? Linear-time method?"
+      },
+      "options": [
+        {
+          "he": "מחשבים את השיפוע y/x לכל נקודה, מריצים Boyer-Moore למציאת מועמד לרוב, ובודקים שהוא מופיע לפחות 0.51n פעמים",
+          "en": "Compute slopes y/x, run Boyer-Moore to get a majority candidate, then verify it occurs ≥ 0.51n times"
+        },
+        {
+          "he": "מריצים Boyer-Moore ומחזירים את התוצאה בלי בדיקה",
+          "en": "Run Boyer-Moore and return its answer without verification"
+        },
+        {
+          "he": "ממיינים את השיפועים ובודקים כל זוג: O(n²)",
+          "en": "Sort slopes and check each pair: O(n²)"
+        },
+        {
+          "he": "משתמשים ב-BFS על הנקודות",
+          "en": "BFS over the points"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "נקודות על אותו ישר דרך הראשית הן נקודות בעלות אותו שיפוע (x=0 מקבל שיפוע ∞). Boyer-Moore מחזיר מועמד שהוא איבר הרוב רק אם קיים רוב, ולכן חייבים לספור את המופעים של המועמד. אפשר גם להשתמש ב-Select עם המיקום n/2.",
+        "en": "Same line through the origin = same slope. Boyer-Moore only returns a candidate, so we must count its occurrences. Select(n/2) also works."
+      }
+    },
+    {
+      "id": "mcq-022",
+      "node": "select",
+      "source": "2022-A-moedB",
+      "ref": "שאלה 2ב",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "אותה בעיה, אבל דורשים שעל הישר יהיו לפחות 34% מהנקודות (יותר משליש). אילו מיקומים מבקשים מ-Select במערך השיפועים?",
+        "en": "Same problem with at least 34% of the points (more than a third). Which ranks do we request from Select on the slope array?"
+      },
+      "options": [
+        {
+          "he": "n/3 ו-2n/3 (ובודקים את מספר המופעים של כל אחד)",
+          "en": "n/3 and 2n/3 (and count each)"
+        },
+        {
+          "he": "רק n/2",
+          "en": "Only n/2"
+        },
+        {
+          "he": "רק n/3",
+          "en": "Only n/3"
+        },
+        {
+          "he": "n/4, n/2 ו-3n/4",
+          "en": "n/4, n/2, 3n/4"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "ערך שמופיע יותר משליש מהפעמים חייב לתפוס את אחד מהמיקומים n/3 או 2n/3 במערך הממוין, כי הרצף שלו ארוך יותר משליש. מריצים Select פעמיים, בודקים כל מועמד בזמן O(n), וסך הכול O(n).",
+        "en": "A value covering more than a third of the sorted array must sit at rank n/3 or 2n/3. Two Select calls plus counting: O(n)."
+      }
+    },
+    {
+      "id": "mcq-023",
+      "node": "select",
+      "source": "2022-B-moedB",
+      "ref": "שאלה 2",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "מערך A של n מספרים שונים ומספר k<n. מחלקים אותו לשני מערכים B (בגודל k) ו-C (בגודל n−k) כך שההפרש |Sum(B)−Sum(C)| מקסימלי. מהו האלגוריתם הלינארי?",
+        "en": "Array A of n distinct numbers, k<n. Split into B (size k) and C (size n−k) maximizing |Sum(B)−Sum(C)|. Linear algorithm?"
+      },
+      "options": [
+        {
+          "he": "מריצים Select למציאת האיבר ה-k (או ה-(n−k)), ומחלקים: ה-k הקטנים בקבוצה אחת והשאר בקבוצה השנייה",
+          "en": "Select the k-th (or (n−k)-th) element and split: k smallest into one set, the rest into the other"
+        },
+        {
+          "he": "ממיינים ולוקחים את k הראשונים: O(n log n)",
+          "en": "Sort and take the first k: O(n log n)"
+        },
+        {
+          "he": "בוחרים k איברים באקראי",
+          "en": "Pick k random elements"
+        },
+        {
+          "he": "בעיה NP-קשה",
+          "en": "NP-hard"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "כדי למקסם את ההפרש, הקבוצה הקטנה (בגודל k) צריכה להכיל את k הקטנים או את k הגדולים ביותר, תלוי איזה מהם נותן הפרש גדול יותר. Select נותן את הסף ב-O(n), ואחריו מעבר אחד. סך הכול O(n).",
+        "en": "The extreme k elements (smallest or largest) maximize the difference; Select gives the threshold in O(n)."
+      }
+    },
+    {
+      "id": "mcq-024",
+      "node": "complexity",
+      "source": "2022-B-moedA",
+      "ref": "שאלה 1ד",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "official-solution",
+      "stem": {
+        "he": "הפונקציה Print_lines(n): אם n>1 מדפיסה שורה בזמן O(1) וקוראת פעמיים ל-Print_lines(n/2). מהי סיבוכיות הזמן?",
+        "en": "Print_lines(n): if n>1 prints a line in O(1) and calls Print_lines(n/2) twice. Time complexity?"
+      },
+      "options": [
+        {
+          "he": "Θ(n)",
+          "en": "Θ(n)"
+        },
+        {
+          "he": "Θ(log n)",
+          "en": "Θ(log n)"
+        },
+        {
+          "he": "Θ(n log n)",
+          "en": "Θ(n log n)"
+        },
+        {
+          "he": "Θ(n²)",
+          "en": "Θ(n²)"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "T(n) = 2T(n/2) + O(1). לפי משפט האב, n^(log₂2) = n גדול מ-f(n)=O(1) באופן פולינומי, ולכן מקרה 1: T(n)=Θ(n).",
+        "en": "T(n)=2T(n/2)+O(1). Master theorem case 1: Θ(n)."
+      }
+    },
+    {
+      "id": "mcq-025",
+      "node": "complexity",
+      "source": "2022-B-moedA",
+      "ref": "שאלה 1ד",
+      "type": "tf",
+      "difficulty": "hard",
+      "basis": "official-solution",
+      "stem": {
+        "he": "זמן הריצה Θ(n) של Print_lines הוא פולינומי ביחס לגודל הקלט.",
+        "en": "The Θ(n) running time of Print_lines is polynomial in the input size."
+      },
+      "options": [
+        {
+          "he": "נכון",
+          "en": "True"
+        },
+        {
+          "he": "לא נכון",
+          "en": "False"
+        }
+      ],
+      "answer": [
+        1
+      ],
+      "explanation": {
+        "he": "הקלט הוא המספר n, וגודל הייצוג שלו הוא log n ביטים. זמן n = 2^(log n) הוא אקספוננציאלי בגודל הקלט. לכן זה זמן פסאודו-פולינומי ולא פולינומי.",
+        "en": "The input is the number n, of size log n bits. Time n = 2^(log n) is exponential in input size: pseudo-polynomial."
+      }
+    },
+    {
+      "id": "mcq-026",
+      "node": "dp-lcs",
+      "source": "2022-A-sample",
+      "ref": "שאלה 1",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "מהי הנוסחה הנכונה לאורך תת-הסדרה הפלינדרומית הארוכה ביותר L(i,j) של S[i..j]? (L(i,i)=1, ו-L=0 כש-i>j)",
+        "en": "Which recurrence gives the longest palindromic subsequence L(i,j) of S[i..j]? (L(i,i)=1, L=0 when i>j)"
+      },
+      "options": [
+        {
+          "he": "אם S[i]=S[j] אז L(i+1,j−1)+2, אחרת max(L(i+1,j), L(i,j−1))",
+          "en": "If S[i]=S[j]: L(i+1,j−1)+2, else max(L(i+1,j), L(i,j−1))"
+        },
+        {
+          "he": "אם S[i]=S[j] אז L(i+1,j−1)+1, אחרת min(L(i+1,j), L(i,j−1))",
+          "en": "If S[i]=S[j]: L(i+1,j−1)+1, else min(L(i+1,j), L(i,j−1))"
+        },
+        {
+          "he": "L(i+1,j)+L(i,j−1) תמיד",
+          "en": "Always L(i+1,j)+L(i,j−1)"
+        },
+        {
+          "he": "אם S[i]=S[j] אז L(i+1,j−1), אחרת 0",
+          "en": "If S[i]=S[j]: L(i+1,j−1), else 0"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "אם הקצוות שווים, שניהם יכולים להיות הקצוות של הפלינדרום ומוסיפים 2 לפלינדרום הפנימי. אחרת לפחות אחד מהם לא משתתף, ולוקחים את הטוב מבין השניים. עבור BARCAR התשובה היא 3 (RAR). הסיבוכיות היא O(n²) זמן ומקום, וזה גם LCS של S עם ההיפוך שלה.",
+        "en": "Equal ends: add 2 to the inner palindrome. Otherwise drop one end and take the better. BARCAR → 3 (RAR). O(n²) time and space; equivalent to LCS(S, reverse(S))."
+      }
+    },
+    {
+      "id": "mcq-027",
+      "node": "dp-lcs",
+      "source": "2022-B-moedA",
+      "ref": "שאלה 4",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "C(i,j) הוא מספר הפעמים ש-P[1..j] מופיעה כתת-סדרה של T[1..i]. מהי הנוסחה, ומה C עבור T=abcbac ו-P=abc?",
+        "en": "C(i,j) = number of times P[1..j] occurs as a subsequence of T[1..i]. What is the recurrence and the value of C for T=abcbac, P=abc?"
+      },
+      "options": [
+        {
+          "he": "אם T[i]=P[j]: C(i−1,j−1)+C(i−1,j), אחרת C(i−1,j). התוצאה: 3",
+          "en": "If T[i]=P[j]: C(i−1,j−1)+C(i−1,j), else C(i−1,j). Result: 3"
+        },
+        {
+          "he": "אם T[i]=P[j]: C(i−1,j−1), אחרת 0. התוצאה: 1",
+          "en": "If T[i]=P[j]: C(i−1,j−1), else 0. Result: 1"
+        },
+        {
+          "he": "אם T[i]=P[j]: C(i−1,j−1)+1, אחרת max. התוצאה: 3",
+          "en": "If T[i]=P[j]: C(i−1,j−1)+1, else max. Result: 3"
+        },
+        {
+          "he": "אם T[i]=P[j]: C(i−1,j)+C(i,j−1), אחרת 0. התוצאה: 6",
+          "en": "If T[i]=P[j]: C(i−1,j)+C(i,j−1), else 0. Result: 6"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "כשהתווים שווים אפשר להשתמש בהתאמה הזו (C(i−1,j−1)) או לדלג עליה (C(i−1,j)), ולכן מחברים. כשלא שווים, התו T[i] לא יכול להשתתף. בסיס: C(i,0)=1 ו-C(i,j)=0 כש-i<j. ב-abcbac יש 3 הופעות של abc: (1,2,3), (1,2,6), (1,4,6). הסיבוכיות O(|T|·|P|).",
+        "en": "Equal: use the match or skip it, so add. Not equal: skip. abc occurs 3 times in abcbac. O(|T||P|)."
+      }
+    },
+    {
+      "id": "mcq-028",
+      "node": "dp-lcs",
+      "source": "2022-A-moedB",
+      "ref": "שאלה 1",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "derived",
+      "stem": {
+        "he": "T(S,i,j) אומרת בזמן O(1) אם S[i..j] היא מילה חוקית. C(i) הוא מספר החלקים המינימלי בחיתוך חוקי של S[1..i]. מהי הנוסחה, ומה הסיבוכיות?",
+        "en": "T(S,i,j) says in O(1) whether S[i..j] is a valid word. C(i) is the minimum number of words that split S[1..i]. Recurrence and time?"
+      },
+      "options": [
+        {
+          "he": "C(i) = min over j<i עם T(S,j+1,i)=1 של C(j)+1, עם C(0)=0. זמן O(n²), מקום O(n)",
+          "en": "C(i) = min over j<i with T(S,j+1,i)=1 of C(j)+1, C(0)=0. O(n²) time, O(n) space"
+        },
+        {
+          "he": "C(i) = C(i−1)+1. זמן O(n)",
+          "en": "C(i) = C(i−1)+1. O(n)"
+        },
+        {
+          "he": "C(i) = max over j<i של C(j)+1. זמן O(n²)",
+          "en": "C(i) = max over j<i of C(j)+1. O(n²)"
+        },
+        {
+          "he": "C(i) = C(i/2)+C(i/2). זמן O(n log n)",
+          "en": "C(i) = C(i/2)+C(i/2). O(n log n)"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "המילה האחרונה היא S[j+1..i], ומה שלפניה הוא חיתוך חוקי מינימלי של S[1..j]. מנסים כל j ולוקחים מינימום. מצב ללא חיתוך חוקי מסומן ב-∞. n מצבים, כל אחד בודק עד n אפשרויות.",
+        "en": "The last word is S[j+1..i]; try every j and take the minimum. n states with up to n options each."
+      }
+    },
+    {
+      "id": "mcq-029",
+      "node": "dp-lcs",
+      "source": "2022-B-moedB",
+      "ref": "שאלה 4",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "official-solution",
+      "stem": {
+        "he": "במערך ממוין A ובמספר k רוצים להסיר מספר מינימלי של איברים כך שהפרש המקסימום והמינימום שנותרו לא יעלה על k. עבור A={1,2,5,6,8} ו-k=2, מהו המספר המינימלי להסרה?",
+        "en": "In a sorted array A, remove the fewest elements so that max−min of the remainder is ≤ k. For A={1,2,5,6,8}, k=2, what is the minimum?"
+      },
+      "options": [
+        {
+          "he": "3",
+          "en": "3"
+        },
+        {
+          "he": "2",
+          "en": "2"
+        },
+        {
+          "he": "4",
+          "en": "4"
+        },
+        {
+          "he": "1",
+          "en": "1"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "מחפשים את החלון הגדול ביותר עם הפרש ≤ 2: {1,2} או {5,6} (גודל 2). {6,8} גם גודל 2. אי אפשר 3 איברים. לכן משאירים 2 ומסירים 3 (למשל 1,2,8). אפשר לפתור בעזרת שני מצביעים ב-O(n) כי המערך ממוין.",
+        "en": "The largest window with difference ≤ 2 has 2 elements, so remove 3. Two pointers give O(n) on a sorted array."
+      }
+    },
+    {
+      "id": "mcq-030",
+      "node": "dp-lcs",
+      "source": "2024-A-moedA",
+      "ref": "שאלה 4",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "בעיית המגדל היציב: n תיבות, מערך ממוין לפי רוחב, ותיבה יכולה לשבת על אחרת רק אם בסיסה קטן ממש. מהן הסיבוכיות של DP שמחשב את גובה המגדל המקסימלי, ושל DP שמחזיר גם אילו תיבות לבחור?",
+        "en": "Stable tower: n boxes sorted by width; a box may sit on another only if its base is strictly smaller. Time/space of the DP for the max height, and of the DP that also returns the chosen boxes?"
+      },
+      "options": [
+        {
+          "he": "בשני המקרים זמן O(n²) ומקום O(n) (בשני מוסיפים רק מערך מצביעים)",
+          "en": "Both: O(n²) time, O(n) space (the second just adds a parent array)"
+        },
+        {
+          "he": "גובה: O(n) זמן; שחזור: O(n²) זמן",
+          "en": "Height: O(n) time; reconstruction: O(n²) time"
+        },
+        {
+          "he": "גובה: O(n²) מקום; שחזור: O(n³) מקום",
+          "en": "Height: O(n²) space; reconstruction: O(n³) space"
+        },
+        {
+          "he": "בשני המקרים O(2ⁿ)",
+          "en": "Both O(2ⁿ)"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "יש n ערכי T(i), וכל אחד נבנה מבדיקת עד n−1 תיבות קודמות: O(n²) זמן. הטבלה היא חד-ממדית ולכן O(n) מקום. לשחזור שומרים לכל i את התיבה שמתחתיו (prev), עוד O(n) מקום, ואז הולכים אחורה ב-O(n).",
+        "en": "n values, each scanning up to n−1 predecessors: O(n²) time, one-dimensional table: O(n) space. Reconstruction stores a predecessor array, still O(n)."
+      }
+    },
+    {
+      "id": "mcq-031",
+      "node": "dp-lcs",
+      "source": "2023-A-moedA",
+      "ref": "שאלה 1ב–ג",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "במערך n×n שבו מותר לרדת שורה אחת בכל צעד (לאותה עמודה או לעמודה הבאה), מחפשים את ערך המסלול המקסימלי (רק הערך, לא את המסלול). מהי הסיבוכיות הטובה ביותר של תכנון דינמי?",
+        "en": "In an n×n array where each step goes down one row (same column or next), find only the maximum path value. Best DP complexity?"
+      },
+      "options": [
+        {
+          "he": "זמן O(n²), מקום O(n) (מספיקה שורה קודמת)",
+          "en": "Time O(n²), space O(n) (previous row suffices)"
+        },
+        {
+          "he": "זמן O(n²), מקום O(n²) בהכרח",
+          "en": "Time O(n²), space necessarily O(n²)"
+        },
+        {
+          "he": "זמן O(n³), מקום O(n)",
+          "en": "Time O(n³), space O(n)"
+        },
+        {
+          "he": "זמן O(2ⁿ), מקום O(n)",
+          "en": "Time O(2ⁿ), space O(n)"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "יש n² תאים וכל תא נבנה ב-O(1) משני תאים בשורה הקודמת, ולכן O(n²) זמן. אם רק הערך נדרש, מספיק לשמור שורה אחת (O(n) מקום). אם נדרש גם המסלול עצמו, בדרך כלל שומרים את כל הטבלה: O(n²) מקום. זה ההבדל שהבחינה בודקת בין סעיפים ב' ו-ג'.",
+        "en": "n² cells, O(1) each. Value only: keep a single row, O(n) space. Recovering the path usually needs the full table, O(n²)."
+      }
+    },
+    {
+      "id": "mcq-032",
+      "node": "graph-repr",
+      "source": "2024-A-miluim",
+      "ref": "שאלה 1",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "official-solution",
+      "stem": {
+        "he": "בגרף לא מכוון G נתון צומת x ברשימת סמיכויות. איך בודקים אם x הוא צומת הפרדה (הסרתו מגדילה את מספר רכיבי הקשירות), ומה הסיבוכיות?",
+        "en": "Given vertex x of an undirected graph (adjacency list), how do you test whether x is a cut vertex, and at what cost?"
+      },
+      "options": [
+        {
+          "he": "אם deg(x)≤1 אז לא. אחרת מריצים BFS מאחד משכני x בגרף G−x ובודקים אם כל שאר השכנים הושגו. אם אחד לא, x צומת הפרדה. O(V+E)",
+          "en": "If deg(x)≤1 no. Otherwise BFS from one neighbor of x in G−x; x is a cut vertex iff some other neighbor is unreached. O(V+E)"
+        },
+        {
+          "he": "בודקים אם deg(x)>2. O(1)",
+          "en": "Check deg(x)>2. O(1)"
+        },
+        {
+          "he": "מריצים BFS מ-x ובודקים אם הגרף קשיר. O(V+E)",
+          "en": "BFS from x and check connectivity. O(V+E)"
+        },
+        {
+          "he": "מריצים BFS מכל שכן בנפרד: O(V·E)",
+          "en": "BFS from every neighbor separately: O(V·E)"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "x הוא צומת הפרדה אם ורק אם יש שני שכנים שלו שנמצאים ברכיבי קשירות שונים של G−x. BFS אחד מ-v מגיע לכל שכן באותו רכיב, ולכן מספיק לבדוק את השכנים האחרים. עלות BFS היא O(V+E) ועוד מעבר על deg(x) שכנים.",
+        "en": "x is a cut vertex iff two of its neighbors lie in different components of G−x. A single BFS from one neighbor reveals it."
+      }
+    },
+    {
+      "id": "mcq-033",
+      "node": "randomized",
+      "source": "2023-A-moedA",
+      "ref": "שאלה 3א",
+      "type": "single",
+      "difficulty": "easy",
+      "basis": "official-solution",
+      "stem": {
+        "he": "מה ההבדל בין אלגוריתם מונטה קרלו לאלגוריתם לאס וגאס?",
+        "en": "What is the difference between Monte Carlo and Las Vegas algorithms?"
+      },
+      "options": [
+        {
+          "he": "לאס וגאס תמיד נותן תשובה נכונה אך זמן הריצה אקראי; מונטה קרלו רץ בזמן חסום ועלול לטעות בהסתברות קטנה",
+          "en": "Las Vegas is always correct but its running time is random; Monte Carlo has bounded time but may err with small probability"
+        },
+        {
+          "he": "מונטה קרלו תמיד נכון וזמנו אקראי; לאס וגאס עלול לטעות",
+          "en": "Monte Carlo is always correct with random time; Las Vegas may err"
+        },
+        {
+          "he": "שניהם תמיד נכונים ורצים באותו זמן",
+          "en": "Both are always correct and run in the same time"
+        },
+        {
+          "he": "שניהם עלולים לטעות ושניהם רצים בזמן אקראי",
+          "en": "Both may err and both have random time"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "כדאי לזכור: לאס וגאס הוא ״הקזינו תמיד אומר אמת״ (נכונות מובטחת, זמן צפוי). מונטה קרלו הוא ״זמן קבוע, סיכוי קטן לטעות״. אפשר להמיר לאס וגאס למונטה קרלו בעזרת קיצוץ הריצה, והפוך רק אם יש דרך לאמת את התשובה.",
+        "en": "Las Vegas: guaranteed correct, expected time. Monte Carlo: bounded time, small error probability."
+      }
+    },
+    {
+      "id": "mcq-034",
+      "node": "randomized",
+      "source": "2023-A-moedA",
+      "ref": "שאלה 3ג",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "יש מטבע מוטה שיוצא עץ בהסתברות p (לא ידועה, 0<p<1). איך מקבלים הגרלה הוגנת של 1/2–1/2 בעזרת זוג הטלות (אלגוריתם לאס וגאס)?",
+        "en": "A coin lands heads with unknown probability p (0<p<1). How do you obtain a fair 1/2–1/2 draw using pairs of tosses (Las Vegas)?"
+      },
+      "options": [
+        {
+          "he": "מטילים פעמיים. אם יצא עץ-פלי מחזירים 0, אם פלי-עץ מחזירים 1, ואחרת חוזרים על התהליך",
+          "en": "Toss twice. HT → 0, TH → 1, otherwise repeat"
+        },
+        {
+          "he": "מטילים פעם אחת ומחזירים את התוצאה",
+          "en": "Toss once and return the result"
+        },
+        {
+          "he": "מטילים פעמיים ומחזירים עץ אם יצא לפחות עץ אחד",
+          "en": "Toss twice and return heads if at least one head"
+        },
+        {
+          "he": "מטילים שלוש פעמים וסופרים רוב",
+          "en": "Toss three times and take the majority"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "ההסתברות ל-עץ-פלי היא p(1−p) והיא זהה להסתברות ל-פלי-עץ, בלי קשר לערך של p. לכן בהינתן שהתוצאה אחת משתיהן, הן שוות הסתברות. התהליך חוזר עד שמתקבלת אחת מהן, כלומר זמן הריצה אקראי והתשובה תמיד נכונה: לאס וגאס. מספר ההטלות הצפוי הוא 2/(2p(1−p)).",
+        "en": "P(HT)=P(TH)=p(1−p). Conditioned on one of them occurring the draw is fair. Random number of rounds, always correct: Las Vegas."
+      }
+    },
+    {
+      "id": "mcq-035",
+      "node": "randomized",
+      "source": "2022-A-sample",
+      "ref": "שאלה 3",
+      "type": "single",
+      "difficulty": "medium",
+      "basis": "derived",
+      "stem": {
+        "he": "אליס ובוב רוצים לבדוק אם C=AB עבור מטריצות n×n. כמה זמן לוקח אלגוריתם מונטה קרלו שבוחר וקטור אקראי r∈{0,1}ⁿ ובודק A(Br)=Cr, ומה ההסתברות לטעות?",
+        "en": "Check whether C=AB for n×n matrices. Time of the Monte Carlo algorithm that picks a random r∈{0,1}ⁿ and tests A(Br)=Cr, and its error probability?"
+      },
+      "options": [
+        {
+          "he": "O(n²) זמן; אם C=AB אין טעות, ואם C≠AB הסיכוי לטעות לכל היותר 1/2 בהרצה אחת",
+          "en": "O(n²) time; no error if C=AB, error ≤ 1/2 per run if C≠AB"
+        },
+        {
+          "he": "O(n³) זמן; הסיכוי לטעות 0",
+          "en": "O(n³) time; zero error"
+        },
+        {
+          "he": "O(n²) זמן; הסיכוי לטעות 1/n",
+          "en": "O(n²) time; error 1/n"
+        },
+        {
+          "he": "O(n) זמן; הסיכוי לטעות 1/2",
+          "en": "O(n) time; error 1/2"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "שלוש כפלות מטריצה-וקטור, כל אחת ב-O(n²), בלי לכפול שתי מטריצות. אם C≠AB אז (AB−C)r=0 בהסתברות לכל היותר 1/2. חזרה k פעמים מורידה את הטעות ל-2^(−k). האלגוריתם הנאיבי (כפל מלא) הוא O(n³).",
+        "en": "Three matrix-vector products, O(n²) each. If C≠AB the test passes with probability ≤ 1/2; k repetitions give 2^(−k). Naive multiplication is O(n³)."
+      }
+    },
+    {
+      "id": "mcq-036",
+      "node": "randomized",
+      "source": "2024-A-moedA",
+      "ref": "שאלה 3",
+      "type": "single",
+      "difficulty": "hard",
+      "basis": "derived",
+      "stem": {
+        "he": "לאליס מחרוזת x של n ביטים, לבוב מחרוזת y, והן שונות בביט אחד לכל היותר. אליס שולחת לבוב אינדקס אקראי i ואת xᵢ. בוב עונה ״שווים״ אם xᵢ=yᵢ. אם בפועל המחרוזות שונות בביט אחד, מה ההסתברות שהתשובה נכונה?",
+        "en": "Alice holds x (n bits), Bob holds y; they differ in at most one bit. Alice sends a random index i and x_i. Bob answers 'equal' if x_i=y_i. If the strings actually differ in one bit, what is the probability of a correct answer?"
+      },
+      "options": [
+        {
+          "he": "1/n",
+          "en": "1/n"
+        },
+        {
+          "he": "1/2",
+          "en": "1/2"
+        },
+        {
+          "he": "1 − 1/n",
+          "en": "1 − 1/n"
+        },
+        {
+          "he": "1",
+          "en": "1"
+        }
+      ],
+      "answer": [
+        0
+      ],
+      "explanation": {
+        "he": "התשובה נכונה (״שונים״) רק אם i נפל בדיוק על הביט היחיד שבו הן שונות, והסיכוי לכך הוא 1/n. אם המחרוזות זהות, התשובה ״שווים״ תמיד נכונה. זה אלגוריתם עם טעות חד-צדדית. אליס שולחת log n ביטים לאינדקס ועוד ביט אחד.",
+        "en": "Correct only if i hits the single differing bit: 1/n. If x=y the answer 'equal' is always right: one-sided error. Alice sends ⌈log n⌉+1 bits."
+      }
+    }
+  ]
+}

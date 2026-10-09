@@ -1,0 +1,725 @@
+{
+  "meta": {
+    "policy": "Easy only. Statements are short paraphrases written for this course, not copied from LeetCode. Always link out to LeetCode for the original statement.",
+    "baseUrl": "https://leetcode.com/problems/",
+    "nodesWithoutEasyQuestions": {
+      "topo": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים.",
+      "dp-knapsack": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים.",
+      "greedy-coloring": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים.",
+      "mst": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים.",
+      "select": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים.",
+      "randomized": "אין שאלת Easy אמיתית בנושא. התרגול נעשה דרך שאלות המבחנים."
+    }
+  },
+  "questions": [
+    {
+      "number": 509,
+      "slug": "fibonacci-number",
+      "premium": false,
+      "nodes": [
+        "complexity",
+        "dp-fib"
+      ],
+      "title": {
+        "he": "מספר פיבונאצ'י",
+        "en": "Fibonacci Number"
+      },
+      "statement": {
+        "he": "בהינתן n, החזירו את F(n) כאשר F(0)=0, F(1)=1 ו-F(n)=F(n-1)+F(n-2).",
+        "en": "Given n, return F(n) where F(0)=0, F(1)=1, F(n)=F(n-1)+F(n-2)."
+      },
+      "explanation": {
+        "he": "פתרו בארבע דרכים: רקורסיה נאיבית (O(2ⁿ), רואים למה זה נורא), memoization (O(n) זמן ומקום), טבלה (O(n)), ושני משתנים בלבד (O(n) זמן, O(1) מקום). זו השאלה הכי טובה להבין למה תת-בעיות חופפות הורסות רקורסיה.",
+        "en": "Solve it four ways: naive, memo, table, two variables."
+      }
+    },
+    {
+      "number": 206,
+      "slug": "reverse-linked-list",
+      "premium": false,
+      "nodes": [
+        "complexity"
+      ],
+      "title": {
+        "he": "היפוך רשימה מקושרת",
+        "en": "Reverse Linked List"
+      },
+      "statement": {
+        "he": "הפכו רשימה מקושרת חד-כיוונית והחזירו את הראש החדש.",
+        "en": "Reverse a singly linked list and return the new head."
+      },
+      "explanation": {
+        "he": "פתרו איטרטיבית (שלושה מצביעים, O(1) מקום) ורקורסיבית (O(n) מקום מחסנית). תרגול טוב לחשיבה רקורסיבית וניתוח עומק רקורסיה.",
+        "en": "Solve iteratively and recursively."
+      }
+    },
+    {
+      "number": 231,
+      "slug": "power-of-two",
+      "premium": false,
+      "nodes": [
+        "complexity"
+      ],
+      "title": {
+        "he": "חזקה של 2",
+        "en": "Power of Two"
+      },
+      "statement": {
+        "he": "קבעו אם מספר שלם n הוא חזקה של 2.",
+        "en": "Decide whether integer n is a power of two."
+      },
+      "explanation": {
+        "he": "פתרון בלולאת חלוקה ב-2 הוא O(log n). טריק סיביות: n>0 וגם n&(n-1)==0 הוא O(1). שימושי להבנת מה זה log n.",
+        "en": "Loop dividing by 2 is O(log n); the bit trick n&(n-1)==0 is O(1)."
+      }
+    },
+    {
+      "number": 67,
+      "slug": "add-binary",
+      "premium": false,
+      "nodes": [
+        "dc-karatsuba"
+      ],
+      "title": {
+        "he": "חיבור בינארי",
+        "en": "Add Binary"
+      },
+      "statement": {
+        "he": "בהינתן שתי מחרוזות בינאריות, החזירו את סכומן כמחרוזת בינארית.",
+        "en": "Given two binary strings, return their sum as a binary string."
+      },
+      "explanation": {
+        "he": "חיבור ספרה-ספרה עם נשא (carry), בזמן O(max(n,m)). זו הדרך שבה מחברים מספרים גדולים, ומכינה להבנת עלות הכפל הרגיל O(n²) שקרצובה משפרת.",
+        "en": "Digit-by-digit addition with carry. Warm-up for Karatsuba's cost model."
+      }
+    },
+    {
+      "number": 69,
+      "slug": "sqrtx",
+      "premium": false,
+      "nodes": [
+        "dc-karatsuba"
+      ],
+      "title": {
+        "he": "שורש ריבועי שלם",
+        "en": "Sqrt(x)"
+      },
+      "statement": {
+        "he": "החזירו את השורש הריבועי של x מעוגל כלפי מטה, בלי פונקציית שורש מובנית.",
+        "en": "Return floor(sqrt(x)) without a built-in sqrt."
+      },
+      "explanation": {
+        "he": "חיפוש בינארי על התשובה בטווח [0, x]. בכל צעד מחלקים את הטווח לחצי, בזמן O(log x). זו תבנית 'הפרד ומשול' פשוטה: בעיה אחת קטנה בכל פעם.",
+        "en": "Binary search on the answer, O(log x)."
+      }
+    },
+    {
+      "number": 169,
+      "slug": "majority-element",
+      "premium": false,
+      "nodes": [
+        "dc-boyer-moore"
+      ],
+      "title": {
+        "he": "איבר הרוב",
+        "en": "Majority Element"
+      },
+      "statement": {
+        "he": "במערך באורך n קיים איבר שמופיע יותר מ-n/2 פעמים. מצאו אותו.",
+        "en": "In an array of length n an element appears more than n/2 times. Find it."
+      },
+      "explanation": {
+        "he": "Boyer-Moore: שומרים מועמד ומונה. אותו ערך מגדיל, ערך אחר מקטין, ובאפס מחליפים מועמד. הסיבה שזה עובד: כל זוג של שני ערכים שונים 'מבטל' זה את זה, ואיבר רוב לא יכול להתבטל לגמרי. O(n) זמן ו-O(1) מקום. פתרון נוסף: הפרד ומשול על חצאים.",
+        "en": "Boyer-Moore voting: candidate + counter, O(n) time, O(1) space."
+      }
+    },
+    {
+      "number": 1150,
+      "slug": "check-if-a-number-is-majority-element-in-a-sorted-array",
+      "premium": true,
+      "nodes": [
+        "dc-boyer-moore"
+      ],
+      "title": {
+        "he": "האם מספר הוא איבר רוב במערך ממוין",
+        "en": "Check If a Number Is Majority Element in a Sorted Array"
+      },
+      "statement": {
+        "he": "במערך ממוין ובמספר target, קבעו אם target מופיע יותר מ-n/2 פעמים.",
+        "en": "In a sorted array, decide whether target appears more than n/2 times."
+      },
+      "explanation": {
+        "he": "המערך ממוין, ולכן אם target הוא רוב הוא חייב להופיע במיקום האמצעי. בודקים את הקצוות של הרצף בעזרת חיפוש בינארי: O(log n).",
+        "en": "A majority must cover the middle index; use binary search for run boundaries."
+      }
+    },
+    {
+      "number": 1971,
+      "slug": "find-if-path-exists-in-graph",
+      "premium": false,
+      "nodes": [
+        "graph-repr",
+        "bfs",
+        "dfs",
+        "union-find"
+      ],
+      "title": {
+        "he": "האם קיים מסלול בגרף",
+        "en": "Find if Path Exists in Graph"
+      },
+      "statement": {
+        "he": "בגרף לא מכוון נתונים צומת מקור וצומת יעד. קבעו אם קיים ביניהם מסלול.",
+        "en": "In an undirected graph, decide whether a path exists from source to destination."
+      },
+      "explanation": {
+        "he": "בנו רשימת סמיכויות מרשימת הקשתות ואז הריצו BFS או DFS מהמקור. פתרון שלישי: Union-Find. O(V+E). שאלה אחת שמכסה ארבעה צמתים במפה.",
+        "en": "Build the adjacency list, then BFS/DFS or Union-Find. O(V+E)."
+      }
+    },
+    {
+      "number": 997,
+      "slug": "find-the-town-judge",
+      "premium": false,
+      "nodes": [
+        "graph-repr"
+      ],
+      "title": {
+        "he": "השופט של העיירה",
+        "en": "Find the Town Judge"
+      },
+      "statement": {
+        "he": "n אנשים; ידוע מי סומך על מי. שופט הוא מי שאף אחד לא סומך עליו אבל כולם סומכים עליו. מצאו אותו.",
+        "en": "Find the person trusted by everyone who trusts nobody."
+      },
+      "explanation": {
+        "he": "בגרף מכוון, השופט הוא צומת עם דרגת כניסה n-1 ודרגת יציאה 0. מספיק מערך דרגות אחד: מוסיפים 1 למי שנסמך ומחסירים 1 למי שסומך. O(n+|trust|).",
+        "en": "Judge = in-degree n-1 and out-degree 0."
+      }
+    },
+    {
+      "number": 1791,
+      "slug": "find-center-of-star-graph",
+      "premium": false,
+      "nodes": [
+        "graph-repr"
+      ],
+      "title": {
+        "he": "מרכז גרף כוכב",
+        "en": "Find Center of Star Graph"
+      },
+      "statement": {
+        "he": "בגרף כוכב קיים צומת אחד שמחובר לכל האחרים. מצאו אותו מרשימת הקשתות.",
+        "en": "Find the center of a star graph from its edge list."
+      },
+      "explanation": {
+        "he": "המרכז מופיע בכל קשת. מספיק להסתכל על שתי הקשתות הראשונות ולמצוא את הצומת המשותף: O(1).",
+        "en": "The center is the common endpoint of the first two edges. O(1)."
+      }
+    },
+    {
+      "number": 733,
+      "slug": "flood-fill",
+      "premium": false,
+      "nodes": [
+        "bfs",
+        "dfs"
+      ],
+      "title": {
+        "he": "מילוי צבע",
+        "en": "Flood Fill"
+      },
+      "statement": {
+        "he": "בתמונה (מטריצה) צבעו את כל התאים המחוברים לתא התחלתי בצבע חדש.",
+        "en": "Recolor the connected region of a starting cell in a grid."
+      },
+      "explanation": {
+        "he": "מטריצה היא גרף שבו כל תא מחובר לארבעת שכניו. פתרו פעם ב-BFS ופעם ב-DFS. שימו לב למקרה שבו הצבע החדש שווה לישן, כדי לא להיתקע בלולאה. O(rows*cols).",
+        "en": "A grid is a graph; solve with both BFS and DFS."
+      }
+    },
+    {
+      "number": 111,
+      "slug": "minimum-depth-of-binary-tree",
+      "premium": false,
+      "nodes": [
+        "bfs"
+      ],
+      "title": {
+        "he": "עומק מינימלי של עץ בינארי",
+        "en": "Minimum Depth of Binary Tree"
+      },
+      "statement": {
+        "he": "מצאו את מספר הצמתים במסלול הקצר ביותר מהשורש לעלה.",
+        "en": "Find the shortest root-to-leaf path length."
+      },
+      "explanation": {
+        "he": "BFS לפי רמות עוצר בעלה הראשון שפוגש, ולכן הוא אופטימלי: לא צריך לעבור על כל העץ. זו הדגמה של 'BFS = מסלולים קצרים'.",
+        "en": "Level-order BFS stops at the first leaf."
+      }
+    },
+    {
+      "number": 463,
+      "slug": "island-perimeter",
+      "premium": false,
+      "nodes": [
+        "dfs"
+      ],
+      "title": {
+        "he": "היקף של אי",
+        "en": "Island Perimeter"
+      },
+      "statement": {
+        "he": "במטריצה של 0 ו-1 קיים אי אחד. חשבו את היקפו.",
+        "en": "Compute the perimeter of the single island in a grid."
+      },
+      "explanation": {
+        "he": "DFS מסמן תאים שביקרנו בהם. כל תא יבשה תורם 4 מינוס מספר שכניו שגם יבשה. אפשר גם בלי DFS בסריקה אחת. O(rows*cols).",
+        "en": "DFS or a single scan; each land cell adds 4 minus land neighbours."
+      }
+    },
+    {
+      "number": 104,
+      "slug": "maximum-depth-of-binary-tree",
+      "premium": false,
+      "nodes": [
+        "dfs",
+        "complexity"
+      ],
+      "title": {
+        "he": "עומק מקסימלי של עץ בינארי",
+        "en": "Maximum Depth of Binary Tree"
+      },
+      "statement": {
+        "he": "החזירו את הגובה של עץ בינארי.",
+        "en": "Return the height of a binary tree."
+      },
+      "explanation": {
+        "he": "DFS רקורסיבי: גובה = 1 + max(גובה שמאל, גובה ימין). זמן O(n). המחשה בסיסית של נוסחת נסיגה על עץ.",
+        "en": "height = 1 + max(left, right). O(n)."
+      }
+    },
+    {
+      "number": 112,
+      "slug": "path-sum",
+      "premium": false,
+      "nodes": [
+        "dfs"
+      ],
+      "title": {
+        "he": "סכום מסלול",
+        "en": "Path Sum"
+      },
+      "statement": {
+        "he": "קבעו אם קיים מסלול משורש לעלה שסכומו שווה למספר נתון.",
+        "en": "Decide if a root-to-leaf path sums to a target."
+      },
+      "explanation": {
+        "he": "DFS שמעביר למטה את הסכום שנשאר. בעלה בודקים אם הגענו ל-0. O(n).",
+        "en": "DFS carrying the remaining sum."
+      }
+    },
+    {
+      "number": 703,
+      "slug": "kth-largest-element-in-a-stream",
+      "premium": false,
+      "nodes": [
+        "heap",
+        "huffman"
+      ],
+      "title": {
+        "he": "האיבר ה-k בגודלו בזרם",
+        "en": "Kth Largest Element in a Stream"
+      },
+      "statement": {
+        "he": "ממשו מחלקה שמקבלת מספרים בזה אחר זה ומחזירה בכל שלב את ה-k הגדול ביותר עד כה.",
+        "en": "Design a class returning the k-th largest value after each insertion."
+      },
+      "explanation": {
+        "he": "שומרים min-heap בגודל k. אם הגדלנו מעבר ל-k, מוציאים את המינימום. ראש הערימה הוא התשובה. הוספה ב-O(log k).",
+        "en": "Keep a min-heap of size k."
+      }
+    },
+    {
+      "number": 1046,
+      "slug": "last-stone-weight",
+      "premium": false,
+      "nodes": [
+        "heap",
+        "huffman"
+      ],
+      "title": {
+        "he": "משקל האבן האחרונה",
+        "en": "Last Stone Weight"
+      },
+      "statement": {
+        "he": "בכל צעד לוקחים את שתי האבנים הכבדות ביותר ומנפצים אותן. מה נשאר בסוף?",
+        "en": "Repeatedly smash the two heaviest stones; what remains?"
+      },
+      "explanation": {
+        "he": "max-heap ו-O(n log n). אותה מכניקה בדיוק של אלגוריתם Huffman, שבו מוציאים את שני הקטנים (min-heap) ומחזירים את הסכום.",
+        "en": "Same mechanics as Huffman, with a max-heap."
+      }
+    },
+    {
+      "number": 70,
+      "slug": "climbing-stairs",
+      "premium": false,
+      "nodes": [
+        "dp-principles",
+        "dp-fib"
+      ],
+      "title": {
+        "he": "טיפוס במדרגות",
+        "en": "Climbing Stairs"
+      },
+      "statement": {
+        "he": "אפשר לעלות מדרגה אחת או שתיים בכל צעד. בכמה דרכים מגיעים למדרגה n?",
+        "en": "Count ways to climb n stairs with steps of 1 or 2."
+      },
+      "explanation": {
+        "he": "ways(n) = ways(n-1) + ways(n-2). זה פיבונאצ'י. התחילו מרקורסיה, הוסיפו memoization, ואז עברו לטבלה.",
+        "en": "ways(n) = ways(n-1) + ways(n-2)."
+      }
+    },
+    {
+      "number": 746,
+      "slug": "min-cost-climbing-stairs",
+      "premium": false,
+      "nodes": [
+        "dp-principles"
+      ],
+      "title": {
+        "he": "עלות מינימלית לטיפוס במדרגות",
+        "en": "Min Cost Climbing Stairs"
+      },
+      "statement": {
+        "he": "לכל מדרגה יש מחיר. מותר לעלות 1 או 2, ומתחילים ממדרגה 0 או 1. מה המחיר המינימלי להגיע לראש?",
+        "en": "Minimum cost to reach the top; start at step 0 or 1."
+      },
+      "explanation": {
+        "he": "dp[i] = cost[i] + min(dp[i-1], dp[i-2]). ההגדרה של dp[i] ('המחיר המינימלי להגיע ל-i') היא הצעד החשוב, וכך גם בכל בחינה.",
+        "en": "dp[i] = cost[i] + min(dp[i-1], dp[i-2])."
+      }
+    },
+    {
+      "number": 118,
+      "slug": "pascals-triangle",
+      "premium": false,
+      "nodes": [
+        "dp-principles"
+      ],
+      "title": {
+        "he": "משולש פסקל",
+        "en": "Pascal's Triangle"
+      },
+      "statement": {
+        "he": "בנו את n השורות הראשונות של משולש פסקל.",
+        "en": "Generate the first n rows of Pascal's triangle."
+      },
+      "explanation": {
+        "he": "כל איבר הוא סכום שני האיברים שמעליו. מילוי טבלה של O(n²) מבלי לחשב שוב. דוגמה פשוטה לטבלת DP דו-ממדית.",
+        "en": "Each cell = sum of two above. A first 2D DP table."
+      }
+    },
+    {
+      "number": 1137,
+      "slug": "n-th-tribonacci-number",
+      "premium": false,
+      "nodes": [
+        "dp-fib"
+      ],
+      "title": {
+        "he": "מספר טריבונאצ'י",
+        "en": "N-th Tribonacci Number"
+      },
+      "statement": {
+        "he": "T(0)=0, T(1)=T(2)=1, ו-T(n)=T(n-1)+T(n-2)+T(n-3). חשבו T(n).",
+        "en": "Compute the n-th Tribonacci number."
+      },
+      "explanation": {
+        "he": "אותה שיטה כמו פיבונאצ'י עם שלושה משתנים. O(n) זמן, O(1) מקום.",
+        "en": "Same as Fibonacci with three variables."
+      }
+    },
+    {
+      "number": 121,
+      "slug": "best-time-to-buy-and-sell-stock",
+      "premium": false,
+      "nodes": [
+        "dp-mis"
+      ],
+      "title": {
+        "he": "הזמן הטוב ביותר לקנות ולמכור מניה",
+        "en": "Best Time to Buy and Sell Stock"
+      },
+      "statement": {
+        "he": "נתונים מחירי מניה לפי יום. קנייה ואחריה מכירה אחת: מה הרווח המקסימלי?",
+        "en": "Max profit from one buy followed by one sell."
+      },
+      "explanation": {
+        "he": "עוברים פעם אחת ושומרים את המינימום עד כה. הרווח המקסימלי הוא max(מחיר היום פחות המינימום). חימום לחשיבה על 'מצב' בתכנון דינמי. O(n).",
+        "en": "Track the running minimum. O(n)."
+      }
+    },
+    {
+      "number": 303,
+      "slug": "range-sum-query-immutable",
+      "premium": false,
+      "nodes": [
+        "dp-mis"
+      ],
+      "title": {
+        "he": "שאילתות סכום טווח (מערך קבוע)",
+        "en": "Range Sum Query - Immutable"
+      },
+      "statement": {
+        "he": "בנו מבנה שעונה על שאלות 'מה סכום האיברים בין i ל-j' במהירות.",
+        "en": "Answer many range-sum queries quickly."
+      },
+      "explanation": {
+        "he": "מחשבים מראש סכומי קידומת prefix[i]. כל שאילתה היא prefix[j+1]-prefix[i] ב-O(1). מראה את הרעיון של 'מילוי טבלה פעם אחת ושימוש חוזר'.",
+        "en": "Precompute prefix sums; each query O(1)."
+      }
+    },
+    {
+      "number": 392,
+      "slug": "is-subsequence",
+      "premium": false,
+      "nodes": [
+        "dp-lcs"
+      ],
+      "title": {
+        "he": "האם תת-סדרה",
+        "en": "Is Subsequence"
+      },
+      "statement": {
+        "he": "קבעו אם מחרוזת s היא תת-סדרה של מחרוזת t.",
+        "en": "Decide whether s is a subsequence of t."
+      },
+      "explanation": {
+        "he": "שני מצביעים: עוברים על t ומקדמים את s כשיש התאמה. O(|t|). זו הגדרת תת-סדרה, והיא הבסיס להבנת LCS (שם הסדרה המשותפת היא הארוכה ביותר).",
+        "en": "Two pointers, O(|t|). Foundation for LCS."
+      }
+    },
+    {
+      "number": 1710,
+      "slug": "maximum-units-on-a-truck",
+      "premium": false,
+      "nodes": [
+        "greedy-knapsack"
+      ],
+      "title": {
+        "he": "מקסימום יחידות במשאית",
+        "en": "Maximum Units on a Truck"
+      },
+      "statement": {
+        "he": "לכל סוג תיבה יש כמות ויחידות בתיבה. במשאית מקום ל-truckSize תיבות. מה מקסימום היחידות?",
+        "en": "Maximize units loaded onto a truck."
+      },
+      "explanation": {
+        "he": "ממיינים לפי יחידות לתיבה בסדר יורד ולוקחים כמה שאפשר. זה תרמיל שברי עם 'משקל' 1 לכל תיבה. O(n log n).",
+        "en": "Sort by units per box descending."
+      }
+    },
+    {
+      "number": 455,
+      "slug": "assign-cookies",
+      "premium": false,
+      "nodes": [
+        "greedy-knapsack"
+      ],
+      "title": {
+        "he": "חלוקת עוגיות",
+        "en": "Assign Cookies"
+      },
+      "statement": {
+        "he": "לכל ילד רמת תיאבון ולכל עוגיה גודל. ילד מרוצה אם העוגיה לפחות כגודל התיאבון. כמה ילדים אפשר לשמח?",
+        "en": "Maximize the number of satisfied children."
+      },
+      "explanation": {
+        "he": "ממיינים את שניהם וממצים: נותנים לכל ילד את העוגיה הקטנה ביותר שמספיקה לו. טיעון חילוף קלאסי להוכחת בחירה חמדנית. O(n log n).",
+        "en": "Sort both, give the smallest sufficient cookie."
+      }
+    },
+    {
+      "number": 860,
+      "slug": "lemonade-change",
+      "premium": false,
+      "nodes": [
+        "greedy-knapsack"
+      ],
+      "title": {
+        "he": "עודף בדוכן לימונדה",
+        "en": "Lemonade Change"
+      },
+      "statement": {
+        "he": "לימונדה עולה 5. לקוחות משלמים ב-5, 10 או 20. האם תמיד אפשר לתת עודף?",
+        "en": "Can you always give correct change?"
+      },
+      "explanation": {
+        "he": "חמדנות: עם 20 מעדיפים לתת 10+5 לפני 5+5+5, כי שטרות של 5 נחוצים יותר. זו דוגמה לבחירה חמדנית 'לשמור את המשאב הגמיש'. O(n).",
+        "en": "Prefer giving 10+5 over 5+5+5."
+      }
+    },
+    {
+      "number": 252,
+      "slug": "meeting-rooms",
+      "premium": true,
+      "nodes": [
+        "greedy-asp"
+      ],
+      "title": {
+        "he": "חדרי ישיבות",
+        "en": "Meeting Rooms"
+      },
+      "statement": {
+        "he": "נתונות פגישות כזוגות זמן התחלה וסיום. האם אדם אחד יכול להשתתף בכולן?",
+        "en": "Can one person attend all meetings?"
+      },
+      "explanation": {
+        "he": "ממיינים לפי התחלה ובודקים אם הסיום של כל פגישה אחרי ההתחלה של הבאה. O(n log n). אחר כך עוברים ל-ASP המלא: כמה פגישות מקסימום אפשר לקיים?",
+        "en": "Sort and compare neighbours. O(n log n)."
+      }
+    },
+    {
+      "number": 2037,
+      "slug": "minimum-number-of-moves-to-seat-everyone",
+      "premium": false,
+      "nodes": [
+        "greedy-asp"
+      ],
+      "title": {
+        "he": "מינימום הזזות כדי לשבץ את כולם",
+        "en": "Minimum Number of Moves to Seat Everyone"
+      },
+      "statement": {
+        "he": "n כיסאות ו-n תלמידים עם מיקומים. כל הזזה היא צעד אחד. מה המינימום להושיב את כולם?",
+        "en": "Match students to seats minimizing total moves."
+      },
+      "explanation": {
+        "he": "ממיינים את שניהם ומתאימים לפי הסדר. טיעון החילוף: שתי התאמות 'צולבות' אף פעם לא טובות יותר. O(n log n).",
+        "en": "Sort both and pair in order."
+      }
+    },
+    {
+      "number": 605,
+      "slug": "can-place-flowers",
+      "premium": false,
+      "nodes": [
+        "greedy-asp"
+      ],
+      "title": {
+        "he": "האם אפשר לשתול פרחים",
+        "en": "Can Place Flowers"
+      },
+      "statement": {
+        "he": "בערוגה שורה של עציצים; אסור לשתול פרחים בעציצים סמוכים. האם אפשר לשתול עוד n פרחים?",
+        "en": "Can n more flowers be planted with no two adjacent?"
+      },
+      "explanation": {
+        "he": "שותלים בכל מקום חוקי משמאל לימין. זה אותו רעיון כמו שאלת המסעדות מהמבחן (מרחק מינימלי k בין מסעדות). O(n).",
+        "en": "Plant at the leftmost legal spot. Same idea as the exam's restaurant problem."
+      }
+    },
+    {
+      "number": 28,
+      "slug": "find-the-index-of-the-first-occurrence-in-a-string",
+      "premium": false,
+      "nodes": [
+        "kmp"
+      ],
+      "title": {
+        "he": "האינדקס של ההופעה הראשונה במחרוזת",
+        "en": "Find the Index of the First Occurrence in a String"
+      },
+      "statement": {
+        "he": "החזירו את המקום הראשון שבו needle מופיעה ב-haystack, או -1.",
+        "en": "Return the first index of needle in haystack, or -1."
+      },
+      "explanation": {
+        "he": "הפתרון הנאיבי הוא O(nm). KMP בונה את מערך π של התבנית ומחפש ב-O(n+m). ממשו את KMP במלואו לפחות פעם אחת.",
+        "en": "Naive O(nm); KMP O(n+m)."
+      }
+    },
+    {
+      "number": 459,
+      "slug": "repeated-substring-pattern",
+      "premium": false,
+      "nodes": [
+        "kmp"
+      ],
+      "title": {
+        "he": "תבנית של תת-מחרוזת חוזרת",
+        "en": "Repeated Substring Pattern"
+      },
+      "statement": {
+        "he": "קבעו אם מחרוזת היא כפל של תת-מחרוזת קצרה יותר.",
+        "en": "Is the string a repetition of a shorter substring?"
+      },
+      "explanation": {
+        "he": "טריק: s מתקבלת מחזרות אם ורק אם s נמצאת ב-(s+s) ללא ההופעה הראשונה והאחרונה. אפשר גם דרך π: n-π[n] מחלק את n. אותו רעיון כמו שאלת הרוטציה במבחן.",
+        "en": "s is in (s+s) minus its ends; or use π."
+      }
+    },
+    {
+      "number": 796,
+      "slug": "rotate-string",
+      "premium": false,
+      "nodes": [
+        "kmp"
+      ],
+      "title": {
+        "he": "רוטציה של מחרוזת",
+        "en": "Rotate String"
+      },
+      "statement": {
+        "he": "קבעו אם מחרוזת goal היא רוטציה מעגלית של s.",
+        "en": "Is goal a rotation of s?"
+      },
+      "explanation": {
+        "he": "אורכים שווים ו-goal נמצא ב-(s+s). עם KMP זה O(n). זו בדיוק שאלת הרוטציה ממבחן לדוגמה 2022.",
+        "en": "Equal length and goal in (s+s). Exactly the 2022 sample exam question."
+      }
+    },
+    {
+      "number": 14,
+      "slug": "longest-common-prefix",
+      "premium": false,
+      "nodes": [
+        "suffix-trees"
+      ],
+      "title": {
+        "he": "הקידומת המשותפת הארוכה ביותר",
+        "en": "Longest Common Prefix"
+      },
+      "statement": {
+        "he": "מצאו את הקידומת המשותפת הארוכה ביותר לכל המחרוזות במערך.",
+        "en": "Find the longest common prefix of an array of strings."
+      },
+      "explanation": {
+        "he": "פתרון ישיר: להשוות עמודה אחר עמודה. פתרון עם Trie: מכניסים את כל המילים והולכים מהשורש כל עוד לצומת בן יחיד. מכין להבנת עץ סיפות (trie דחוס).",
+        "en": "Column scan, or walk a trie while nodes have a single child."
+      }
+    },
+    {
+      "number": 1455,
+      "slug": "check-if-a-word-occurs-as-a-prefix-of-any-word-in-a-sentence",
+      "premium": false,
+      "nodes": [
+        "suffix-trees"
+      ],
+      "title": {
+        "he": "האם מילה היא קידומת של מילה במשפט",
+        "en": "Check If a Word Occurs As a Prefix of Any Word in a Sentence"
+      },
+      "statement": {
+        "he": "החזירו את מקום המילה הראשונה במשפט ש-searchWord היא קידומת שלה.",
+        "en": "Return the first word index that has searchWord as a prefix."
+      },
+      "explanation": {
+        "he": "פיצול לפי רווחים ובדיקת startsWith לכל מילה. אם יש הרבה שאילתות על אותו טקסט, בונים Trie. הכנה להבנה למה צריך עץ סיפות.",
+        "en": "Split and check startsWith; use a trie for many queries."
+      }
+    }
+  ]
+}
