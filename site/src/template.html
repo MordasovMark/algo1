@@ -347,7 +347,7 @@ he:{
  islands:"התקדמות לפי אי",badges:"תגים",settings:"הגדרות",sound:"צלילים",lang:"שפה",reset:"איפוס התקדמות",resetSure:"בטוח? לחצו שוב לאיפוס",
  levelUp:function(n){return "עלית לרמה "+n+"!"},badgeNew:"תג חדש: ",streakFreeze:"הקפאת רצף שימשה אותך",
  starsHelp:"★ סיימת את התחנה · ★★ מעל 80% נכון בניסיון ראשון · ★★★ בלי טעויות",
- foot:"השאלות האמריקאיות נגזרו מסעיפים פתוחים בבחינות 2022-2024. שאלות שסומנו טיוטה עדיין לא נבדקו על ידי מתרגל/ת. ההתקדמות נשמרת רק בדפדפן הזה.",
+ foot:"השאלות האמריקאיות נגזרו מסעיפים פתוחים בבחינות 2022-2024. שאלות שסומנו טיוטה עדיין לא נבדקו על ידי מתרגל/ת. ההתקדמות נשמרת בדפדפן, ובענן אם מתחברים עם Google.",
  lcHelp:"סימון של שאלות LeetCode הוא דיווח עצמי.",
  vidNC:"סרטון הסבר של NeetCode",vidSearch:"חפש את הסרטון של NeetCode ביוטיוב",
  levels:["מתחיל","סייר","נווט","קברניט","אלוף הים","מאסטר אלגוריתמים","אגדה"]},
@@ -374,7 +374,7 @@ en:{
  islands:"Progress by island",badges:"Badges",settings:"Settings",sound:"Sounds",lang:"Language",reset:"Reset progress",resetSure:"Sure? Tap again to reset",
  levelUp:function(n){return "Level "+n+" reached!"},badgeNew:"New badge: ",streakFreeze:"A streak freeze saved your streak",
  starsHelp:"★ stop finished · ★★ over 80% right on the first try · ★★★ no mistakes",
- foot:"The multiple-choice questions were derived from open questions in the 2022-2024 exams. Questions marked Draft have not been checked by a TA yet. Progress is stored only in this browser.",
+ foot:"The multiple-choice questions were derived from open questions in the 2022-2024 exams. Questions marked Draft have not been checked by a TA yet. Progress is saved in this browser, and in the cloud if you sign in with Google.",
  lcHelp:"Ticking LeetCode questions is self-reported.",
  vidNC:"NeetCode video explanation",vidSearch:"Find the NeetCode video on YouTube",
  levels:["Beginner","Scout","Navigator","Captain","Sea Champion","Algorithm Master","Legend"]}
@@ -1711,7 +1711,7 @@ function mapHTML(){
   var dq=dailyQ(),dDone=!!S.daily[today()],due=dueIds().length,nx=nextStop();
   var flame='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="var(--c-amber)"/></svg>';
   var h='<div class="bar"><div class="bar-in"><div class="lvl" aria-label="'+esc(t("lvl"))+' '+lv+'">'+lv+'</div><div class="xpbox"><div class="xprow"><b>'+esc(lvlName(lv))+'</b><span dir="ltr">'+S.xp+' / '+b+' '+t("xp")+'</span></div><div class="track"><i style="width:'+pc+'%"></i></div></div><div class="pill" title="'+esc(t("days"))+'">'+flame+(S.streak||0)+'</div><button class="xbtn" data-act="profile" aria-label="'+esc(t("profile"))+'">☰</button></div></div>';
-  h+='<div class="wrap"><div class="hero"><h1>'+esc(t("app"))+'</h1><p>'+esc(t("heroP"))+'</p><button class="btn ghost" data-act="guide" style="margin-top:10px">'+esc(B("איך עובדים על שאלה? כלל 30 הדקות","How to work on a question: the 30-minute rule"))+'</button></div>'+cloudBanner();
+  h+='<div class="wrap"><div class="hero"><h1>'+esc(t("app"))+'</h1><p>'+esc(t("heroP"))+'</p><button class="btn ghost" data-act="guide" style="margin-top:10px">'+esc(B("איך עובדים על שאלה? כלל 30 הדקות","How to work on a question: the 30-minute rule"))+'</button> <a class="btn ghost" href="https://github.com/MordasovMark/algo1" target="_blank" rel="noopener" style="margin-top:10px;text-decoration:none;display:inline-block">'+esc(B("⭐ אהבתם? תנו כוכב ב-GitHub","⭐ Like it? Star it on GitHub"))+'</a></div>'+cloudBanner();
   h+='<div class="quests">';
   h+='<button class="quest hot" data-act="cont"><b>'+esc(t("cont"))+'</b><span>'+(nx?esc(loc(NODES[nx].title)):"")+'</span></button>';
   h+='<button class="quest'+(dDone?" done":"")+'" data-act="daily"'+(dDone?" disabled":"")+'><b>'+esc(t("daily"))+'</b><span>'+esc(dDone?t("dailyDone"):t("dailyGo"))+'</span></button>';
@@ -1720,7 +1720,7 @@ function mapHTML(){
   h+='<button class="quest" data-act="exam"><b>'+esc(t("exam"))+'</b><span>'+esc(t("examSub"))+'</span></button></div>';
   h+='<p class="chip" style="margin-top:6px">'+esc(t("starsHelp"))+'</p>';
   ORDER.forEach(function(w,i){h+=islandHTML(w);if(i<ORDER.length-1)h+='<svg class="wave" viewBox="0 0 400 28" preserveAspectRatio="none" aria-hidden="true"><path d="M0 14 Q25 0 50 14 T100 14 T150 14 T200 14 T250 14 T300 14 T350 14 T400 14" fill="none" stroke="currentColor" stroke-width="3"/></svg>'});
-  h+='<p class="foot">'+esc(t("foot"))+'</p></div>';
+  h+='<p class="foot">'+esc(t("foot"))+' <a href="https://github.com/MordasovMark/algo1" target="_blank" rel="noopener">'+esc(B("הקוד ב-GitHub. כוכב ⭐ עוזר לאחרים למצוא את האתר.","Source on GitHub. A ⭐ helps others find the site."))+'</a></p></div>';
   return h;
 }
 
