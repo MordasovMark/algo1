@@ -26,6 +26,8 @@
    - **Build command:** ריק.
    - **Build output directory:** `site/dist`.
 3. Save and Deploy. תקבלו כתובת `משהו.pages.dev`.
+   - אם האתר מחזיר 404, ה-Build output directory ריק. תקנו ב-**Settings > Build > Build configuration** ל-`site/dist` ופרסו מחדש.
+   - הכתובת הנוכחית: https://algo1-bn0.pages.dev
 4. חזרו ל-Firebase: **Authentication > Settings > Authorized domains > Add domain** והוסיפו את `משהו.pages.dev`. בלי זה ההתחברות לא תעבוד.
 
 ## שלב 3: בדיקה
