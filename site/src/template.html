@@ -303,6 +303,33 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0
 #toast div{background:var(--ink);color:var(--bg);border-radius:14px;padding:10px 16px;font-weight:700;box-shadow:var(--shadow);animation:pop .35s ease-out both;max-width:420px}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:70}
 .foot{margin-top:40px;color:var(--ink2);font-size:.82rem;max-width:56ch}
+/* judge (LeetCode-style runner) */
+.sheet.jwide{max-width:1100px;max-height:96%}
+.jgrid{display:grid;gap:14px}
+@media (min-width:900px){.jgrid{grid-template-columns:minmax(0,5fr) minmax(0,7fr);align-items:start}.jdesc{position:sticky;top:0}}
+.jdesc{display:flex;flex-direction:column;gap:10px}
+.jex{margin:0;padding:10px 12px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;font:13px/1.55 var(--f-code);direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.jcons{margin:0;padding-inline-start:18px;font:13px/1.6 var(--f-code);direction:ltr;text-align:left;color:var(--ink2)}
+.jed{display:flex;flex-direction:column;gap:10px;min-width:0}
+#jcode{display:block;width:100%;min-height:300px;resize:vertical;border:0;border-radius:14px;padding:14px;background:#0f2a3f;color:#e7f2f6;font:14px/1.6 var(--f-code);direction:ltr;text-align:left;tab-size:4;white-space:pre;overflow:auto}
+.jbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.jbar .btn{padding:10px 16px}
+.jst{font-size:.85rem;color:var(--ink2);margin-inline-start:auto}
+.jkeys{font-size:.78rem;color:var(--ink2);margin:0}
+.jv{border:2px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.jv h3{font-family:var(--f-display);font-weight:400;font-size:1.35rem;margin:0}
+.jv.ok{border-color:var(--good)}.jv.ok h3{color:var(--good)}
+.jv.no{border-color:var(--bad)}.jv.no h3{color:var(--bad)}
+.jv p{margin:0}
+.jcase{border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:var(--surface2);display:flex;flex-direction:column;gap:4px}
+.jcase b{font-size:.85rem}
+.jcase.ok{border-color:var(--good)}.jcase.no{border-color:var(--bad)}
+.jk{font-size:.75rem;color:var(--ink2);font-weight:700}
+.jcase pre,.jv pre{margin:0;font:13px/1.5 var(--f-code);direction:ltr;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.jv pre.err{color:var(--bad)}
+.jx{border:2px dashed var(--line);border-radius:12px;padding:8px 12px;font-size:.92rem}
+.jx.ok{border-color:var(--good)}.jx.no{border-color:var(--warn)}
+.chip.ac{color:var(--good);border-color:var(--good)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 @media (max-width:420px){.irow{grid-template-columns:minmax(0,1fr) 64px 40px}.ihead h2{font-size:1.25rem}}
 </style>
@@ -381,7 +408,7 @@ en:{
 };
 
 /* ---------- state ---------- */
-function fresh(){return {open:{},openDone:{},think:{},retry:{},guideSeen:0,xp:0,streak:0,best:0,last:"",freezes:1,ans:{},lc:{},learned:{},badges:{},boss:{},exam:0,daily:{},cleared:0,set:{lang:"he",sound:false}}}
+function fresh(){return {jg:{},open:{},openDone:{},think:{},retry:{},guideSeen:0,xp:0,streak:0,best:0,last:"",freezes:1,ans:{},lc:{},learned:{},badges:{},boss:{},exam:0,daily:{},cleared:0,set:{lang:"he",sound:false}}}
 var mem=null;
 function load(){try{var s=localStorage.getItem(KEY);if(s)return Object.assign(fresh(),JSON.parse(s))}catch(e){}return mem?Object.assign(fresh(),mem):fresh()}
 var S=load();
@@ -1456,7 +1483,7 @@ function guideHTML(){
   return h;
 }
 function openGuide(){document.getElementById("ov").innerHTML=guideHTML();var x=document.getElementById("ox");if(x)x.focus();AIQ=null}
-function closeOv(){document.getElementById("ov").innerHTML="";AIQ=null;if(!S.guideSeen){S.guideSeen=1;save()}}
+function closeOv(){document.getElementById("ov").innerHTML="";AIQ=null;JN=null;if(!S.guideSeen){S.guideSeen=1;save()}}
 (function(){
   var box=document.getElementById("ov");
   box.addEventListener("click",function(e){
@@ -1545,6 +1572,7 @@ function mergeStates(a,b){
     if(!y){r.ans[id]=x;return}
     if(x.ok&&!y.ok)r.ans[id]=x;else if(x.ok===y.ok&&(x.first&&!y.first||(x.first===y.first&&(x.tries||0)>(y.tries||0))))r.ans[id]=x});
   ["think","retry"].forEach(function(key){r[key]=Object.assign({},b[key]||{});Object.keys(a[key]||{}).forEach(function(n){var x=a[key][n],y=r[key][n];if(!y||(x.skip&&!y.skip)||(!y.skip&&x.s&&y.s&&x.s<y.s))r[key][n]=x})});
+  r.jg=Object.assign({},b.jg||{});Object.keys(a.jg||{}).forEach(function(n){var x=a.jg[n],y=r.jg[n]||{};r.jg[n]={t:Math.max(x.t||0,y.t||0),ok:(x.ok&&y.ok?(x.ok<y.ok?x.ok:y.ok):(x.ok||y.ok))}});
   r.open=JSON.parse(JSON.stringify(b.open||{}));
   Object.keys(a.open||{}).forEach(function(q){r.open[q]=r.open[q]||{};Object.keys(a.open[q]).forEach(function(p){var x=a.open[q][p],y=r.open[q][p];
     if(!y||(x.rev&&x.self&&!(y.rev&&y.self))||((x.rev?1:0)===(y.rev?1:0)&&String(x.txt||"").length>String(y.txt||"").length))r.open[q][p]=x})});
@@ -1729,6 +1757,7 @@ function vidLink(q,id){
   var u=q.video?'https://www.youtube.com/watch?v='+q.video:'https://www.youtube.com/results?search_query='+encodeURIComponent('neetcode '+q.title.en+' leetcode '+q.number);
   var lk=thinkOK(q.number)?"":" lk",la=thinkOK(q.number)?"":' data-lock="'+q.number+'"',lic=thinkOK(q.number)?"":"🔒 ";
   var h='<div class="lc-vid">';
+  if(JP[q.number])h+='<button class="vbtn" data-act="judge" data-n="'+q.number+'">⌨ '+esc(B("פתרו כאן","Solve here"))+'</button>'+(S.jg[q.number]&&S.jg[q.number].ok?'<span class="chip ac">✔ Accepted</span>':"");
   if(VIZ["s"+q.number])h+='<button class="vbtn" data-act="viz" data-k="i'+q.number+'" data-id="'+id+'">▶ '+esc(B("הרעיון","The idea"))+'</button><button class="vbtn'+lk+'"'+la+' data-act="viz" data-k="s'+q.number+'" data-id="'+id+'">'+lic+'▶ '+esc(B("הפתרון","The solution"))+'</button>';
   var lk2=retryOK(q.number)?"":" lk",la2=retryOK(q.number)?"":' data-lock2="'+q.number+'"',lic2=retryOK(q.number)?"":"🔒 ";
   h+='<button class="vbtn'+lk2+'"'+la2+' data-act="ai" data-n="'+q.number+'">'+lic2+esc(B("פסאודו-קוד לפייתון (AI)","Pseudocode to Python (AI)"))+'</button>';
@@ -1859,6 +1888,171 @@ function profileHTML(){
   return h;
 }
 
+/* ---------- judge: LeetCode-style runner. Python runs in the student's browser (Pyodide in a Web Worker), no server ---------- */
+var JP=D.judge?D.judge.problems:{},JURL="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/",JKEY="algo1-judge-code-";
+var JW=null,JREADY=false,JFAIL=false,JRUN=null,JSEQ=0,JN=null,JOUT=null;
+BADGES.push({id:"ac1",he:["Accepted!","פתרון ראשון שעבר את כל הטסטים באתר"],en:["Accepted!","First solution that passed every test on the site"],ok:function(){return Object.keys(S.jg||{}).some(function(n){return S.jg[n].ok})}});
+function jCode(n){try{var c=localStorage.getItem(JKEY+n);if(c!=null)return c}catch(e){}return JP[n].starter}
+function jKeep(n,c){try{localStorage.setItem(JKEY+n,c)}catch(e){}}
+function jQ(n){var r=null;D.lc.questions.forEach(function(q){if(String(q.number)===String(n))r=q});return r}
+function jStart(){
+  if(JW)return;JREADY=false;JFAIL=false;
+  var src='importScripts('+JSON.stringify(JURL+"pyodide.js")+');var py,ready=loadPyodide({indexURL:'+JSON.stringify(JURL)+'}).then(function(p){py=p;py.runPython('+JSON.stringify(D.judge.harness)+');postMessage({type:"ready"})}).catch(function(e){postMessage({type:"fatal",error:String(e)})});'+
+    'onmessage=function(ev){ready.then(function(){var m=ev.data,fn=py.globals.get("judge");try{var r=fn(m.src,m.spec,function(s){postMessage({type:"ev",id:m.id,data:JSON.parse(s)})});postMessage({type:"end",id:m.id,data:JSON.parse(r)})}catch(e){postMessage({type:"end",id:m.id,data:{verdict:"RE",error:String(e)}})}finally{fn.destroy()}})};';
+  try{JW=new Worker(URL.createObjectURL(new Blob([src],{type:"text/javascript"})))}catch(e){JFAIL=true;jUpd();return}
+  JW.onmessage=function(ev){var m=ev.data,R=JRUN;
+    if(m.type==="ready"){JREADY=true;jUpd();return}
+    if(m.type==="fatal"){JFAIL=true;JW=null;jUpd();return}
+    if(!R||m.id!==R.id)return;
+    if(m.type==="ev"){if(m.data.start!=null){R.cur=m.data.start;jArm(R.limit)}else if(m.data.result)R.results.push(m.data.result);jUpd();return}
+    if(m.type==="end"){clearTimeout(R.timer);JRUN=null;jFinish(R,m.data)}
+  };
+  JW.onerror=function(){JFAIL=true;JW=null;jUpd()};
+  jUpd();
+}
+function jArm(ms){var R=JRUN;if(!R)return;clearTimeout(R.timer);R.timer=setTimeout(jTimeout,ms)}
+function jTimeout(){
+  // A runaway loop can't be interrupted from outside the worker, so kill it and start a fresh one.
+  var R=JRUN;if(!R)return;JRUN=null;JW.terminate();JW=null;jFinish(R,{tle:R.cur});jStart();
+}
+function jRun(mode){
+  if(!JREADY||JRUN||JN==null)return;
+  var n=JN,P=JP[n],ta=document.getElementById("jcode"),src=ta?ta.value:jCode(n);jKeep(n,src);
+  var tests=P.tests.filter(function(t){return mode==="submit"||t.example});
+  var spec={method:P.method,sig:P.sig,types:P.types||[],ret:P.ret||null,tests:tests,stopOnFail:mode==="submit"};
+  JRUN={id:++JSEQ,n:n,mode:mode,tests:tests,results:[],cur:-1,limit:P.limitMs||2000};
+  JOUT=null;jArm(JRUN.limit+3000);jUpd();
+  JW.postMessage({id:JRUN.id,src:src,spec:JSON.stringify(spec)});
+}
+function jFinish(R,d){
+  var reg=R.tests.filter(function(t){return !t.extra}).length,ok=R.results.filter(function(r){return r.ok&&!R.tests[r.i].extra}).length;
+  var o={n:R.n,mode:R.mode,tests:R.tests,results:R.results,verdict:d.verdict,error:d.error,stdout:d.stdout,passed:d.passed!=null?d.passed:ok,total:d.total!=null?d.total:reg};
+  if(d.tle!=null){
+    if(R.tests[d.tle]&&R.tests[d.tle].extra){o.verdict="AC";o.extraTLE=d.tle;o.passed=o.total=reg}
+    else{o.verdict="TLE";o.tleAt=d.tle;o.passed=ok;o.total=reg}
+  }
+  if(R.mode==="submit"){
+    var g=S.jg[R.n]=S.jg[R.n]||{t:0};g.t=(g.t||0)+1;
+    if(o.verdict==="AC"&&!g.ok){
+      g.ok=today();var gain=S.lc[R.n]?5:20;S.lc[R.n]=1;addXP(gain);touch();confetti();tone(740,.12);setTimeout(function(){tone(988,.16)},120);
+      toast("Accepted! +"+gain+" XP");o.gain=gain;
+    }
+    save();checkBadges();save();render();
+  }
+  JOUT=o;jUpd();
+  // The clicked button was disabled during the run, which drops focus to <body>; put it back.
+  if(String(R.n)===JN&&(!document.activeElement||document.activeElement===document.body)){var fb=document.getElementById(R.mode==="submit"?"jsub":"jrun");if(fb&&!fb.disabled)fb.focus()}
+}
+function jIn(P,t){
+  if(t.label)return loc(t.label);
+  return (P.params||[]).map(function(p,i){return p+" = "+JSON.stringify(t.args[i])}).join("\n");
+}
+function jCase(P,t,r,title){
+  var h='<div class="jcase'+(r?(r.ok?" ok":" no"):"")+'"><b>'+(r?(r.ok?"✔ ":"✘ "):"")+esc(title)+'</b>';
+  h+='<span class="jk">Input</span><pre>'+esc(jIn(P,t))+'</pre>';
+  if(r){
+    if(r.error)h+='<span class="jk">Error</span><pre style="color:var(--bad)">'+esc(r.error)+'</pre>';
+    else h+='<span class="jk">Output</span><pre>'+esc(r.got)+'</pre>';
+    h+='<span class="jk">Expected</span><pre>'+esc(r.want!=null?r.want:t.expected!=null?JSON.stringify(t.expected):"")+'</pre>';
+    if(r.stdout)h+='<span class="jk">Stdout</span><pre>'+esc(r.stdout)+'</pre>';
+  }
+  return h+'</div>';
+}
+function jResHTML(){
+  var R=JRUN;
+  if(R&&R.n!==JN)return '<div class="jv"><p>'+esc(B("מחכה לסיום הבדיקה של שאלה #"+R.n+"…","Waiting for the run on #"+R.n+" to finish…"))+'</p></div>';
+  if(R)return '<div class="jv"><p>'+esc(B("רץ…","Running…"))+(R.cur>=0?' '+esc(B("טסט ","test "))+(R.cur+1)+"/"+R.tests.length:"")+'</p></div>';
+  var o=JOUT;if(!o||String(o.n)!==String(JN))return "";
+  var P=JP[o.n],h="",fail=null;
+  o.results.forEach(function(r){if(!fail&&!r.ok&&!o.tests[r.i].extra)fail=r});
+  if(o.verdict==="CE")return '<div class="jv no"><h3>Syntax Error</h3><p>'+esc(B("הקוד לא עבר קומפילציה. תקנו את השורה המסומנת.","The code did not compile. Fix the marked line."))+'</p><pre class="err">'+esc(o.error)+'</pre></div>';
+  if(!o.results.length&&o.error)return '<div class="jv no"><h3>Runtime Error</h3><pre class="err">'+esc(o.error)+'</pre>'+(o.stdout?'<span class="jk">Stdout</span><pre>'+esc(o.stdout)+'</pre>':"")+'</div>';
+  if(o.mode==="run"){
+    h='<div class="jv'+(o.verdict==="AC"?" ok":" no")+'"><h3>'+esc(o.verdict==="AC"?B("הדוגמאות עברו","Examples passed"):o.verdict==="TLE"?"Time Limit Exceeded":B("יש דוגמה שנכשלה","An example failed"))+'</h3>';
+    o.tests.forEach(function(t,i){
+      var r=o.results.filter(function(x){return x.i===i})[0];
+      if(r)h+=jCase(P,t,r,B("דוגמה ","Example ")+(i+1));
+      else if(o.tleAt===i)h+=jCase(P,t,{ok:false,error:B("איטי מדי, או לולאה אינסופית","Too slow, or an infinite loop"),want:JSON.stringify(t.expected)},B("דוגמה ","Example ")+(i+1));
+    });
+    return h+'<p class="jkeys">'+esc(B("Submit מריץ גם טסטים נסתרים.","Submit also runs hidden tests."))+'</p></div>';
+  }
+  var V={AC:"Accepted",WA:"Wrong Answer",RE:"Runtime Error",TLE:"Time Limit Exceeded"}[o.verdict]||o.verdict;
+  h='<div class="jv'+(o.verdict==="AC"?" ok":" no")+'"><h3>'+(o.verdict==="AC"?"✔ ":"")+esc(V)+'</h3><p>'+esc(B(o.passed+" מתוך "+o.total+" טסטים עברו",o.passed+" / "+o.total+" tests passed"))+(o.gain?' · <b><bdi dir="ltr">+'+o.gain+' XP</bdi></b>':"")+'</p>';
+  if(o.verdict==="TLE"){var tt=o.tests[o.tleAt];
+    h+='<p>'+esc(B("הקוד רץ יותר מ-"+(P.limitMs/1000)+" שניות על הטסט הזה. אולי יש לולאה אינסופית, ואולי הפתרון נכון אבל איטי מדי. מה הסיבוכיות שלו?","The code ran over "+(P.limitMs/1000)+" s on this test. Maybe an infinite loop, or a correct but too slow solution. What is its complexity?"))+'</p>';
+    if(tt)h+=jCase(P,tt,null,B("הטסט","The test"));
+  }else if(fail)h+=jCase(P,o.tests[fail.i],fail,B("הטסט הראשון שנכשל","First failing test"));
+  var xi=-1;o.tests.forEach(function(t,i){if(t.extra)xi=i});
+  if(o.verdict==="AC"&&xi>=0){var xr=o.results.filter(function(r){return r.i===xi})[0],xt=o.tests[xi];
+    if(xr&&xr.ok)h+='<div class="jx ok">⚡ '+esc(B("אתגר יעילות עבר: ","Efficiency challenge passed: ")+loc(xt.label)+" ("+xr.ms+" ms)")+'</div>';
+    else h+='<div class="jx no">🐢 '+esc(B("אתגר יעילות (לא חובה): על "+loc(xt.label)+" הפתרון "+(o.extraTLE!=null?"איטי מדי":"נכשל")+". הוא עובר את האילוצים של LeetCode, אבל אפשר מהר יותר. מה הסיבוכיות שלו, ואיך משפרים אותה?","Efficiency challenge (optional): on "+loc(xt.label)+" the solution "+(o.extraTLE!=null?"is too slow":"fails")+". It passes LeetCode's constraints, but it can be faster. What is its complexity, and how do you improve it?"))+'</div>';
+  }
+  return h+'</div>';
+}
+function jUpd(){
+  if(JN==null)return;
+  var st=document.getElementById("jst"),res=document.getElementById("jres"),busy=!JREADY||!!JRUN;
+  ["jrun","jsub"].forEach(function(id){var b=document.getElementById(id);if(b)b.disabled=busy});
+  if(st)st.textContent=JFAIL?B("לא הצלחנו לטעון את פייתון. בדקו את החיבור ורעננו.","Could not load Python. Check your connection and reload."):!JREADY?B("טוען את פייתון… (בפעם הראשונה כמה שניות)","Loading Python… (a few seconds the first time)"):"";
+  if(res)res.innerHTML=jResHTML();
+}
+function jOpen(n){
+  if(!JP[n])return;AIQ=null;JN=String(n);var P=JP[n],q=jQ(n),g=S.jg[n];
+  var h='<div class="scrim" data-oact="scrim"><div class="sheet modal jwide" role="dialog" aria-modal="true" aria-label="'+esc(loc(q.title))+'"><div class="shead"><span class="core2" style="--ic:var(--brand)">#'+esc(n)+'</span><div style="min-width:0"><h2>'+esc(loc(q.title))+'</h2><div class="row2" style="margin-top:4px"><span class="chip draft">'+esc(B("בטא","Beta"))+'</span>'+(g&&g.ok?'<span class="chip ac">✔ Accepted</span>':"")+(g&&g.t?'<span class="chip">'+esc(B(g.t+" הגשות",g.t+" submissions"))+'</span>':"")+'</div></div><button class="xbtn" data-oact="close" id="ox" aria-label="close">✕</button></div><div class="sbody"><div class="jgrid">';
+  h+='<div class="jdesc"><p>'+esc(loc(q.statement))+'</p>';
+  P.tests.filter(function(t){return t.example}).forEach(function(t,i){
+    h+='<div><div class="sub" style="font-size:.95rem">'+esc(B("דוגמה ","Example ")+(i+1))+'</div><pre class="jex">Input: '+esc(jIn(P,t).replace(/\n/g,", "))+"\nOutput: "+esc(JSON.stringify(t.expected))+'</pre></div>';
+  });
+  h+='<div><div class="sub" style="font-size:.95rem">'+esc(B("אילוצים","Constraints"))+'</div><ul class="jcons">'+(P.constraints||[]).map(function(c){return '<li>'+esc(c)+'</li>'}).join("")+'</ul></div>';
+  h+='<p class="ivn">'+esc(B("הניסוח כאן מקוצר. הטסטים נכתבו על ידינו. הקוד רץ אצלכם בדפדפן.","The statement here is shortened. The tests are our own. The code runs in your browser."))+' <a href="https://leetcode.com/problems/'+esc(q.slug)+'/" target="_blank" rel="noopener">LeetCode ↗</a></p></div>';
+  h+='<div class="jed"><label class="jk" for="jcode">Python 3</label><textarea id="jcode" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea>';
+  h+='<div class="jbar"><button class="btn ghost" id="jrun" data-oact="jrun">▶ Run</button><button class="btn" id="jsub" data-oact="jsub">Submit</button><button class="toggle" data-oact="jreset">'+esc(B("קוד התחלה","Starter code"))+'</button><span class="jst" id="jst" aria-live="polite"></span></div>';
+  h+='<p class="jkeys">'+esc(B("Ctrl+Enter הגשה · Ctrl+' הרצה · Tab הזחה · Esc ואז Tab כדי לצאת מהעורך","Ctrl+Enter submit · Ctrl+' run · Tab indent · Esc then Tab to leave the editor"))+'</p>';
+  h+='<div id="jres" aria-live="polite"></div></div></div></div></div></div>';
+  document.getElementById("ov").innerHTML=h;
+  var ta=document.getElementById("jcode");ta.value=jCode(n);
+  ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length);
+  jStart();jUpd();
+}
+(function(){
+  var box=document.getElementById("ov");
+  box.addEventListener("click",function(e){
+    if(JN==null)return;var el=e.target.closest("[data-oact]");if(!el)return;var a=el.getAttribute("data-oact");
+    if(a==="jrun")jRun("run");
+    else if(a==="jsub")jRun("submit");
+    else if(a==="jreset"){var ta=document.getElementById("jcode");ta.value=JP[JN].starter;jKeep(JN,ta.value);ta.focus()}
+  });
+  box.addEventListener("input",function(e){if(e.target.id==="jcode"&&JN!=null)jKeep(JN,e.target.value)});
+  // On document in the capture phase, so this runs before the other #ov and document Escape handlers
+  // (which would also close the sheet behind), and still works when focus has fallen back to <body>.
+  document.addEventListener("keydown",function(e){
+    if(JN==null)return;
+    var ta=e.target;
+    if(e.key==="Escape"){e.stopPropagation();
+      // In the editor, the first Esc only lets the next Tab leave the editor; a second Esc closes.
+      if(ta.id==="jcode"&&!ta.dataset.esc)ta.dataset.esc="1";else closeOv();
+      return}
+    if(ta.id!=="jcode")return;
+    var esc1=ta.dataset.esc;delete ta.dataset.esc;
+    if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){e.preventDefault();jRun("submit");return}
+    if((e.ctrlKey||e.metaKey)&&e.key==="'"){e.preventDefault();jRun("run");return}
+    var v=ta.value,s=ta.selectionStart,en=ta.selectionEnd,ls=v.lastIndexOf("\n",s-1)+1;
+    if(e.key==="Tab"&&!esc1&&!e.ctrlKey&&!e.altKey&&!e.metaKey){
+      e.preventDefault();
+      if(e.shiftKey){var m=/^ {1,4}/.exec(v.slice(ls));if(m){ta.setRangeText("",ls,ls+m[0].length,"preserve");ta.setSelectionRange(Math.max(ls,s-m[0].length),Math.max(ls,en-m[0].length))}}
+      else ta.setRangeText("    ",s,en,"end");
+      jKeep(JN,ta.value);return;
+    }
+    if(e.key==="Enter"&&!e.shiftKey&&!e.ctrlKey&&!e.metaKey&&!e.altKey){
+      var line=v.slice(ls,s),ind=/^\s*/.exec(line)[0];if(/:\s*(#.*)?$/.test(line))ind+="    ";
+      e.preventDefault();ta.setRangeText("\n"+ind,s,en,"end");jKeep(JN,ta.value);return;
+    }
+    if(e.key==="Backspace"&&s===en&&s>ls&&/^ +$/.test(v.slice(ls,s))){
+      var k=(s-ls)%4||4;e.preventDefault();ta.setRangeText("",s-k,s,"end");jKeep(JN,ta.value);
+    }
+  },true);
+})();
+
 /* ---------- render + events ---------- */
 function render(){
   var keep=null,had=false,sb=document.querySelector(".scrim .sbody");if(sb){keep=sb.scrollTop;had=true}
@@ -1889,6 +2083,7 @@ app.addEventListener("click",function(e){
    case "openlist":openOList(null);break;
    case "openq-node":openOList(el.getAttribute("data-id"));break;
    case "ai":openAI(el.getAttribute("data-n"));break;
+   case "judge":jOpen(el.getAttribute("data-n"));break;
    case "tstart":S.think[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("הטיימר התחיל. בהצלחה!","Timer started. Good luck!"));render();break;
    case "rstart":S.retry[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("בהצלחה בניסיון השני!","Good luck on the second try!"));render();break;
    case "rskip":{var rn=el.getAttribute("data-n");S.retry[rn]=Object.assign(S.retry[rn]||{s:Date.now()},{skip:1});save();render();break}
