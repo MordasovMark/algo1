@@ -1,3 +1,12 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="תרגול לאלגוריתמים 1: מפת מסע לפי שבועות, שאלות ממבחני עבר, LeetCode בעברית וויזואליזציות.">
+<meta name="theme-color" content="#0b7f86">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>המסע אל עבר הארגזים</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -126,6 +135,28 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0
 .lc summary{cursor:pointer;color:var(--brand);font-weight:700}
 .lc details p{margin-top:6px}
 .sub{font-family:var(--f-display);font-size:1.05rem}
+
+/* today card: one primary action, daily goal, streak, exam countdown */
+.hero.slim{padding-block:16px 0}
+.hero.slim h1{font-size:clamp(1.5rem,6vw,2rem)}
+.today{margin-top:12px;background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:12px}
+.today h2{font-size:1.45rem}
+.tline{margin:2px 0 0;color:var(--ink2);font-size:.95rem}
+.tline.hot{color:var(--warn);font-weight:700}
+.goal .track{height:12px}
+.goal .track i{background:var(--good)}
+.cta{display:flex;flex-direction:column;align-items:flex-start;gap:2px;width:100%;text-align:start;font-size:1.15rem;padding:14px 18px}
+.cta small{font-weight:500;font-size:.85rem;opacity:.9}
+.exam{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;font-size:.92rem;color:var(--ink2)}
+.exam b{color:var(--ink)}
+.exam input{font:inherit;color:var(--ink);background:var(--surface2);border:2px solid var(--line);border-radius:10px;padding:4px 8px}
+.tlinks{display:flex;flex-wrap:wrap;gap:6px 16px}
+.linkbtn{border:0;background:none;padding:2px 0;color:var(--brand);font-weight:700;text-decoration:underline;text-underline-offset:3px;font-size:.92rem}
+.moreh{margin:22px 0 0;font-family:var(--f-display);font-weight:400;font-size:1.1rem}
+.tmr{margin-top:18px;padding:14px 16px;border:2px dashed var(--sun);border-radius:16px;background:var(--surface);text-align:start;display:flex;flex-direction:column;gap:8px}
+.tmr b{font-family:var(--f-display);font-weight:400;font-size:1.15rem}
+.tmr ul{margin:0;padding-inline-start:4px;list-style:none;display:flex;flex-direction:column;gap:4px}
+.rtime{font:inherit;font-size:1.2rem;color:var(--ink);background:var(--surface2);border:2px solid var(--line);border-radius:12px;padding:8px 12px;align-self:flex-start}
 
 /* quiz */
 .qtop{display:flex;align-items:center;gap:12px;padding-block:14px 8px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
@@ -269,12 +300,6 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0
 .ivid a.alt{border-style:dashed}
 .ivn{margin:0;font-size:.82rem;color:var(--ink2)}
 #ov .scrim{z-index:55}
-.lc-think{padding:0 12px 8px;display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;font-weight:500}
-.lc-think.ok{color:var(--good);font-size:.9rem}
-.lc-think .btn{padding:8px 14px;font-size:.95rem}
-.lkn{font-size:.82rem;color:var(--ink2)}
-.lk{opacity:.55}
-.lk:hover{opacity:.85}
 .vfield textarea{font-family:var(--f-code);font-size:.9rem;color:var(--ink);background:var(--surface2);border:2px solid var(--line);border-radius:10px;padding:10px;width:100%;resize:vertical;min-height:140px}
 .aiout{margin:0;padding:12px;background:var(--surface2);border:1px solid var(--line);border-radius:12px;overflow:auto;font-family:var(--f-code);font-size:.85rem;white-space:pre;color:var(--ink);max-height:300px;text-align:left}
 .aiout.small{max-height:200px;font-size:.78rem;white-space:pre-wrap}
@@ -288,6 +313,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:400;text-wrap:balance;margin:0
 .gai>div{border:2px solid var(--line);border-radius:14px;padding:10px 12px;background:var(--surface2)}
 .gai ul{margin:6px 0 0;padding-inline-start:18px;font-size:.92rem}
 .olist{display:flex;flex-direction:column;gap:8px}
+.lkn{font-size:.82rem;color:var(--ink2)}
 .oq{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:start;border:2px solid var(--line);background:var(--surface2);border-radius:14px;padding:10px 12px;color:var(--ink)}
 .oq b{font-family:var(--f-display);font-weight:400}
 .oq span{grid-column:1;font-size:.82rem;color:var(--ink2)}
@@ -381,10 +407,11 @@ en:{
 };
 
 /* ---------- state ---------- */
-function fresh(){return {open:{},openDone:{},think:{},retry:{},guideSeen:0,xp:0,streak:0,best:0,last:"",freezes:1,ans:{},lc:{},learned:{},badges:{},boss:{},exam:0,daily:{},cleared:0,set:{lang:"he",sound:false}}}
+function fresh(){return {dxp:{d:"",xp:0,hit:0},gdays:0,open:{},openDone:{},think:{},retry:{},guideSeen:0,xp:0,streak:0,best:0,last:"",freezes:1,ans:{},lc:{},learned:{},badges:{},boss:{},exam:0,daily:{},cleared:0,set:{lang:"he",sound:false,goal:30,examDate:""}}}
 var mem=null;
 function load(){try{var s=localStorage.getItem(KEY);if(s)return Object.assign(fresh(),JSON.parse(s))}catch(e){}return mem?Object.assign(fresh(),mem):fresh()}
 var S=load();
+(function(){var i=0,t=new Date();t.setHours(0,0,0,0);Object.keys(S.ans).forEach(function(k){var a=S.ans[k];if(a.ok&&!a.due&&a.box==null){a.box=1;a.due=t.getTime()+(1+(i++%5))*DAY}});if(i)try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}})();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}try{mem=JSON.parse(JSON.stringify(S))}catch(e){}cloudDirty()}
 function L(){return S.set.lang==="en"?"en":"he"}
 function t(k){var v=T[L()][k];return v===undefined?k:v}
@@ -442,8 +469,18 @@ function touch(){
   S.last=d;if(S.streak>0&&S.streak%7===0)S.freezes=Math.min(2,S.freezes+1);
   S.best=Math.max(S.best||0,S.streak);
 }
+var BOX=[1,3,7,16,35];
+function dayStart(ts){var d=new Date(ts);d.setHours(0,0,0,0);return d.getTime()}
+function goal(){return S.set.goal||30}
+function todayXP(){return S.dxp&&S.dxp.d===today()?S.dxp.xp:0}
+function gapDays(){return S.last?Math.round((new Date(today())-new Date(S.last))/DAY):-1}
+function liveStreak(){var g=gapDays();return g>=0&&(g<=1||(g===2&&S.freezes>0))?(S.streak||0):0}
+function daysTo(ds){return ds?Math.round((new Date(ds)-new Date(today()))/DAY):null}
+function dueBy(ts){return Object.keys(S.ans).filter(function(k){var a=S.ans[k];return a.due&&a.due<=ts&&MCQ[k]}).length}
 function addXP(n){
   if(!n)return;var before=level(S.xp);S.xp+=n;var after=level(S.xp);
+  var d=today();if(!S.dxp||S.dxp.d!==d)S.dxp={d:d,xp:0,hit:0};S.dxp.xp+=n;
+  if(!S.dxp.hit&&S.dxp.xp>=goal()){S.dxp.hit=1;if(S.gdl!==d){S.gdl=d;S.gdays=(S.gdays||0)+1}setTimeout(function(){toast(B("🎯 עמדתם ביעד היומי! נתראה מחר","🎯 Daily goal reached! See you tomorrow"));confetti();tone(880,.18)},500)}
   if(after>before){toast(t("levelUp")(after)+" "+lvlName(after));confetti();tone(660,.12);setTimeout(function(){tone(880,.18)},130)}
 }
 var BADGES=[
@@ -453,7 +490,8 @@ var BADGES=[
  {id:"boss",he:["צייד בוסים","ניצחון ראשון על בוס"],en:["Boss hunter","First boss win"],ok:function(){return Object.keys(S.boss).length>0}},
  {id:"island",he:["אי כבוש","סיימת את כל התחנות באי"],en:["Island cleared","Finished every stop on an island"],ok:function(){return ORDER.some(islandDone)}},
  {id:"lc10",he:["מתמיד","10 שאלות LeetCode"],en:["Persistent","10 LeetCode questions"],ok:function(){return Object.keys(S.lc).length>=10}},
- {id:"review",he:["חוזר חזק","5 שאלות חזרה נכונות"],en:["Comeback","5 review questions fixed"],ok:function(){return S.cleared>=5}},
+ {id:"goal7",he:["שבוע של יעדים","7 ימים שעמדתם ביעד היומי"],en:["Goal week","Hit the daily goal on 7 days"],ok:function(){return (S.gdays||0)>=7}},
+ {id:"review",he:["חוזר חזק","5 שאלות חזרה נכונות"],en:["Comeback","5 review questions right"],ok:function(){return S.cleared>=5}},
  {id:"exam",he:["מבחן אש","סימולציה בציון 70 ומעלה"],en:["Trial by fire","Exam simulation at 70+"],ok:function(){return S.exam>=70}}
 ];
 function checkBadges(){
@@ -1352,29 +1390,7 @@ LCV[733][0]=gFlood;LCV[463][0]=gPerim;
   });
 })();
 
-/* ---------- guide, think timers, AI helper ---------- */
-var THINK=30*60000,RETRY=15*60000,PEND={};
-function thinkOK(n){var t=S.think&&S.think[n];return !!(t&&(t.skip||(t.s&&Date.now()-t.s>=THINK)))}
-function retryOK(n){var t=S.retry&&S.retry[n];return !!(t&&(t.skip||(t.s&&Date.now()-t.s>=RETRY)))}
-function fmtMS(ms){ms=Math.max(0,Math.ceil(ms/1000));return Math.floor(ms/60)+":"+("0"+(ms%60)).slice(-2)}
-function thinkHTML(q){
-  var n=q.number,t=S.think&&S.think[n],r=S.retry&&S.retry[n];
-  if(!thinkOK(n)){
-    if(t&&t.s)return '<div class="lc-think"><span>⏱ '+esc(B("שלב 1, חשיבה לבד: נשארו ","Step 1, think on your own: left "))+'<b class="tk" data-n="'+n+'" data-st="1">'+fmtMS(THINK-(Date.now()-t.s))+'</b></span><button class="vbtn" data-act="tskip" data-n="'+n+'">'+esc(B("אני תקוע/ה, פתחו לי","I'm stuck, unlock"))+'</button></div>';
-    return '<div class="lc-think"><button class="btn sun" data-act="tstart" data-n="'+n+'">⏱ '+esc(B("שלב 1: 30 דקות חשיבה לבד","Step 1: 30 minutes of thinking on your own"))+'</button><span class="lkn">'+esc(B("הסרטון, ההסבר וההדגמה נעולים. אחריהם: ניסיון נוסף, ורק אז AI.","The video, explanation and solution demo stay locked. After them: try again, and only then AI."))+'</span></div>';
-  }
-  if(retryOK(n))return '<div class="lc-think ok">✓ '+esc(B("חשבתם, צפיתם ונסיתם שוב. עוזר ה-AI פתוח.","You thought, watched and tried again. The AI helper is unlocked."))+'</div>';
-  if(r&&r.s)return '<div class="lc-think"><span>⏱ '+esc(B("שלב 3, ניסיון נוסף אחרי הסרטון: נשארו ","Step 3, try again after the video: left "))+'<b class="tk" data-n="'+n+'" data-st="2">'+fmtMS(RETRY-(Date.now()-r.s))+'</b></span><button class="vbtn" data-act="rskip" data-n="'+n+'">'+esc(B("ניסיתי, פתחו AI","I tried, unlock AI"))+'</button></div>';
-  return '<div class="lc-think"><span>✓ '+esc(B("שלב 2: צפו עכשיו בסרטון המצורף (או בהדגמת הפתרון).","Step 2: now watch the attached video (or the solution demo)."))+'</span><button class="btn sun" data-act="rstart" data-n="'+n+'">'+esc(B("צפיתי. שלב 3: מנסה שוב (15 דקות)","Watched. Step 3: trying again (15 min)"))+'</button></div>';
-}
-setInterval(function(){
-  var again=false;
-  [].forEach.call(document.querySelectorAll(".tk"),function(el){
-    var n=el.getAttribute("data-n"),st=el.getAttribute("data-st"),o=st==="2"?S.retry&&S.retry[n]:S.think&&S.think[n];if(!o||!o.s)return;
-    var left=(st==="2"?RETRY:THINK)-(Date.now()-o.s);if(left<=0)again=true;else el.textContent=fmtMS(left)});
-  if(again){toast(B("השלב הסתיים.","The step is finished."));render()}
-},1000);
-
+/* ---------- guide, AI helper ---------- */
 function copyText(txt){
   function fb(){try{var ta=document.createElement("textarea");ta.value=txt;ta.style.position="fixed";ta.style.opacity="0";document.body.appendChild(ta);ta.select();var ok=document.execCommand("copy");document.body.removeChild(ta);toast(ok?B("הועתק","Copied"):B("לא הצלחתי להעתיק. סמנו ידנית.","Could not copy. Select it manually."))}catch(e){toast(B("לא הצלחתי להעתיק. סמנו ידנית.","Could not copy. Select it manually."))}}
   try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(function(){toast(B("הועתק","Copied"))},fb)}else fb()}catch(e){fb()}
@@ -1442,16 +1458,16 @@ function guideHTML(){
   var steps=[
    [B("1. קראו והבינו","1. Read and understand"),B("5 דקות","5 min"),B("הבינו קלט ופלט. פתרו ידנית שתי דוגמאות על דף. כפתור 'הרעיון' בכל שאלה מראה דוגמה שלמה.","Understand input and output. Solve two examples by hand. The 'idea' button on every question shows a full example.")],
    [B("2. רעיון ופסאודו-קוד","2. Idea and pseudocode"),B("30 דקות, לבד","30 min, alone"),B("איזו תבנית מהאי מתאימה? כתבו פסאודו-קוד על נייר (בעברית או באנגלית). זה גם מה שנבחנים עליו בבחינה. בדקו אותו על הדוגמאות.","Which pattern from the island fits? Write pseudocode on paper (Hebrew or English). That is also what the exam tests. Trace it on the examples.")],
-   [B("3. צפו בסרטון","3. Watch the video"),B("אחרי 30 דקות","after 30 min"),B("רק עכשיו נפתחים: הסרטון המצורף, הסבר הפתרון וההדגמה 'הפתרון'. צפו, ואל תעתיקו.","Only now do these unlock: the attached video, the explanation and the 'solution' demo. Watch, do not copy.")],
+   [B("3. צפו בסרטון","3. Watch the video"),B("אחרי 30 דקות","after 30 min"),B("עכשיו זה הזמן לסרטון, להסבר ולהדגמה 'הפתרון'. צפו, ואל תעתיקו.","Now is the time for the video, the explanation and the 'solution' demo. Watch, do not copy.")],
    [B("4. נסו שוב","4. Try again"),B("15 דקות","15 min"),B("סגרו את הסרטון וכתבו שוב את הפתרון מהראש, בפסאודו-קוד שלכם.","Close the video and write the solution again from memory, as your own pseudocode.")],
-   [B("5. ואז AI","5. Then AI"),B("רק עכשיו","only now"),B("הדביקו את הפסאודו-קוד שלכם בפרומפט המוכן, וה-AI יתרגם אותו לפייתון של LeetCode. הוא מתרגם, לא פותר.","Paste your pseudocode into the ready prompt and the AI turns it into LeetCode Python. It translates, it does not solve.")]
+   [B("5. ואז AI","5. Then AI"),B("בסוף","last"),B("הדביקו את הפסאודו-קוד שלכם בפרומפט המוכן, וה-AI יתרגם אותו לפייתון של LeetCode. הוא מתרגם, לא פותר.","Paste your pseudocode into the ready prompt and the AI turns it into LeetCode Python. It translates, it does not solve.")]
   ];
   var h='<div class="scrim" data-oact="scrim"><div class="sheet modal" role="dialog" aria-modal="true" aria-label="'+esc(B("איך עובדים על שאלה","How to work on a question"))+'"><div class="shead"><span class="core2" style="--ic:var(--sun);color:var(--sun-ink)">30</span><div style="min-width:0"><h2>'+esc(B("איך עובדים על שאלה","How to work on a question"))+'</h2><div class="chip" style="margin-top:4px">'+esc(B("חשיבה, סרטון, ניסיון נוסף, ואז AI","Think, video, try again, then AI"))+'</div></div><button class="xbtn" data-oact="gclose" id="ox" aria-label="close">✕</button></div><div class="sbody">';
   h+='<p>'+esc(B("הלמידה האמיתית קורית כשמתקשים. אם תראו פתרון או תשאלו AI אחרי שתי דקות, תרגישו שהבנתם, ובבחינה (על נייר, בלי AI) זה לא יחזיק. הסדר הזה מחזיק אתכם בתוך הבעיה מספיק זמן כדי ללמוד.","Real learning happens while you struggle. If you look at a solution or ask an AI after two minutes you will feel you understood, and in the exam (on paper, no AI) it will not hold. This order keeps you inside the problem long enough to learn."))+'</p>';
   h+='<ol class="gsteps">'+steps.map(function(s){return '<li><div class="gst"><b>'+esc(s[0])+'</b><span class="chip">'+esc(s[1])+'</span></div><p>'+esc(s[2])+'</p></li>'}).join("")+'</ol>';
   h+='<div class="sub">'+esc(B("כללים לשימוש ב-AI","Rules for using AI"))+'</div>';
   h+='<div class="gai"><div><b>✓ '+esc(B("כן","Do"))+'</b><ul><li>'+esc(B("לתרגם את הפסאודו-קוד שלכם לפייתון","Translate your own pseudocode to Python"))+'</li><li>'+esc(B("לבקש דוגמת קלט שבה הקוד נכשל","Ask for an input where your code fails"))+'</li></ul></div><div><b>✕ '+esc(B("לא","Don't"))+'</b><ul><li>'+esc(B("להדביק את השאלה ולבקש פתרון","Paste the question and ask for the answer"))+'</li><li>'+esc(B("להעתיק קוד שלא הבנתם","Copy code you do not understand"))+'</li></ul></div></div>';
-  h+='<p class="ivn">'+esc(B("זו תזכורת ולא חומה: לחיצה כפולה על כפתור נעול פותחת אותו בכל זאת.","It is a reminder, not a wall: tapping a locked button twice opens it anyway."))+'</p>';
+  h+='<p class="ivn">'+esc(B("זו המלצה, לא חובה. הכול פתוח, ואתם מחליטים מתי לפתוח.","It is a recommendation, not a rule. Everything is open, and you decide when to look."))+'</p>';
   h+='<button class="btn" data-oact="gclose">'+esc(B("הבנתי, בואו נתחיל","Got it, let's start"))+'</button></div></div></div>';
   return h;
 }
@@ -1548,7 +1564,8 @@ function mergeStates(a,b){
   r.open=JSON.parse(JSON.stringify(b.open||{}));
   Object.keys(a.open||{}).forEach(function(q){r.open[q]=r.open[q]||{};Object.keys(a.open[q]).forEach(function(p){var x=a.open[q][p],y=r.open[q][p];
     if(!y||(x.rev&&x.self&&!(y.rev&&y.self))||((x.rev?1:0)===(y.rev?1:0)&&String(x.txt||"").length>String(y.txt||"").length))r.open[q][p]=x})});
-  r.set=a.set;
+  r.set=a.set;if(!r.set.examDate&&b.set&&b.set.examDate)r.set.examDate=b.set.examDate;
+  r.gdays=Math.max(a.gdays||0,b.gdays||0);var ad=a.dxp||{},bd=b.dxp||{};r.dxp=((bd.d||"")>(ad.d||"")||(bd.d===ad.d&&(bd.xp||0)>(ad.xp||0)))?bd:ad;
   return r;
 }
 function cloudPayload(){
@@ -1710,29 +1727,105 @@ function mapHTML(){
   var lv=level(S.xp),a=lvlStart(lv),b=lvlStart(lv+1),pc=Math.round((S.xp-a)/(b-a)*100);
   var dq=dailyQ(),dDone=!!S.daily[today()],due=dueIds().length,nx=nextStop();
   var flame='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-4-1-6 1-10z" fill="var(--c-amber)"/></svg>';
-  var h='<div class="bar"><div class="bar-in"><div class="lvl" aria-label="'+esc(t("lvl"))+' '+lv+'">'+lv+'</div><div class="xpbox"><div class="xprow"><b>'+esc(lvlName(lv))+'</b><span dir="ltr">'+S.xp+' / '+b+' '+t("xp")+'</span></div><div class="track"><i style="width:'+pc+'%"></i></div></div><div class="pill" title="'+esc(t("days"))+'">'+flame+(S.streak||0)+'</div><button class="xbtn" data-act="profile" aria-label="'+esc(t("profile"))+'">☰</button></div></div>';
-  h+='<div class="wrap"><div class="hero"><h1>'+esc(t("app"))+'</h1><p>'+esc(t("heroP"))+'</p><button class="btn ghost" data-act="guide" style="margin-top:10px">'+esc(B("איך עובדים על שאלה? כלל 30 הדקות","How to work on a question: the 30-minute rule"))+'</button> <a class="btn ghost" href="https://github.com/MordasovMark/algo1" target="_blank" rel="noopener" style="margin-top:10px;text-decoration:none;display:inline-block">'+esc(B("⭐ אהבתם? תנו כוכב ב-GitHub","⭐ Like it? Star it on GitHub"))+'</a></div>'+cloudBanner();
+  var h='<div class="bar"><div class="bar-in"><div class="lvl" aria-label="'+esc(t("lvl"))+' '+lv+'">'+lv+'</div><div class="xpbox"><div class="xprow"><b>'+esc(lvlName(lv))+'</b><span dir="ltr">'+S.xp+' / '+b+' '+t("xp")+'</span></div><div class="track"><i style="width:'+pc+'%"></i></div></div><div class="pill" title="'+esc(t("days"))+'">'+flame+liveStreak()+'</div><button class="xbtn" data-act="profile" aria-label="'+esc(t("profile"))+'">☰</button></div></div>';
+  h+='<div class="wrap"><div class="hero slim"><h1>'+esc(t("app"))+'</h1></div>'+todayHTML(dDone,due,nx)+cloudBanner();
+  h+='<h2 class="moreh">'+esc(B("עוד דרכים לתרגל","More ways to practise"))+'</h2>';
   h+='<div class="quests">';
   h+='<button class="quest hot" data-act="cont"><b>'+esc(t("cont"))+'</b><span>'+(nx?esc(loc(NODES[nx].title)):"")+'</span></button>';
   h+='<button class="quest'+(dDone?" done":"")+'" data-act="daily"'+(dDone?" disabled":"")+'><b>'+esc(t("daily"))+'</b><span>'+esc(dDone?t("dailyDone"):t("dailyGo"))+'</span></button>';
   h+='<button class="quest" data-act="review"'+(due?"":" disabled")+'><b>'+esc(t("review"))+'</b><span>'+esc(t("reviewN")(due))+'</span></button>';
   h+='<button class="quest" data-act="openlist"><b>'+esc(B("שאלות מבחן פתוחות","Open exam questions"))+'</b><span>'+esc(B(D.open.questions.length+" תרגילים. קודם ניסיון, ואז פתרון","")+(L()==="he"?"":D.open.questions.length+" exercises. Attempt first, then the solution"))+'</span></button>';
   h+='<button class="quest" data-act="exam"><b>'+esc(t("exam"))+'</b><span>'+esc(t("examSub"))+'</span></button></div>';
-  h+='<p class="chip" style="margin-top:6px">'+esc(t("starsHelp"))+'</p>';
+  h+='<div class="tlinks" style="margin-top:4px"><button class="linkbtn" data-act="guide">💡 '+esc(B("איך כדאי לעבוד על שאלה","How to work on a question"))+'</button></div>';
+  h+='<p class="chip" style="margin-top:10px">'+esc(t("starsHelp"))+'</p>';
   ORDER.forEach(function(w,i){h+=islandHTML(w);if(i<ORDER.length-1)h+='<svg class="wave" viewBox="0 0 400 28" preserveAspectRatio="none" aria-hidden="true"><path d="M0 14 Q25 0 50 14 T100 14 T150 14 T200 14 T250 14 T300 14 T350 14 T400 14" fill="none" stroke="currentColor" stroke-width="3"/></svg>'});
   h+='<p class="foot">'+esc(t("foot"))+' <a href="https://github.com/MordasovMark/algo1" target="_blank" rel="noopener">'+esc(B("הקוד ב-GitHub. כוכב ⭐ עוזר לאחרים למצוא את האתר.","Source on GitHub. A ⭐ helps others find the site."))+'</a></p></div>';
   return h;
 }
 
+function todayHTML(dDone,due,nx){
+  var g=gapDays(),ls=liveStreak(),isNew=!S.last&&!S.xp,tx=todayXP(),gl=goal(),cta,line,hot=false;
+  if(isNew)cta={act:"daily",t:B("התחילו כאן: שאלה ראשונה","Start here: your first question"),s:B("דקה אחת · עד 30 XP","One minute · up to 30 XP")};
+  else if(due)cta={act:"review",t:B(due===1?"חזרה: שאלה אחת":"חזרה: "+due+" שאלות",due===1?"Review: 1 question":"Review: "+due+" questions"),s:B("מה שכדאי לרענן היום כדי שלא יישכח · +3 XP לשאלה","Refresh these today so they stick · +3 XP each")};
+  else if(!dDone)cta={act:"daily",t:t("daily"),s:t("dailyGo")};
+  else if(nx)cta={act:"cont",t:B("המשך: ","Continue: ")+loc(NODES[nx].title),s:B("התחנה הבאה שלך במפה","Your next stop on the map")};
+  else cta={act:"exam",t:t("exam"),s:t("examSub")};
+  if(isNew)line=t("heroP");
+  else if(g===0)line=ls>1?B("🔥 "+ls+" ימים ברצף. היום כבר נספר.","🔥 "+ls+"-day streak. Today already counts."):B("🔥 היום נספר. חזרו מחר ותתחילו רצף.","🔥 Today counts. Come back tomorrow to start a streak.");
+  else if(ls>0){hot=true;line=g===1?B("🔥 הרצף שלכם: "+ls+" ימים. פעולה אחת היום שומרת עליו.","🔥 Your streak: "+ls+" days. One action today keeps it."):B("🧊 פספסתם אתמול, אבל הקפאת רצף תשמור על "+ls+" הימים אם תתרגלו היום.","🧊 You missed yesterday, but a streak freeze saves your "+ls+" days if you practise today.")}
+  else line=B("מתחילים רצף חדש היום. פעולה אחת מספיקה.","Start a new streak today. One action is enough.");
+  var h='<section class="today" aria-label="'+esc(B("היום","Today"))+'"><div><h2>'+esc(isNew?B("ברוכים הבאים 👋","Welcome 👋"):g===0?B("ממשיכים 💪","Keep going 💪"):B("טוב שחזרתם 👋","Good to see you 👋"))+'</h2><p class="tline'+(hot?" hot":"")+'">'+esc(line)+'</p></div>';
+  if(!isNew)h+='<div class="goal"><div class="xprow"><b>'+esc(B("יעד יומי","Daily goal"))+(tx>=gl?" ✓":"")+'</b><span dir="ltr">'+Math.min(tx,gl)+' / '+gl+' XP</span></div><div class="track"><i style="width:'+Math.min(100,Math.round(tx/gl*100))+'%"></i></div></div>';
+  h+='<button class="btn sun cta" data-act="'+cta.act+'"><span>'+esc(cta.t)+'</span><small>'+esc(cta.s)+'</small></button>';
+  var dl=daysTo(S.set.examDate);
+  if(dl==null||dl<0)h+='<label class="exam"><span>📅 '+esc(B("מתי המבחן? נחשב לכם קצב:","When is the exam? We'll set your pace:"))+'</span><input type="date" data-act="examdate" min="'+today()+'"></label>';
+  else{
+    var done=GLOBAL.filter(function(id){return info(id).complete}).length,left=GLOBAL.length-done,pace=Math.ceil(left/Math.max(1,Math.ceil(dl/7)));
+    h+='<div class="exam"><span>📅 <b>'+esc(dl===0?B("המבחן היום. בהצלחה 🍀","Exam day. Good luck 🍀"):dl===1?B("המבחן מחר","The exam is tomorrow"):B("עוד "+dl+" ימים למבחן","Exam in "+dl+" days"))+'</b></span><span>'+esc(B(done+"/"+GLOBAL.length+" תחנות",done+"/"+GLOBAL.length+" stops"))+'</span>'+(left&&dl>0?'<span>'+esc(B("קצב: "+pace+" תחנות בשבוע","Pace: "+pace+" stops a week"))+'</span>':"")+'<button class="linkbtn" data-act="examclear">'+esc(B("שינוי","Change"))+'</button></div>';
+  }
+  if(!isNew){
+    var links='';
+    if(!S.set.reminded)links+='<button class="linkbtn" data-act="remind">⏰ '+esc(B("תזכורת יומית ביומן","Daily reminder in your calendar"))+'</button>';
+    if(canInstall())links+='<button class="linkbtn" data-act="install">📲 '+esc(B("התקינו כאפליקציה","Install as an app"))+'</button>';
+    if(links)h+='<div class="tlinks">'+links+'</div>';
+  }
+  return h+'</section>';
+}
+
+/* ---------- reminders and install ---------- */
+var INST=null;
+window.addEventListener("beforeinstallprompt",function(e){e.preventDefault();INST=e;if(typeof render==="function")render()});
+window.addEventListener("appinstalled",function(){INST=null;S.set.installed=1;save()});
+if("serviceWorker" in navigator&&location.protocol==="https:")window.addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})});
+function standalone(){try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(e){return false}}
+function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
+function canInstall(){return !standalone()&&!S.set.installed&&(!!INST||isIOS())}
+function doInstall(){
+  if(INST){INST.prompt();INST.userChoice.then(function(c){if(c&&c.outcome==="accepted"){S.set.installed=1;save()}INST=null;render()});return}
+  toast(B("ב-Safari: כפתור השיתוף ⬆️ ואז 'הוספה למסך הבית'","In Safari: the Share button ⬆️, then 'Add to Home Screen'"));
+}
+function siteURL(){return /^https?:/.test(location.protocol)?location.origin+location.pathname:"https://algo1-bn0.pages.dev/"}
+function remindPlan(time){
+  // First reminder: today if the time has not passed yet, otherwise tomorrow. Repeats daily until the exam, if one is set.
+  var hm=(time||"20:00").split(":"),d=new Date();d.setHours(+hm[0],+hm[1],0,0);if(d<new Date())d.setDate(d.getDate()+1);
+  var e=new Date(d.getTime()+15*60000);
+  function f(x){return x.getFullYear()+("0"+(x.getMonth()+1)).slice(-2)+("0"+x.getDate()).slice(-2)+"T"+("0"+x.getHours()).slice(-2)+("0"+x.getMinutes()).slice(-2)+"00"}
+  var until=S.set.examDate&&daysTo(S.set.examDate)>=0?";UNTIL="+S.set.examDate.replace(/-/g,"")+"T235959Z":"";
+  return {s:f(d),e:f(e),rule:"RRULE:FREQ=DAILY"+until,title:B("15 דקות אלגוריתמים 🚢","15 minutes of algorithms 🚢"),desc:B("שאלת היום והחזרות מחכות לכם: ","Today's question and your reviews are waiting: ")+siteURL()};
+}
+function remindGoogle(time){
+  var P=remindPlan(time),tz="Asia/Jerusalem";try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||tz}catch(e){}
+  window.open("https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(P.title)+"&details="+encodeURIComponent(P.desc)+"&dates="+P.s+"/"+P.e+"&ctz="+encodeURIComponent(tz)+"&recur="+encodeURIComponent(P.rule),"_blank","noopener");
+}
+function remindICS(time){
+  var P=remindPlan(time),now=new Date().toISOString().replace(/[-:]/g,"").replace(/\.\d+/,"");
+  var ics=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//algo1//voyage//HE","CALSCALE:GREGORIAN","BEGIN:VEVENT","UID:algo1-daily-"+Date.now()+"@algo1","DTSTAMP:"+now,"DTSTART:"+P.s,"DTEND:"+P.e,P.rule,"SUMMARY:"+P.title,"DESCRIPTION:"+P.desc,"URL:"+siteURL(),"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+P.title,"TRIGGER:PT0M","END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([ics],{type:"text/calendar;charset=utf-8"}));a.download="algo1-reminder.ics";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+function openRemind(){
+  var h='<div class="scrim" data-oact="scrim"><div class="sheet modal" role="dialog" aria-modal="true" aria-label="'+esc(B("תזכורת יומית","Daily reminder"))+'"><div class="shead"><span class="core2" style="--ic:var(--sun);color:var(--sun-ink)">⏰</span><div style="min-width:0"><h2>'+esc(B("תזכורת יומית","Daily reminder"))+'</h2><div class="chip" style="margin-top:4px">'+esc(B("15 דקות ביום עדיפות על 5 שעות לפני המבחן","15 minutes a day beat 5 hours before the exam"))+'</div></div><button class="xbtn" data-oact="close" id="ox" aria-label="close">✕</button></div><div class="sbody">';
+  h+='<p>'+esc(B("נוסיף ליומן שלכם אירוע יומי קבוע עם קישור לאתר"+(S.set.examDate?", עד יום המבחן":"")+". באיזו שעה?","We'll add a daily event with a link to the site to your calendar"+(S.set.examDate?", until the exam":"")+". What time?"))+'</p>';
+  h+='<input type="time" class="rtime" id="rtime" value="'+esc(S.set.rtime||"20:00")+'" aria-label="'+esc(B("שעה","Time"))+'">';
+  h+='<div class="row2"><button class="btn" data-oact="rgoogle">Google Calendar</button><button class="btn ghost" data-oact="rics">'+esc(B("אייפון / Outlook (קובץ ‎.ics)","iPhone / Outlook (.ics file)"))+'</button></div>';
+  h+='<p class="ivn">'+esc(B("האירוע נשמר אצלכם ביומן. לא שולחים לכם כלום ולא שומרים את המייל.","The event lives in your own calendar. Nothing is sent to you and no email is stored."))+'</p></div></div></div>';
+  AIQ=null;document.getElementById("ov").innerHTML=h;var x=document.getElementById("ox");if(x)x.focus();
+}
+(function(){
+  document.getElementById("ov").addEventListener("click",function(e){
+    var el=e.target.closest("[data-oact]");if(!el)return;var a=el.getAttribute("data-oact");if(a!=="rgoogle"&&a!=="rics")return;
+    var tm=(document.getElementById("rtime")||{}).value||"20:00";S.set.rtime=tm;
+    if(a==="rgoogle")remindGoogle(tm);else remindICS(tm);
+    S.set.reminded=1;save();closeOv();render();toast(B("מעולה. נתראה מחר ⏰","Great. See you tomorrow ⏰"));
+  });
+})();
+
 /* ---------- node sheet ---------- */
 function vidLink(q,id){
   var u=q.video?'https://www.youtube.com/watch?v='+q.video:'https://www.youtube.com/results?search_query='+encodeURIComponent('neetcode '+q.title.en+' leetcode '+q.number);
-  var lk=thinkOK(q.number)?"":" lk",la=thinkOK(q.number)?"":' data-lock="'+q.number+'"',lic=thinkOK(q.number)?"":"🔒 ";
   var h='<div class="lc-vid">';
-  if(VIZ["s"+q.number])h+='<button class="vbtn" data-act="viz" data-k="i'+q.number+'" data-id="'+id+'">▶ '+esc(B("הרעיון","The idea"))+'</button><button class="vbtn'+lk+'"'+la+' data-act="viz" data-k="s'+q.number+'" data-id="'+id+'">'+lic+'▶ '+esc(B("הפתרון","The solution"))+'</button>';
-  var lk2=retryOK(q.number)?"":" lk",la2=retryOK(q.number)?"":' data-lock2="'+q.number+'"',lic2=retryOK(q.number)?"":"🔒 ";
-  h+='<button class="vbtn'+lk2+'"'+la2+' data-act="ai" data-n="'+q.number+'">'+lic2+esc(B("פסאודו-קוד לפייתון (AI)","Pseudocode to Python (AI)"))+'</button>';
-  return h+'<a class="vid'+(q.video?'':' alt')+lk+'"'+la+' href="'+u+'" target="_blank" rel="noopener">'+lic+'▶ '+esc(q.video?t('vidNC'):t('vidSearch'))+'</a></div>';
+  if(VIZ["s"+q.number])h+='<button class="vbtn" data-act="viz" data-k="i'+q.number+'" data-id="'+id+'">▶ '+esc(B("הרעיון","The idea"))+'</button><button class="vbtn" data-act="viz" data-k="s'+q.number+'" data-id="'+id+'">▶ '+esc(B("הפתרון","The solution"))+'</button>';
+  h+='<button class="vbtn" data-act="ai" data-n="'+q.number+'">'+esc(B("פסאודו-קוד לפייתון (AI)","Pseudocode to Python (AI)"))+'</button>';
+  return h+'<a class="vid'+(q.video?'':' alt')+'" href="'+u+'" target="_blank" rel="noopener">▶ '+esc(q.video?t('vidNC'):t('vidSearch'))+'</a></div>';
 }
 function sheetHTML(id){
   var n=NODES[id],f=info(id),w=WK[n.week],col="var("+COL[w.color]+")",ms=missing(id);
@@ -1749,7 +1842,7 @@ function sheetHTML(id){
   if(lcs.length){
     h+='<ul class="lcl">'+lcs.map(function(q){
       var on=!!S.lc[q.number];
-      return '<li class="lc'+(on?" on":"")+'"><div class="lc-top"><input type="checkbox" id="lc'+q.number+'" data-act="lc" data-n="'+q.number+'"'+(on?" checked":"")+'><label for="lc'+q.number+'"><span class="num">#'+q.number+'</span> '+esc(loc(q.title))+(q.premium?' <span class="chip">'+esc(t("premium"))+'</span>':"")+'</label><a href="https://leetcode.com/problems/'+q.slug+'/" target="_blank" rel="noopener" aria-label="'+esc(t("open"))+'">↗</a></div>'+thinkHTML(q)+vidLink(q,id)+'<details><summary'+(thinkOK(q.number)?"":' data-lock="'+q.number+'"')+'>'+(thinkOK(q.number)?"":"🔒 ")+esc(t("details"))+'</summary><p><b>'+esc(loc(q.statement))+'</b></p><p>'+esc(loc(q.explanation))+'</p></details></li>';
+      return '<li class="lc'+(on?" on":"")+'"><div class="lc-top"><input type="checkbox" id="lc'+q.number+'" data-act="lc" data-n="'+q.number+'"'+(on?" checked":"")+'><label for="lc'+q.number+'"><span class="num">#'+q.number+'</span> '+esc(loc(q.title))+(q.premium?' <span class="chip">'+esc(t("premium"))+'</span>':"")+'</label><a href="https://leetcode.com/problems/'+q.slug+'/" target="_blank" rel="noopener" aria-label="'+esc(t("open"))+'">↗</a></div>'+vidLink(q,id)+'<details><summary>'+esc(t("details"))+'</summary><p><b>'+esc(loc(q.statement))+'</b></p><p>'+esc(loc(q.explanation))+'</p></details></li>';
     }).join("")+'</ul><p class="chip" style="align-self:flex-start">'+esc(t("lcHelp"))+'</p>';
   }else{
     h+='<p class="chip" style="align-self:flex-start">'+esc(t("gap"))+'</p>';
@@ -1776,10 +1869,14 @@ function startQuiz(mode,ids,o){
 function fmt(s){s=Math.max(0,s);return Math.floor(s/60)+":"+("0"+(s%60)).slice(-2)}
 function cur(){return MCQ[V.quiz.ids[V.quiz.i]]}
 function record(q,correct,mode){
-  var a=S.ans[q.id]=S.ans[q.id]||{tries:0,first:false,ok:false,due:null},gain=0;
+  var a=S.ans[q.id]=S.ans[q.id]||{tries:0,first:false,ok:false,due:null},gain=0,now=Date.now(),wasDue=!!(a.due&&a.due<=now);
   a.tries++;if(a.tries===1)a.first=correct;
-  if(correct){if(!a.ok){gain=a.tries===1?10:5;a.ok=true}if(mode==="review"){if(a.due&&a.due<=Date.now())S.cleared++;a.due=null}}
-  else a.due=Date.now()+DAY;
+  if(correct){
+    if(!a.ok){gain=a.tries===1?10:5;a.ok=true}else if(wasDue)gain=3;
+    if(wasDue&&mode==="review")S.cleared++;
+    // Leitner box: 1, 3, 7, 16, 35 days, then retired. Only a new or due question moves up, so practising it early does not skip ahead.
+    if(a.box==null||wasDue){a.box=Math.min((a.box||0)+1,BOX.length);a.due=a.box>=BOX.length?null:dayStart(now)+BOX[a.box]*DAY}
+  }else{a.box=0;a.due=dayStart(now)+DAY}
   touch();return gain;
 }
 function check(){
@@ -1843,6 +1940,8 @@ function resHTML(){
   if(R.timeUp)sub=t("times");
   var h='<div class="wrap"><div class="res"><h1>'+esc(title)+'</h1>'+(sub?'<p class="chip">'+esc(sub)+'</p>':"")+'<div class="big">'+R.c+'/'+R.n+'</div><p>'+esc(t("correct"))+(R.mode==="exam"?' · '+esc(t("score"))+' '+R.score:"")+(R.bonus?' · '+esc(t("bonus"))+' +'+R.bonus+' '+t("xp"):"")+'</p>';
   h+='<div class="rlist">'+R.list.map(function(r){var q=MCQ[r.id];return '<details><summary><span class="'+(r.ok?"y":"n")+'">'+(r.ok?"✓":"✕")+'</span> '+esc(loc(q.stem).slice(0,90))+'…</summary><p>'+esc(loc(q.explanation))+'</p></details>'}).join("")+'</div>';
+  var tm=dueBy(dayStart(Date.now())+2*DAY-1),ls=liveStreak(),tx=todayXP(),gl=goal();
+  h+='<div class="tmr"><b>'+esc(B("מה מחכה לכם מחר","What's waiting for you tomorrow"))+'</b><ul>'+(tm?'<li>🔁 '+esc(B((tm===1?"שאלת חזרה אחת":tm+" שאלות חזרה")+", כדי שזה יישאר בראש",tm+(tm===1?" review question":" review questions")+", so it sticks"))+'</li>':"")+'<li>☀️ '+esc(B("שאלת יום חדשה, בונוס 20 XP","A new daily question, 20 XP bonus"))+'</li><li>🔥 '+esc(B("חזרו מחר והרצף יעלה ל-"+(ls+1)+" ימים","Come back tomorrow for a "+(ls+1)+"-day streak"))+'</li>'+(tx<gl?'<li>🎯 '+esc(B("ליעד של היום חסרים עוד "+(gl-tx)+" XP",(gl-tx)+" XP left to today's goal"))+'</li>':"")+'</ul>'+(S.set.reminded?"":'<button class="btn ghost" data-act="remind" style="align-self:flex-start">⏰ '+esc(B("תזכירו לי מחר","Remind me tomorrow"))+'</button>')+'</div>';
   h+='<div class="actions" style="justify-content:center"><button class="btn" data-act="home">'+esc(t("back"))+'</button></div></div></div>';
   return h;
 }
@@ -1855,6 +1954,8 @@ function profileHTML(){
   h+='<div class="sub">'+esc(t("islands"))+'</div><div class="ibar">'+ORDER.map(function(w){var ids=islandIds(w),d=0,tt=0;ids.forEach(function(id){var f=info(id);d+=f.done;tt+=f.total});var p=Math.round(d/tt*100);return '<div class="irow" style="--ic:var('+COL[WK[w].color]+')"><span>'+esc(loc(WK[w].title))+'</span><div class="track"><i style="width:'+p+'%"></i></div><em>'+p+'%</em></div>'}).join("")+'</div>';
   h+=accountHTML();
   h+='<div class="sub">'+esc(t("badges"))+'</div><div class="badges">'+BADGES.map(function(b){var on=!!S.badges[b.id];return '<div class="badge '+(on?"on":"off")+'"><b>'+esc(b[L()][0])+'</b><span>'+esc(b[L()][1])+'</span></div>'}).join("")+'</div>';
+  h+='<div class="sub">'+esc(B("יעד יומי","Daily goal"))+'</div><div class="row2">'+[[10,B("קליל","Light")],[30,B("רגיל","Regular")],[50,B("רציני","Serious")],[100,B("לפני מבחן","Exam mode")]].map(function(g){return '<button class="toggle" data-act="goal" data-g="'+g[0]+'" aria-pressed="'+(goal()===g[0])+'">'+esc(g[1])+' · '+g[0]+' XP</button>'}).join("")+'</div>';
+  h+='<div class="row2"><button class="toggle" data-act="remind">⏰ '+esc(S.set.reminded?B("תזכורת נוספת ביומן","Another calendar reminder"):B("תזכורת יומית ביומן","Daily calendar reminder"))+'</button>'+(canInstall()?'<button class="toggle" data-act="install">📲 '+esc(B("התקינו כאפליקציה","Install as an app"))+'</button>':"")+'</div>';
   h+='<div class="sub">'+esc(t("settings"))+'</div><div class="row2"><button class="toggle" data-act="lang" aria-pressed="false">'+(L()==="he"?"English":"עברית")+'</button><button class="toggle" data-act="sound" aria-pressed="'+!!S.set.sound+'">'+esc(t("sound"))+'</button><button class="toggle danger" data-act="reset">'+esc(V.confirmReset?t("resetSure"):t("reset"))+'</button></div></div></div></div>';
   return h;
 }
@@ -1870,10 +1971,6 @@ function render(){
   if(!had){var x=document.getElementById("sx");if(x)x.focus()}
 }
 app.addEventListener("click",function(e){
-  var lk=e.target.closest("[data-lock]");
-  if(lk){var ln=lk.getAttribute("data-lock");if(!thinkOK(ln)){var nw=Date.now();if(!PEND[ln]||nw-PEND[ln]>8000){e.preventDefault();e.stopPropagation();PEND[ln]=nw;toast(B("קודם 30 דקות חשיבה לבד. לחצו שוב תוך כמה שניות כדי לפתוח בכל זאת.","Think on your own for 30 minutes first. Tap again within seconds to open anyway."));return}delete PEND[ln]}}
-  var lk2=e.target.closest("[data-lock2]");
-  if(lk2){var l2=lk2.getAttribute("data-lock2");if(!retryOK(l2)){var n2=Date.now(),key2="r"+l2;if(!PEND[key2]||n2-PEND[key2]>8000){e.preventDefault();e.stopPropagation();PEND[key2]=n2;toast(thinkOK(l2)?B("קודם צפו בסרטון ונסו שוב. לחצו שוב תוך כמה שניות כדי לפתוח בכל זאת.","Watch the video and try again first. Tap again within seconds to open anyway."):B("קודם 30 דקות חשיבה, סרטון וניסיון נוסף. לחצו שוב כדי לפתוח בכל זאת.","First 30 minutes of thinking, the video and another try. Tap again to open anyway."));return}delete PEND[key2]}}
   var el=e.target.closest("[data-act]");if(!el)return;
   var act=el.getAttribute("data-act");
   if((act==="closeSheet"||act==="closeProfile")&&e.target.closest("[data-stop]")&&el.classList.contains("scrim"))return;
@@ -1889,10 +1986,10 @@ app.addEventListener("click",function(e){
    case "openlist":openOList(null);break;
    case "openq-node":openOList(el.getAttribute("data-id"));break;
    case "ai":openAI(el.getAttribute("data-n"));break;
-   case "tstart":S.think[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("הטיימר התחיל. בהצלחה!","Timer started. Good luck!"));render();break;
-   case "rstart":S.retry[el.getAttribute("data-n")]={s:Date.now()};save();toast(B("בהצלחה בניסיון השני!","Good luck on the second try!"));render();break;
-   case "rskip":{var rn=el.getAttribute("data-n");S.retry[rn]=Object.assign(S.retry[rn]||{s:Date.now()},{skip:1});save();render();break}
-   case "tskip":{var tn=el.getAttribute("data-n");S.think[tn]=Object.assign(S.think[tn]||{s:Date.now()},{skip:1});save();render();break}
+   case "remind":V.profile=false;render();openRemind();break;
+   case "install":doInstall();break;
+   case "examclear":S.set.examDate="";save();render();break;
+   case "goal":S.set.goal=+el.getAttribute("data-g");if(S.dxp&&S.dxp.d===today()&&S.dxp.xp<goal())S.dxp.hit=0;save();render();break;
    case "closeSheet":V.sheet=null;render();break;
    case "profile":V.profile=true;V.confirmReset=false;render();break;
    case "closeProfile":V.profile=false;render();break;
@@ -1920,14 +2017,15 @@ app.addEventListener("click",function(e){
   }
 });
 app.addEventListener("change",function(e){
-  var el=e.target;if(el.getAttribute("data-act")!=="lc")return;
+  var el=e.target,ea=el.getAttribute("data-act");
+  if(ea==="examdate"){if(el.value){S.set.examDate=el.value;save();render();toast(B("נשמר. הקצב מחושב לפי התאריך.","Saved. Your pace is set from the date."))}return}
+  if(ea!=="lc")return;
   var n=el.getAttribute("data-n");
   if(el.checked){if(!S.lc[n]){S.lc[n]=1;addXP(15);touch();tone(740,.12)}}else{delete S.lc[n]}
   save();checkBadges();save();render();
 });
 document.addEventListener("keydown",function(e){if(e.key==="Escape"){if(VZ){vizClose();return}if(V.profile){V.profile=false;render()}else if(V.sheet){V.sheet=null;render()}}});
 render();
-if(!S.guideSeen)setTimeout(openGuide,350);
 })();
 </script>
 
